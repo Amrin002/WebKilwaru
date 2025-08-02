@@ -8,8 +8,10 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.0/font/bootstrap-icons.min.css"
         rel="stylesheet">
-    <link rel="stylesheet" href="{{ asset('panel/assets/style.css') }}">
+    @include('layouts.style')
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     @stack('style')
+
 </head>
 
 <body>
@@ -22,8 +24,14 @@
         @yield('content')
     </main>
 
-    <script src="{{ asset('panel/assets/javascript.js') }}"></script>
+    {{-- <script src="{{ asset('panel/assets/javascript.js') }}"></script> --}}
+    <!-- Latest compiled and minified JavaScript -->
+    {{-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@3.3.7/dist/js/bootstrap.min.js"
+        integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous">
+    </script> --}}
     @stack('script')
+    @include('layouts.script')
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>
