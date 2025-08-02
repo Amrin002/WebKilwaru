@@ -16,6 +16,7 @@ class KKController extends Controller
     {
         // Query builder
         $query = KK::query();
+        $titleHeader = "Kelola Kartu Keluarga";
 
         // Search functionality
         if ($request->filled('search')) {
@@ -41,7 +42,7 @@ class KKController extends Controller
         // Get statistics
         $statistics = $this->getStatistics();
 
-        return view('admin.kk.index', compact('kkData', 'locationData', 'statistics'));
+        return view('admin.kk.index', compact('kkData', 'locationData', 'statistics', 'titleHeader'));
     }
 
     /**
@@ -65,6 +66,7 @@ class KKController extends Controller
                 'regex:/^[0-9]+$/',
                 'unique:k_k_s,no_kk'
             ],
+            'nama_kepala_keluarga' => 'required|string|max:100|regex:/^[a-zA-Z\s]+$/',
             'alamat' => 'required|string|max:255',
             'rt' => 'required|string|max:3',
             'rw' => 'required|string|max:3',
@@ -78,6 +80,9 @@ class KKController extends Controller
             'no_kk.size' => 'Nomor KK harus 16 digit',
             'no_kk.regex' => 'Nomor KK hanya boleh berisi angka',
             'no_kk.unique' => 'Nomor KK sudah terdaftar',
+            'nama_kepala_keluarga.required' => 'Nama kepala keluarga wajib diisi',
+            'nama_kepala_keluarga.max' => 'Nama kepala keluarga maksimal 100 karakter',
+            'nama_kepala_keluarga.regex' => 'Nama kepala keluarga hanya boleh berisi huruf dan spasi',
             'alamat.required' => 'Alamat wajib diisi',
             'rt.required' => 'RT wajib diisi',
             'rw.required' => 'RW wajib diisi',
@@ -137,6 +142,7 @@ class KKController extends Controller
                 'regex:/^[0-9]+$/',
                 Rule::unique('k_k_s', 'no_kk')->ignore($kk->no_kk, 'no_kk')
             ],
+            'nama_kepala_keluarga' => 'required|string|max:100|regex:/^[a-zA-Z\s]+$/',
             'alamat' => 'required|string|max:255',
             'rt' => 'required|string|max:3',
             'rw' => 'required|string|max:3',
@@ -150,6 +156,9 @@ class KKController extends Controller
             'no_kk.size' => 'Nomor KK harus 16 digit',
             'no_kk.regex' => 'Nomor KK hanya boleh berisi angka',
             'no_kk.unique' => 'Nomor KK sudah terdaftar',
+            'nama_kepala_keluarga.required' => 'Nama kepala keluarga wajib diisi',
+            'nama_kepala_keluarga.max' => 'Nama kepala keluarga maksimal 100 karakter',
+            'nama_kepala_keluarga.regex' => 'Nama kepala keluarga hanya boleh berisi huruf dan spasi',
             'alamat.required' => 'Alamat wajib diisi',
             'rt.required' => 'RT wajib diisi',
             'rw.required' => 'RW wajib diisi',
@@ -256,6 +265,7 @@ class KKController extends Controller
             // Header row
             fputcsv($file, [
                 'No. KK',
+                'Nama Kepala Keluarga',
                 'Alamat',
                 'RT',
                 'RW',
@@ -272,6 +282,7 @@ class KKController extends Controller
             foreach ($kkData as $kk) {
                 fputcsv($file, [
                     $kk->no_kk,
+                    $kk->nama_kepala_keluarga,
                     $kk->alamat,
                     $kk->rt,
                     $kk->rw,
@@ -314,14 +325,15 @@ class KKController extends Controller
                 try {
                     KK::create([
                         'no_kk' => $data[0],
-                        'alamat' => $data[1],
-                        'rt' => $data[2],
-                        'rw' => $data[3],
-                        'desa' => $data[4],
-                        'kecamatan' => $data[5],
-                        'kabupaten' => $data[6],
-                        'provinsi' => $data[7],
-                        'kode_pos' => $data[8],
+                        'nama_kepala_keluarga' => $data[1],
+                        'alamat' => $data[2],
+                        'rt' => $data[3],
+                        'rw' => $data[4],
+                        'desa' => $data[5],
+                        'kecamatan' => $data[6],
+                        'kabupaten' => $data[7],
+                        'provinsi' => $data[8],
+                        'kode_pos' => $data[9],
                     ]);
                     $imported++;
                 } catch (\Exception $e) {

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class KK extends Model
 {
@@ -44,6 +45,7 @@ class KK extends Model
      */
     protected $fillable = [
         'no_kk',
+        'nama_kepala_keluarga',
         'alamat',
         'rt',
         'rw',
@@ -64,6 +66,11 @@ class KK extends Model
         'updated_at' => 'datetime',
     ];
 
+    public function penduduk(): HasMany
+    {
+        return $this->hasMany(Penduduk::class, 'no_kk', 'no_kk');
+    }
+
     /**
      * Get full address
      *
@@ -75,7 +82,7 @@ class KK extends Model
     }
 
     /**
-     * Scope a query to search by address components
+     * Scope a query to search by address components and kepala keluarga
      *
      * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @param  string  $search
@@ -85,6 +92,7 @@ class KK extends Model
     {
         return $query->where(function ($q) use ($search) {
             $q->where('no_kk', 'like', "%{$search}%")
+                ->orWhere('nama_kepala_keluarga', 'like', "%{$search}%")
                 ->orWhere('alamat', 'like', "%{$search}%")
                 ->orWhere('desa', 'like', "%{$search}%")
                 ->orWhere('kecamatan', 'like', "%{$search}%")

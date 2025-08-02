@@ -548,7 +548,7 @@
                     <i class="bi bi-funnel me-2"></i>Filter & Pencarian
                 </h4>
                 <div class="d-flex gap-2">
-                    <a href="{{ route('kk.create') }}" class="btn btn-primary">
+                    <a href="{{ route('admin.kk.create') }}" class="btn btn-primary">
                         <i class="bi bi-plus-lg me-2"></i>Tambah KK Baru
                     </a>
                     <div class="dropdown">
@@ -556,7 +556,7 @@
                             <i class="bi bi-download me-2"></i>Export/Import
                         </button>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{{ route('kk.export', request()->query()) }}">
+                            <li><a class="dropdown-item" href="{{ route('admin.kk.export', request()->query()) }}">
                                     <i class="bi bi-file-excel me-2"></i>Export CSV
                                 </a></li>
                             <li>
@@ -571,11 +571,11 @@
                 </div>
             </div>
 
-            <form method="GET" action="{{ route('kk.index') }}" class="row g-3">
+            <form method="GET" action="{{ route('admin.kk.index') }}" class="row g-3">
                 <div class="col-md-4">
-                    <label class="form-label">Cari No. KK atau Alamat</label>
+                    <label class="form-label">Cari No. KK, Nama, atau Alamat</label>
                     <input type="text" class="form-control" name="search" value="{{ request('search') }}"
-                        placeholder="Cari No. KK atau Alamat...">
+                        placeholder="Cari No. KK, Nama KK, atau Alamat...">
                 </div>
                 <div class="col-md-2">
                     <label class="form-label">Provinsi</label>
@@ -612,13 +612,13 @@
                         @endforeach
                     </select>
                 </div>
-                <div class="col-md-2">
+                <div class="col-md-1">
                     <label class="form-label">&nbsp;</label>
                     <div class="d-flex gap-2">
                         <button type="submit" class="btn btn-success">
                             <i class="bi bi-search"></i>
                         </button>
-                        <a href="{{ route('kk.index') }}" class="btn btn-outline-primary">
+                        <a href="{{ route('admin.kk.index') }}" class="btn btn-outline-primary">
                             <i class="bi bi-arrow-clockwise"></i>
                         </a>
                     </div>
@@ -669,15 +669,15 @@
                                     <td>{{ $kk->kode_pos }}</td>
                                     <td>
                                         <div class="action-buttons">
-                                            <a href="{{ route('kk.show', $kk->no_kk) }}"
+                                            <a href="{{ route('admin.kk.show', $kk->no_kk) }}"
                                                 class="btn btn-sm btn-outline-primary" title="Detail">
                                                 <i class="bi bi-eye"></i>
                                             </a>
-                                            <a href="{{ route('kk.edit', $kk->no_kk) }}" class="btn btn-sm btn-warning"
-                                                title="Edit">
+                                            <a href="{{ route('admin.kk.edit', $kk->no_kk) }}"
+                                                class="btn btn-sm btn-warning" title="Edit">
                                                 <i class="bi bi-pencil"></i>
                                             </a>
-                                            <form action="{{ route('kk.destroy', $kk->no_kk) }}" method="POST"
+                                            <form action="{{ route('admin.kk.destroy', $kk->no_kk) }}" method="POST"
                                                 style="display: inline-block;"
                                                 onsubmit="return confirm('Yakin ingin menghapus data KK ini?')">
                                                 @csrf
@@ -707,7 +707,7 @@
                     <i class="bi bi-inbox"></i>
                     <h5>Tidak ada data KK</h5>
                     <p class="mb-3">Belum ada data kartu keluarga yang tersedia</p>
-                    <a href="{{ route('kk.create') }}" class="btn btn-primary">
+                    <a href="{{ route('admin.kk.create') }}" class="btn btn-primary">
                         <i class="bi bi-plus-lg me-2"></i>Tambah KK Pertama
                     </a>
                 </div>
@@ -715,6 +715,7 @@
         </div>
     </div>
 
+    <!-- Import Modal -->
     <!-- Import Modal -->
     <div class="modal fade" id="importModal" tabindex="-1">
         <div class="modal-dialog">
@@ -725,20 +726,34 @@
                     </h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <form action="{{ route('kk.import') }}" method="POST" enctype="multipart/form-data">
+                <form action="{{ route('admin.kk.import') }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     <div class="modal-body">
                         <div class="mb-3">
                             <label class="form-label">File CSV</label>
                             <input type="file" class="form-control" name="file" accept=".csv,.txt" required>
                             <div class="form-text">
-                                Format: No. KK, Alamat, RT, RW, Desa, Kecamatan, Kabupaten, Provinsi, Kode Pos
+                                <strong>Format CSV:</strong> No. KK, Nama Kepala Keluarga, Alamat, RT, RW, Desa, Kecamatan,
+                                Kabupaten, Provinsi, Kode Pos
                             </div>
                         </div>
+
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle me-2"></i>
+                            <strong>Contoh format CSV:</strong><br>
+                            <code>1234567890123456,Budi Santoso,Jl. Merdeka No. 1,001,002,Sukamaju,Cikarang
+                                Pusat,Bekasi,Jawa Barat,17530</code>
+                        </div>
+
                         <div class="alert alert-warning">
                             <i class="bi bi-exclamation-triangle me-2"></i>
-                            <strong>Perhatian:</strong> Pastikan format file CSV sesuai dengan template yang telah
-                            ditentukan.
+                            <strong>Perhatian:</strong>
+                            <ul class="mb-0 mt-2">
+                                <li>Nomor KK harus 16 digit angka</li>
+                                <li>Nama kepala keluarga hanya boleh huruf dan spasi</li>
+                                <li>Kode pos harus 5 digit angka</li>
+                                <li>Pastikan format file CSV sesuai dengan template</li>
+                            </ul>
                         </div>
                     </div>
                     <div class="modal-footer">

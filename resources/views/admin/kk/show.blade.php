@@ -518,7 +518,7 @@
                 <ol class="breadcrumb">
                     <li class="breadcrumb-item"><a href="{{ route('admin.index') }}">Dashboard</a></li>
                     <li class="breadcrumb-item">Data Penduduk</li>
-                    <li class="breadcrumb-item"><a href="{{ route('kk.index') }}">Data Kartu Keluarga</a></li>
+                    <li class="breadcrumb-item"><a href="{{ route('admin.kk.index') }}">Data Kartu Keluarga</a></li>
                     <li class="breadcrumb-item active">Detail KK</li>
                 </ol>
             </nav>
@@ -528,16 +528,16 @@
 
         <!-- Action Buttons -->
         <div class="action-buttons">
-            <a href="{{ route('kk.index') }}" class="btn btn-outline-secondary">
+            <a href="{{ route('admin.kk.index') }}" class="btn btn-outline-secondary">
                 <i class="bi bi-arrow-left"></i>Kembali ke Daftar
             </a>
-            <a href="{{ route('kk.edit', $kk->no_kk) }}" class="btn btn-warning">
+            <a href="{{ route('admin.kk.edit', $kk->no_kk) }}" class="btn btn-warning">
                 <i class="bi bi-pencil-square"></i>Edit Data
             </a>
             <button onclick="window.print()" class="btn btn-primary">
                 <i class="bi bi-printer"></i>Cetak
             </button>
-            <form action="{{ route('kk.destroy', $kk->no_kk) }}" method="POST" style="display: inline-block;"
+            <form action="{{ route('admin.kk.destroy', $kk->no_kk) }}" method="POST" style="display: inline-block;"
                 onsubmit="return confirm('Yakin ingin menghapus data KK ini? Tindakan ini tidak dapat dibatalkan!')">
                 @csrf
                 @method('DELETE')
@@ -618,6 +618,13 @@
                             Nomor KK
                         </div>
                         <div class="detail-value large highlight">{{ $kk->no_kk }}</div>
+                    </div>
+                    <div class="detail-item">
+                        <div class="detail-label">
+                            <i class="bi bi-person-badge"></i>
+                            Nama Kepala Keluarga
+                        </div>
+                        <div class="detail-value large">{{ $kk->nama_kepala_keluarga }}</div>
                     </div>
                     <div class="detail-item">
                         <div class="detail-label">

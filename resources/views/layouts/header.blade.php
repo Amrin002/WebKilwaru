@@ -4,7 +4,7 @@
         <button class="sidebar-toggle" id="sidebarToggle">
             <i class="bi bi-list"></i>
         </button>
-        <h1 class="header-title">Dashboard Admin</h1>
+        <h1 class="header-title">{{ $titleHeader }}</h1>
     </div>
     <div class="header-right">
         <div class="header-clock" id="headerClock">

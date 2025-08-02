@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('k_k_s', function (Blueprint $table) {
             $table->string('no_kk')->primary()->unique()->index();
+            $table->string('nama_kepala_keluarga');
             $table->string('alamat');
             $table->string('rt');
             $table->string('rw');

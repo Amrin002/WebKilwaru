@@ -364,7 +364,7 @@
                 <ol class="breadcrumb">
                     <li class="breadcrumb-item"><a href="{{ route('admin.index') }}">Dashboard</a></li>
                     <li class="breadcrumb-item">Data Penduduk</li>
-                    <li class="breadcrumb-item"><a href="{{ route('kk.index') }}">Data Kartu Keluarga</a></li>
+                    <li class="breadcrumb-item"><a href="{{ route('admin.kk.index') }}">Data Kartu Keluarga</a></li>
                     <li class="breadcrumb-item active">Edit KK</li>
                 </ol>
             </nav>
@@ -403,7 +403,7 @@
                 </p>
             </div>
 
-            <form action="{{ route('kk.update', $kk->no_kk) }}" method="POST" novalidate>
+            <form action="{{ route('admin.kk.update', $kk->no_kk) }}" method="POST" novalidate>
                 @csrf
                 @method('PUT')
 
@@ -417,7 +417,7 @@
                     </h4>
 
                     <div class="row">
-                        <div class="col-md-12 mb-3">
+                        <div class="col-md-6 mb-3">
                             <label for="no_kk" class="form-label">
                                 Nomor Kartu Keluarga <span class="required">*</span>
                             </label>
@@ -433,9 +433,27 @@
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="nama_kepala_keluarga" class="form-label">
+                                Nama Kepala Keluarga <span class="required">*</span>
+                            </label>
+                            <input type="text"
+                                class="form-control change-indicator @error('nama_kepala_keluarga') is-invalid @enderror"
+                                id="nama_kepala_keluarga" name="nama_kepala_keluarga"
+                                value="{{ old('nama_kepala_keluarga', $kk->nama_kepala_keluarga) }}"
+                                data-original="{{ $kk->nama_kepala_keluarga }}" placeholder="Nama lengkap kepala keluarga"
+                                maxlength="100" required>
+                            <div class="form-text">
+                                <i class="bi bi-info-circle me-1"></i>
+                                Nama lengkap kepala keluarga sesuai KTP
+                            </div>
+                            @error('nama_kepala_keluarga')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
                     </div>
                 </div>
-
                 <!-- Section 2: Alamat Detail -->
                 <div class="form-section">
                     <h4 class="section-title">
@@ -572,10 +590,10 @@
 
                 <!-- Form Actions -->
                 <div class="form-actions">
-                    <a href="{{ route('kk.index') }}" class="btn btn-outline-secondary">
+                    <a href="{{ route('admin.kk.index') }}" class="btn btn-outline-secondary">
                         <i class="bi bi-arrow-left me-2"></i>Kembali
                     </a>
-                    <a href="{{ route('kk.show', $kk->no_kk) }}" class="btn btn-outline-danger">
+                    <a href="{{ route('admin.kk.show', $kk->no_kk) }}" class="btn btn-outline-danger">
                         <i class="bi bi-eye me-2"></i>Lihat Detail
                     </a>
                     <button type="submit" class="btn btn-primary" id="saveBtn">
@@ -600,6 +618,14 @@
             const noKkInput = document.getElementById('no_kk');
             noKkInput.addEventListener('input', function(e) {
                 e.target.value = e.target.value.replace(/\D/g, '');
+            });
+            // Format nama kepala keluarga (hanya huruf dan spasi)
+            const namaKepalaKeluargaInput = document.getElementById('nama_kepala_keluarga');
+            namaKepalaKeluargaInput.addEventListener('input', function(e) {
+                // Remove numbers and special characters, keep only letters and spaces
+                e.target.value = e.target.value.replace(/[^a-zA-Z\s]/g, '');
+                // Capitalize first letter of each word
+                e.target.value = e.target.value.toLowerCase().replace(/\b\w/g, l => l.toUpperCase());
             });
 
             // Format kode pos (hanya angka)
@@ -656,6 +682,7 @@
             function getFieldName(name) {
                 const fieldNames = {
                     'no_kk': 'Nomor KK',
+                    'nama_kepala_keluarga': 'Nama Kepala Keluarga',
                     'alamat': 'Alamat',
                     'rt': 'RT',
                     'rw': 'RW',
@@ -702,6 +729,16 @@
                 if (noKk.length !== 16) {
                     e.preventDefault();
                     alert('Nomor KK harus 16 digit!');
+                    return false;
+                }
+                if (namaKepalaKeluarga.length < 2) {
+                    e.preventDefault();
+                    alert('Nama kepala keluarga harus minimal 2 karakter!');
+                    return false;
+                }
+                if (!/^[a-zA-Z\s]+$/.test(namaKepalaKeluarga)) {
+                    e.preventDefault();
+                    alert('Nama kepala keluarga hanya boleh berisi huruf dan spasi!');
                     return false;
                 }
 
