@@ -39,12 +39,15 @@ class RegisteredUserController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            'roles' => 'user', // Explicitly set sebagai user biasa
         ]);
 
         event(new Registered($user));
 
         Auth::login($user);
 
-        return redirect(route('admin.index', absolute: false));
+        // User baru selalu diarahkan ke dashboard user (bukan admin)
+        return redirect()->intended(route('dashboard', absolute: false))
+            ->with('success', 'Selamat datang! Akun Anda berhasil dibuat.');
     }
 }

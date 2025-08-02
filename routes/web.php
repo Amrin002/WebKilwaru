@@ -7,6 +7,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\StatistikPertumbuhanController;
 use Illuminate\Support\Facades\Route;
 
+// Public routes
 Route::get('/', function () {
     return view('home.index');
 });
@@ -23,19 +24,24 @@ Route::get('/privacy', function () {
     return view('pages.privacy');
 })->name('privacy');
 
+// User dashboard (untuk semua user yang sudah login dan verified)
 Route::get('/dashboard', function () {
     return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+})->middleware(['auth', 'verified', 'user'])->name('dashboard');
 
-Route::middleware('auth')->group(function () {
+// Routes untuk authenticated users (user & admin bisa akses profile)
+Route::middleware(['auth', 'user'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
 
+// Admin only routes
+Route::middleware(['auth', 'admin'])->group(function () {
     // Admin Dashboard
     Route::get('/admin', [AdminDashboardController::class, 'index'])->name('admin.index');
 
-    // Admin Routes
+    // Admin Routes dengan prefix 'admin'
     Route::prefix('admin')->name('admin.')->group(function () {
 
         // KK Routes
