@@ -50,7 +50,8 @@ class KKController extends Controller
      */
     public function create()
     {
-        return view('admin.kk.create');
+        $titleHeader = "Buat Kartu Keluarga";
+        return view('admin.kk.create', compact('titleHeader'));
     }
 
     /**
@@ -98,7 +99,7 @@ class KKController extends Controller
         try {
             KK::create($validated);
 
-            return redirect()->route('kk.index')
+            return redirect()->route('admin.kk.index')
                 ->with('success', 'Data Kartu Keluarga berhasil ditambahkan');
         } catch (\Exception $e) {
             return redirect()->back()
@@ -113,8 +114,9 @@ class KKController extends Controller
     public function show(string $no_kk)
     {
         $kk = KK::findOrFail($no_kk);
+        $titleHeader = "Detail Kartu Keluarga";
 
-        return view('admin.kk.show', compact('kk'));
+        return view('admin.kk.show', compact('kk', "titleHeader"));
     }
 
     /**
@@ -122,9 +124,10 @@ class KKController extends Controller
      */
     public function edit(string $no_kk)
     {
+        $titleHeader = "Edit Kartu Keluarga";
         $kk = KK::findOrFail($no_kk);
 
-        return view('admin.kk.edit', compact('kk'));
+        return view('admin.kk.edit', compact('kk', 'titleHeader'));
     }
 
     /**
@@ -174,7 +177,7 @@ class KKController extends Controller
         try {
             $kk->update($validated);
 
-            return redirect()->route('kk.index')
+            return redirect()->route('admin.kk.index')
                 ->with('success', 'Data Kartu Keluarga berhasil diperbarui');
         } catch (\Exception $e) {
             return redirect()->back()
@@ -192,7 +195,7 @@ class KKController extends Controller
             $kk = KK::findOrFail($no_kk);
             $kk->delete();
 
-            return redirect()->route('kk.index')
+            return redirect()->route('admin.kk.index')
                 ->with('success', 'Data Kartu Keluarga berhasil dihapus');
         } catch (\Exception $e) {
             return redirect()->back()
