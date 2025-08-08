@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\KK;
+use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
@@ -12,7 +13,7 @@ class KKController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request)
+    public function index(Request $request): View
     {
         // Query builder
         $query = KK::query();
@@ -351,7 +352,7 @@ class KKController extends Controller
                 $message .= ". " . count($errors) . " data gagal import.";
             }
 
-            return redirect()->route('kk.index')
+            return redirect()->route('admin.kk.index')
                 ->with('success', $message)
                 ->with('import_errors', $errors);
         } catch (\Exception $e) {

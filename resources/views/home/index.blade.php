@@ -11,6 +11,11 @@
         <meta name="csrf-token" content="{{ csrf_token() }}">
     @endpush
 
+    {{-- Chart.js untuk halaman landing saja --}}
+    @push('chart-scripts')
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.min.js"></script>
+    @endpush
+
 @section('content')
     <!-- Hero Section -->
     <section id="home" class="hero-section">
@@ -149,42 +154,6 @@
                     <div class="card h-100 fade-in">
                         <div class="card-body text-center p-4">
                             <div class="feature-icon">
-                                <i class="bi bi-file-earmark-text"></i>
-                            </div>
-                            <h5 class="card-title">Administrasi Kependudukan</h5>
-                            <p class="card-text">Layanan pembuatan dan pengurusan dokumen kependudukan seperti KTP, KK,
-                                dan akta kelahiran.</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-4 col-md-6 mb-4">
-                    <div class="card h-100 fade-in">
-                        <div class="card-body text-center p-4">
-                            <div class="feature-icon">
-                                <i class="bi bi-briefcase"></i>
-                            </div>
-                            <h5 class="card-title">Surat Keterangan</h5>
-                            <p class="card-text">Penerbitan berbagai surat keterangan seperti surat keterangan usaha,
-                                domisili, dan lainnya.</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-4 col-md-6 mb-4">
-                    <div class="card h-100 fade-in">
-                        <div class="card-body text-center p-4">
-                            <div class="feature-icon">
-                                <i class="bi bi-heart-pulse"></i>
-                            </div>
-                            <h5 class="card-title">Kesehatan</h5>
-                            <p class="card-text">Pelayanan kesehatan dasar, posyandu, dan program kesehatan masyarakat
-                                desa.</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-4 col-md-6 mb-4">
-                    <div class="card h-100 fade-in">
-                        <div class="card-body text-center p-4">
-                            <div class="feature-icon">
                                 <i class="bi bi-book"></i>
                             </div>
                             <h5 class="card-title">Pendidikan</h5>
@@ -229,51 +198,89 @@
                 <p class="lead">Informasi terbaru seputar kegiatan dan perkembangan desa</p>
             </div>
             <div class="row">
-                <div class="col-lg-4 col-md-6 mb-4">
-                    <div class="news-card fade-in">
-                        <div class="card-body p-4">
-                            <div class="d-flex justify-content-between align-items-start mb-3">
-                                <span class="news-date">15 Juli 2025</span>
-                                <i class="bi bi-bookmark text-muted"></i>
+                @forelse($latestBerita as $berita)
+                    <div class="col-lg-4 col-md-6 mb-4">
+                        <div class="news-card fade-in">
+                            @if ($berita->gambar)
+                                <img src="{{ $berita->gambar_url }}" alt="{{ $berita->judul }}" class="card-img-top"
+                                    style="height: 200px; object-fit: cover;">
+                            @endif
+                            <div class="card-body p-4">
+                                <div class="d-flex justify-content-between align-items-start mb-3">
+                                    <span class="news-date">{{ $berita->published_at->format('d M Y') }}</span>
+                                    @if ($berita->kategoriBeri)
+                                        <span class="badge" style="background-color: {{ $berita->kategoriBeri->warna }}">
+                                            {{ $berita->kategoriBeri->nama }}
+                                        </span>
+                                    @endif
+                                </div>
+                                <h5 class="card-title">{{ $berita->judul }}</h5>
+                                <p class="card-text">{{ $berita->excerpt_formatted }}</p>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <a href="{{ route('berita.show', $berita->slug) }}"
+                                        class="btn btn-sm btn-outline-primary">
+                                        Baca Selengkapnya
+                                    </a>
+                                    <small class="text-muted">
+                                        <i class="bi bi-eye"></i> {{ $berita->views }}
+                                    </small>
+                                </div>
                             </div>
-                            <h5 class="card-title">Pembangunan Jalan Desa Tahap 2</h5>
-                            <p class="card-text">Pemerintah desa melanjutkan pembangunan infrastruktur jalan untuk
-                                meningkatkan konektivitas antar dusun.</p>
-                            <a href="#" class="btn btn-sm btn-outline-primary">Baca Selengkapnya</a>
                         </div>
                     </div>
-                </div>
-                <div class="col-lg-4 col-md-6 mb-4">
-                    <div class="news-card fade-in">
-                        <div class="card-body p-4">
-                            <div class="d-flex justify-content-between align-items-start mb-3">
-                                <span class="news-date">12 Juli 2025</span>
-                                <i class="bi bi-bookmark text-muted"></i>
-                            </div>
-                            <h5 class="card-title">Program Pelatihan UMKM</h5>
-                            <p class="card-text">Desa menyelenggarakan pelatihan kewirausahaan untuk meningkatkan
-                                ekonomi kreatif warga.</p>
-                            <a href="#" class="btn btn-sm btn-outline-primary">Baca Selengkapnya</a>
+                @empty
+                    <div class="col-12">
+                        <div class="text-center py-5">
+                            <i class="bi bi-newspaper" style="font-size: 4rem; color: var(--soft-gray);"></i>
+                            <p class="mt-3 text-muted">Belum ada berita terbaru</p>
                         </div>
                     </div>
+                @endforelse
+            </div>
+
+            @if ($latestBerita->count() > 0)
+                <div class="text-center mt-4">
+                    <a href="{{ route('berita.index') }}" class="btn btn-primary">
+                        <i class="bi bi-arrow-right me-2"></i>Lihat Semua Berita
+                    </a>
                 </div>
-                <div class="col-lg-4 col-md-6 mb-4">
-                    <div class="news-card fade-in">
-                        <div class="card-body p-4">
-                            <div class="d-flex justify-content-between align-items-start mb-3">
-                                <span class="news-date">10 Juli 2025</span>
-                                <i class="bi bi-bookmark text-muted"></i>
+            @endif
+        </div>
+    </section>
+
+    {{-- Demographics Section - Optional, jika ada chart --}}
+    @if (isset($showDemographics) && $showDemographics)
+        <section class="py-5 bg-light demographics-section">
+            <div class="container">
+                <div class="text-center mb-5">
+                    <h2 class="section-title">Data Demografis</h2>
+                    <p class="lead">Statistik penduduk Desa Kilwaru</p>
+                </div>
+                <div class="row">
+                    <div class="col-lg-6 mb-4">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h5 class="card-title text-center mb-4">Distribusi Usia</h5>
+                                <div style="height: 300px;">
+                                    <canvas id="ageChart"></canvas>
+                                </div>
                             </div>
-                            <h5 class="card-title">Gotong Royong Bersih Desa</h5>
-                            <p class="card-text">Kegiatan gotong royong bulanan untuk menjaga kebersihan dan keindahan
-                                lingkungan desa.</p>
-                            <a href="#" class="btn btn-sm btn-outline-primary">Baca Selengkapnya</a>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 mb-4">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h5 class="card-title text-center mb-4">Distribusi Gender</h5>
+                                <div style="height: 300px;">
+                                    <canvas id="genderChart"></canvas>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </section>
+        </section>
+    @endif
 
     <!-- Contact Section -->
     <section id="contact" class="py-5 bg-light">
@@ -310,7 +317,7 @@
                                     <i class="bi bi-envelope"></i>
                                 </div>
                                 <h6>Email</h6>
-                                <p class="text-muted">info@desaKilwaru.id<br>admin@desaKilwaru.id</p>
+                                <p class="text-muted">info@desakilwaru.id<br>admin@desakilwaru.id</p>
                             </div>
                         </div>
                     </div>
@@ -319,3 +326,268 @@
         </div>
     </section>
 @endsection
+
+@push('scripts')
+    <script>
+        // Landing Page Specific JavaScript for Desa Kilwaru
+        // This file handles functionality specific to the home/index page
+
+        // Counter animation for statistics (Landing page only)
+        function animateCounters() {
+            const counters = document.querySelectorAll('.stat-number');
+            const speed = 200;
+
+            counters.forEach(counter => {
+                const animate = () => {
+                    const value = +counter.getAttribute('data-target') || +counter.innerText.replace(/,/g, '');
+                    const data = +counter.innerText.replace(/,/g, '') || 0;
+
+                    const time = value / speed;
+
+                    if (data < value) {
+                        counter.innerText = Math.ceil(data + time).toLocaleString();
+                        setTimeout(animate, 1);
+                    } else {
+                        counter.innerText = value.toLocaleString();
+                    }
+                }; // Set target values and start animation when visible if
+                (!counter.getAttribute('data-target')) {
+                    const originalValue = counter.innerText.replace(/,/g, '');
+                    counter.setAttribute('data-target', originalValue);
+                    counter.innerText = '0';
+                }
+                animate();
+            });
+        } // Trigger counter
+        animation when stats section is visible(Landing page) const statsSection = document.querySelector('.stats-section');
+        const statsObserver = new IntersectionObserver(function(entries) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    animateCounters();
+                    statsObserver.unobserve(entry.target);
+                }
+            });
+        }, {
+            threshold: 0.5
+        });
+
+        if (statsSection) {
+            statsObserver.observe(statsSection);
+        }
+
+        // Parallax effect for hero section (Landing page only)
+        window.addEventListener('scroll', () => {
+            const scrolled = window.pageYOffset;
+            const parallaxElements = document.querySelectorAll('.floating-elements');
+            const speed = scrolled * 0.5;
+
+            parallaxElements.forEach(element => {
+                element.style.transform = `translateY(${speed}px)`;
+            });
+        });
+
+        // Typing effect for hero title (Landing page only)
+        function typeWriter(element, text, speed = 100) {
+            let i = 0;
+            element.innerHTML = '';
+
+            function type() {
+                if (i < text.length) {
+                    element.innerHTML += text.charAt(i);
+                    i++;
+                    setTimeout(type, speed);
+                }
+            }
+            type();
+        } // Initialize
+        typing effect after page load(Landing page) window.addEventListener('load', () => {
+            setTimeout(() => {
+                const heroTitle = document.querySelector('.hero-content h1');
+                if (heroTitle) {
+                    const originalText = heroTitle.innerText;
+                    typeWriter(heroTitle, originalText, 50);
+                }
+            }, 500);
+        });
+
+        // Particle effect for hero section (Landing page only)
+        function createParticles() {
+            const hero = document.querySelector('.hero-section');
+            if (!hero) return;
+
+            const particleCount = 20;
+
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.style.cssText = `
+                position: absolute; width: 4px; height: 4px; background: rgba(255, 255, 255, 0.3); border-radius: 50%;
+                animation: float ${3 + Math.random() * 4}s ease-in-out infinite; animation-delay: ${Math.random() * 2}s;
+                left: ${Math.random() * 100}%; top: ${Math.random() * 100}%; pointer-events: none; `;
+                hero.appendChild(particle);
+            } // Add float animation CSS const floatStyle=document.createElement('style');
+            floatStyle.textContent = ` @keyframes float { 0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 1;
+                } 33% { transform: translateY(-20px) rotate(120deg); opacity: 0.7; } 66% { transform: translateY(20px)
+                rotate(240deg); opacity: 0.4; } } `;
+            document.head.appendChild(floatStyle);
+        } // Initialize particles
+        (Landing page) createParticles(); // Chart initialization for demographics (Landing page only) function
+        initCharts() { // Age Distribution Chart const ageCtx=document.getElementById('ageChart'); if (ageCtx) {
+        const ageChart = new Chart(ageCtx.getContext('2d'), {
+                    type: 'pie',
+                    data: {
+                        labels: ['0-17
+                            Tahun ', '
+                            18 - 35 Tahun ' , '
+                            36 - 50 Tahun ' , '
+                            51 - 65 Tahun ' , '
+                            65 + Tahun ' ], datasets: [{ data: [642, 1089, 736,
+                            285, 95
+                        ],
+                        backgroundColor: ['#4a7c59', '#8fbc8f', '#ff8c42', '#2d5016', '#6c757d'],
+                        borderColor: '#fff',
+                        borderWidth: 3,
+                        hoverOffset: 10
+                    }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 20,
+                            font: {
+                                size: 12,
+                                family: 'Segoe UI'
+                            }
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const
+                                    total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = ((context.parsed / total) * 100).toFixed(1);
+                                return context.label + ': ' + context.parsed + ' orang (' + percentage + '%)';
+                            }
+                        }
+                    }
+                },
+                animation: {
+                    animateScale: true,
+                    animateRotate: true,
+                    duration: 1500
+                }
+            }
+        });
+        }
+
+        // Gender Distribution Chart
+        const genderCtx = document.getElementById('genderChart');
+        if (genderCtx) {
+            const genderChart = new Chart(genderCtx.getContext('2d'), {
+                type: 'pie',
+                data: {
+                    labels: ['Laki-laki', 'Perempuan'],
+                    datasets: [{
+                        data: [1456, 1391],
+                        backgroundColor: [
+                            '#4a7c59',
+                            '#ff8c42'
+                        ],
+                        borderColor: '#fff',
+                        borderWidth: 3,
+                        hoverOffset: 15
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 20,
+                                font: {
+                                    size: 14,
+                                    family: 'Segoe UI'
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = ((context.parsed / total) * 100).toFixed(1);
+                                    return context.label + ': ' + context.parsed + ' orang (' + percentage +
+                                        '%)';
+                                }
+                            }
+                        }
+                    },
+                    animation: {
+                        animateScale: true,
+                        animateRotate: true,
+                        duration: 1500
+                    }
+                }
+            });
+        }
+        }
+
+        // Initialize charts when demographic section becomes visible (Landing page)
+        const chartSection = document.querySelector('.demographics-section, .charts-section');
+        if (chartSection) {
+            const chartObserver = new IntersectionObserver(function(entries) {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        setTimeout(initCharts, 500); // Small delay for better effect
+                        chartObserver.unobserve(entry.target);
+                    }
+                });
+            }, {
+                threshold: 0.3
+            });
+
+            chartObserver.observe(chartSection);
+        }
+
+        // Hero section specific animations (Landing page)
+        const heroElements = document.querySelectorAll('.hero-animation');
+        heroElements.forEach((element, index) => {
+            element.style.opacity = '0';
+            element.style.transform = 'translateY(50px)';
+            element.style.transition = 'all 0.8s ease';
+
+            setTimeout(() => {
+                element.style.opacity = '1';
+                element.style.transform = 'translateY(0)';
+            }, 200 + (index * 200));
+        });
+
+        // Landing page specific news refresh (if needed)
+        if (typeof refreshNews === 'undefined') {
+            window.refreshNews = function() {
+                // Auto refresh berita setiap 5 menit - hanya di landing page
+                setInterval(function() {
+                    const newsSection = document.querySelector('#news');
+                    if (newsSection && window.location.pathname === '/') {
+                        fetch('/api/berita/latest?limit=3')
+                            .then(response => response.json())
+                            .then(data => {
+                                console.log('Checking for new articles...');
+                                // Logic untuk update berita bisa ditambahkan di sini
+                            })
+                            .catch(error => console.log('News refresh error:', error));
+                    }
+                }, 300000); // 5 menit
+            };
+
+            // Initialize news refresh
+            refreshNews();
+        }
+
+        console.log('Desa Kilwaru landing page scripts loaded successfully! 🏡');
+    </script>
+@endpush

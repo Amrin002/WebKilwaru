@@ -161,7 +161,7 @@
             </div>
             <ul class="sub-menu {{ request()->routeIs('admin.berita.*') ? 'expanded' : '' }}">
                 <li class="sub-menu-item">
-                    <a href="#"
+                    <a href="{{ route('admin.berita.index') }}"
                         class="sub-menu-link {{ request()->routeIs('admin.berita.kelola.*') ? 'active' : '' }}"
                         data-subpage="kelola-berita">
                         <i class="bi bi-pencil-square"></i>
