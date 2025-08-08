@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Berita;
+use App\Models\StrukturDesa;
 use Illuminate\Http\Request;
 
 class HomeController extends Controller
@@ -16,7 +17,12 @@ class HomeController extends Controller
             ->limit(3)
             ->get();
 
-        return view('home.index', compact('latestBerita'));
+        $strukturDesa = StrukturDesa::aktif()
+            ->ordered()
+            ->get()
+            ->groupBy('kategori');
+
+        return view('home.index', compact('latestBerita', 'strukturDesa'));
     }
     public function beritaLatest()
     {

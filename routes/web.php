@@ -9,6 +9,7 @@ use App\Http\Controllers\PendudukController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PublicBeritaController;
 use App\Http\Controllers\StatistikPertumbuhanController;
+use App\Http\Controllers\StrukturDesaController;
 use Illuminate\Support\Facades\Route;
 
 // Public routes
@@ -56,6 +57,8 @@ Route::get('/privacy', function () {
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified', 'user'])->name('dashboard');
+
+Route::get('/sturktur-desa', [StrukturDesaController::class, 'publicStructure'])->name('struktur-desa.public');
 
 // Routes untuk authenticated users (user & admin bisa akses profile)
 Route::middleware(['auth', 'user'])->group(function () {
@@ -134,6 +137,11 @@ Route::middleware(['auth', 'admin'])->group(function () {
         Route::prefix('api')->name('api.')->group(function () {
             Route::get('/kategori-berita/list', [KategoriBeritaController::class, 'getKategoriList'])->name('kategori-berita.list');
         });
+        Route::resource('struktur-desa', StrukturDesaController::class);
+        Route::post('struktur-desa/{struktur_desa}/toggle-status', [StrukturDesaController::class, 'toggleStatus'])->name('struktur-desa.toggle-status');
+        Route::post('struktur-desa-bulk-action', [StrukturDesaController::class, 'bulkAction'])->name('struktur-desa.bulk-action');
+        Route::get('struktur-desa-export', [StrukturDesaController::class, 'export'])->name('struktur-desa.export');
+        Route::get('struktur-desa-print', [StrukturDesaController::class, 'print'])->name('struktur-desa.print');
     });
 });
 

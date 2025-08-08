@@ -142,6 +142,212 @@
         </div>
     </section>
 
+    <!-- Struktur Desa Section -->
+    <section id="struktur" class="py-5 bg-light">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="section-title">Struktur Pemerintahan Desa</h2>
+                <p class="lead">Mengenal pejabat dan aparatur {{ config('app.village_name', 'Desa Kilwaru') }}</p>
+            </div>
+
+            @if (isset($strukturDesa) && $strukturDesa->isNotEmpty())
+                <!-- Kepala Desa & Sekretaris Row -->
+                @if (isset($strukturDesa['kepala_desa']) || isset($strukturDesa['sekretaris']))
+                    <div class="row mb-5">
+                        @if (isset($strukturDesa['kepala_desa']) && $strukturDesa['kepala_desa']->first())
+                            @php $kepalaDesa = $strukturDesa['kepala_desa']->first(); @endphp
+                            <div class="col-lg-6 mb-4">
+                                <div class="card h-100 shadow-lg border-0 fade-in">
+                                    <div class="row g-0">
+                                        <div class="col-md-4">
+                                            @if ($kepalaDesa->image)
+                                                <img src="{{ $kepalaDesa->image_url }}" alt="{{ $kepalaDesa->nama }}"
+                                                    class="img-fluid rounded-start h-100"
+                                                    style="object-fit: cover; min-height: 200px;">
+                                            @else
+                                                <div class="h-100 d-flex align-items-center justify-content-center bg-light rounded-start"
+                                                    style="min-height: 200px;">
+                                                    <i class="bi bi-person-circle"
+                                                        style="font-size: 4rem; color: #dee2e6;"></i>
+                                                </div>
+                                            @endif
+                                        </div>
+                                        <div class="col-md-8">
+                                            <div class="card-body">
+                                                <span class="badge bg-primary mb-2">Kepala Desa</span>
+                                                <h5 class="card-title fw-bold" style="color: var(--primary-green);">
+                                                    {{ $kepalaDesa->nama }}</h5>
+                                                <p class="card-text text-muted mb-2">{{ $kepalaDesa->posisi }}</p>
+                                                @if ($kepalaDesa->telepon)
+                                                    <p class="mb-1 small"><i
+                                                            class="bi bi-telephone me-2 text-success"></i>{{ $kepalaDesa->telepon }}
+                                                    </p>
+                                                @endif
+                                                @if ($kepalaDesa->email)
+                                                    <p class="mb-1 small"><i
+                                                            class="bi bi-envelope me-2 text-info"></i>{{ $kepalaDesa->email }}
+                                                    </p>
+                                                @endif
+                                                @if ($kepalaDesa->mulai_menjabat)
+                                                    <p class="mb-0 small"><i
+                                                            class="bi bi-calendar-check me-2 text-warning"></i>Menjabat
+                                                        sejak {{ $kepalaDesa->mulai_menjabat->format('Y') }}</p>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
+
+                        @if (isset($strukturDesa['sekretaris']) && $strukturDesa['sekretaris']->first())
+                            @php $sekretaris = $strukturDesa['sekretaris']->first(); @endphp
+                            <div class="col-lg-6 mb-4">
+                                <div class="card h-100 shadow-lg border-0 fade-in">
+                                    <div class="row g-0">
+                                        <div class="col-md-4">
+                                            @if ($sekretaris->image)
+                                                <img src="{{ $sekretaris->image_url }}" alt="{{ $sekretaris->nama }}"
+                                                    class="img-fluid rounded-start h-100"
+                                                    style="object-fit: cover; min-height: 200px;">
+                                            @else
+                                                <div class="h-100 d-flex align-items-center justify-content-center bg-light rounded-start"
+                                                    style="min-height: 200px;">
+                                                    <i class="bi bi-person-circle"
+                                                        style="font-size: 4rem; color: #dee2e6;"></i>
+                                                </div>
+                                            @endif
+                                        </div>
+                                        <div class="col-md-8">
+                                            <div class="card-body">
+                                                <span class="badge bg-success mb-2">Sekretaris Desa</span>
+                                                <h5 class="card-title fw-bold" style="color: var(--primary-green);">
+                                                    {{ $sekretaris->nama }}</h5>
+                                                <p class="card-text text-muted mb-2">{{ $sekretaris->posisi }}</p>
+                                                @if ($sekretaris->telepon)
+                                                    <p class="mb-1 small"><i
+                                                            class="bi bi-telephone me-2 text-success"></i>{{ $sekretaris->telepon }}
+                                                    </p>
+                                                @endif
+                                                @if ($sekretaris->email)
+                                                    <p class="mb-1 small"><i
+                                                            class="bi bi-envelope me-2 text-info"></i>{{ $sekretaris->email }}
+                                                    </p>
+                                                @endif
+                                                @if ($sekretaris->mulai_menjabat)
+                                                    <p class="mb-0 small"><i
+                                                            class="bi bi-calendar-check me-2 text-warning"></i>Menjabat
+                                                        sejak {{ $sekretaris->mulai_menjabat->format('Y') }}</p>
+                                                @endif
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
+                    </div>
+                @endif
+
+                <!-- Other Officials Grid -->
+                <div class="row">
+                    @php
+                        $otherOfficials = collect();
+                        $categories = [
+                            'kaur_umum',
+                            'kaur_keuangan',
+                            'kasi_pemerintahan',
+                            'kasi_kesejahteraan',
+                            'kasi_pelayanan',
+                            'kadus',
+                        ];
+                        foreach ($categories as $cat) {
+                            if (isset($strukturDesa[$cat])) {
+                                $otherOfficials = $otherOfficials->merge($strukturDesa[$cat]);
+                            }
+                        }
+                    @endphp
+
+                    @foreach ($otherOfficials->take(6) as $pejabat)
+                        <div class="col-lg-4 col-md-6 mb-4">
+                            <div class="card h-100 fade-in">
+                                <div class="card-body text-center p-4">
+                                    @if ($pejabat->image)
+                                        <img src="{{ $pejabat->image_url }}" alt="{{ $pejabat->nama }}"
+                                            class="rounded-circle mb-3"
+                                            style="width: 100px; height: 100px; object-fit: cover; border: 3px solid var(--light-green);">
+                                    @else
+                                        <div class="feature-icon mb-3">
+                                            <i class="bi bi-person"></i>
+                                        </div>
+                                    @endif
+                                    <h6 class="fw-bold" style="color: var(--primary-green);">{{ $pejabat->nama }}</h6>
+                                    <p class="text-muted small mb-2">{{ $pejabat->posisi }}</p>
+                                    <span class="badge"
+                                        style="background-color: var(--light-green); color: var(--primary-green);">
+                                        {{ $pejabat->kategori_display }}
+                                    </span>
+                                    @if ($pejabat->telepon)
+                                        <p class="mb-0 small mt-2"><i
+                                                class="bi bi-telephone me-1"></i>{{ $pejabat->telepon }}</p>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+
+                <div class="text-center mt-4">
+                    <a href="{{ route('struktur-desa.public') }}" class="btn btn-primary btn-lg">
+                        <i class="bi bi-diagram-3 me-2"></i>Lihat Struktur Lengkap
+                    </a>
+                </div>
+            @else
+                <!-- Fallback Display if no data from database -->
+                <div class="row">
+                    <div class="col-lg-4 col-md-6 mb-4">
+                        <div class="card h-100 fade-in">
+                            <div class="card-body text-center p-4">
+                                <div class="feature-icon mb-3">
+                                    <i class="bi bi-person-badge"></i>
+                                </div>
+                                <h5 class="card-title">Kepala Desa</h5>
+                                <p class="card-text">Memimpin penyelenggaraan pemerintahan desa dan pembangunan</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-6 mb-4">
+                        <div class="card h-100 fade-in">
+                            <div class="card-body text-center p-4">
+                                <div class="feature-icon mb-3">
+                                    <i class="bi bi-people"></i>
+                                </div>
+                                <h5 class="card-title">Perangkat Desa</h5>
+                                <p class="card-text">Membantu kepala desa dalam pelaksanaan tugas pemerintahan</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 col-md-6 mb-4">
+                        <div class="card h-100 fade-in">
+                            <div class="card-body text-center p-4">
+                                <div class="feature-icon mb-3">
+                                    <i class="bi bi-bank"></i>
+                                </div>
+                                <h5 class="card-title">BPD</h5>
+                                <p class="card-text">Lembaga permusyawaratan desa yang demokratis</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-center mt-4">
+                    <a href="{{ route('struktur-desa.public') }}" class="btn btn-primary btn-lg">
+                        <i class="bi bi-diagram-3 me-2"></i>Lihat Struktur Organisasi
+                    </a>
+                </div>
+            @endif
+        </div>
+    </section>
+
     <!-- Services Section -->
     <section id="services" class="py-5 bg-light">
         <div class="container">
@@ -209,7 +415,8 @@
                                 <div class="d-flex justify-content-between align-items-start mb-3">
                                     <span class="news-date">{{ $berita->published_at->format('d M Y') }}</span>
                                     @if ($berita->kategoriBeri)
-                                        <span class="badge" style="background-color: {{ $berita->kategoriBeri->warna }}">
+                                        <span class="badge"
+                                            style="background-color: {{ $berita->kategoriBeri->warna }}">
                                             {{ $berita->kategoriBeri->nama }}
                                         </span>
                                     @endif

@@ -62,6 +62,15 @@
                 </li>
             </ul>
         </li>
+        <!-- Struktur Desa -->
+        <li class="nav-item">
+            <a href="{{ route('admin.struktur-desa.index') }}"
+                class="nav-link {{ request()->routeIs('admin.struktur-desa.*') ? 'active' : '' }}"
+                data-page="struktur-desa">
+                <i class="bi bi-diagram-3"></i>
+                <span class="nav-text">Struktur Desa</span>
+            </a>
+        </li>
 
         <!-- Administrasi dengan Sub Menu -->
         <li class="nav-item">
