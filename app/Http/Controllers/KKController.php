@@ -2,11 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\KKExport;
+use App\Exports\Templates\KKTemplateExport;
+use App\Imports\KKImport;
 use App\Models\KK;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
+use Maatwebsite\Excel\Facades\Excel;
+use Maatwebsite\Excel\HeadingRowImport;
 
 class KKController extends Controller
 {
@@ -230,134 +237,226 @@ class KKController extends Controller
         ];
     }
 
+
     /**
-     * Export data to CSV
+     * Export data to Excel
      */
     public function export(Request $request)
     {
-        $query = KK::query();
+        // Debug: Log untuk memastikan method dipanggil
+        Log::info('Export method called', [
+            'user' => Auth::user()->id ?? 'guest',
+            'query' => $request->all()
+        ]);
 
-        // Apply same filters as index
-        if ($request->filled('search')) {
-            $query->search($request->search);
-        }
-
-        $filters = [
-            'provinsi' => $request->provinsi,
-            'kabupaten' => $request->kabupaten,
-            'kecamatan' => $request->kecamatan,
-            'desa' => $request->desa,
-        ];
-
-        $query->filterByLocation(array_filter($filters));
-
-        $kkData = $query->orderBy('created_at', 'desc')->get();
-
-        $filename = 'data_kk_' . date('Y-m-d_H-i-s') . '.csv';
-
-        $headers = [
-            'Content-Type' => 'text/csv',
-            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
-        ];
-
-        $callback = function () use ($kkData) {
-            $file = fopen('php://output', 'w');
-
-            // Add BOM for proper UTF-8 encoding
-            fwrite($file, "\xEF\xBB\xBF");
-
-            // Header row
-            fputcsv($file, [
-                'No. KK',
-                'Nama Kepala Keluarga',
-                'Alamat',
-                'RT',
-                'RW',
-                'Desa',
-                'Kecamatan',
-                'Kabupaten',
-                'Provinsi',
-                'Kode Pos',
-                'Alamat Lengkap',
-                'Tanggal Dibuat'
-            ]);
-
-            // Data rows
-            foreach ($kkData as $kk) {
-                fputcsv($file, [
-                    $kk->no_kk,
-                    $kk->nama_kepala_keluarga,
-                    $kk->alamat,
-                    $kk->rt,
-                    $kk->rw,
-                    $kk->desa,
-                    $kk->kecamatan,
-                    $kk->kabupaten,
-                    $kk->provinsi,
-                    $kk->kode_pos,
-                    $kk->alamat_lengkap,
-                    $kk->created_at->format('d/m/Y H:i:s')
-                ]);
+        try {
+            // Debug: Cek apakah KKExport class ada
+            if (!class_exists(\App\Exports\KKExport::class)) {
+                throw new \Exception('KKExport class not found');
             }
 
-            fclose($file);
-        };
+            $filename = 'data_kk_' . date('Y-m-d_H-i-s') . '.xlsx';
 
-        return response()->stream($callback, 200, $headers);
+            // Debug: Log sebelum download
+            Log::info('Attempting to download', ['filename' => $filename]);
+
+            return Excel::download(new KKExport($request), $filename);
+        } catch (\Exception $e) {
+            Log::error('Export failed', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return redirect()->back()
+                ->with('error', 'Gagal mengexport data: ' . $e->getMessage());
+        }
     }
 
     /**
-     * Import data from CSV
+     * Import data from Excel
      */
     public function import(Request $request)
     {
+        // Validasi request
         $request->validate([
-            'file' => 'required|file|mimes:csv,txt|max:2048'
+            'file' => 'required|file|mimes:xlsx,xls|max:10240' // Max 10MB
+        ], [
+            'file.required' => 'File wajib dipilih',
+            'file.mimes' => 'File harus berformat Excel (.xlsx, .xls)',
+            'file.max' => 'Ukuran file maksimal 10MB'
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            $import = new KKImport();
+            Excel::import($import, $request->file('file'));
+
+            DB::commit();
+
+            $importedCount = $import->getImportedCount();
+            $skippedCount = $import->getSkippedCount();
+            $errorCount = count($import->failures()) + count($import->errors());
+
+            $message = "Import selesai! ";
+            $message .= "Berhasil: {$importedCount} data, ";
+            $message .= "Dilewati: {$skippedCount} data";
+
+            if ($errorCount > 0) {
+                $message .= ", Error: {$errorCount} data";
+            }
+
+            // Store detailed errors in session for display
+            if (count($import->failures()) > 0 || count($import->errors()) > 0) {
+                session(['import_details' => [
+                    'failures' => $import->failures(),
+                    'errors' => $import->errors()
+                ]]);
+            }
+
+            // Return JSON response for AJAX requests
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => $message,
+                    'data' => [
+                        'imported' => $importedCount,
+                        'skipped' => $skippedCount,
+                        'errors' => $errorCount
+                    ]
+                ]);
+            }
+
+            return redirect()->route('admin.kk.index')
+                ->with('success', $message);
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            // Return JSON response for AJAX requests
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Gagal import data: ' . $e->getMessage()
+                ], 500);
+            }
+
+            return redirect()->back()
+                ->with('error', 'Gagal import data: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Download template Excel untuk import
+     */
+    public function downloadTemplate()
+    {
+        try {
+            $filename = 'template_import_kk.xlsx';
+
+            // Gunakan KKTemplateExport yang sudah dibuat
+            return Excel::download(new KKTemplateExport, $filename);
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Gagal mendownload template: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Show import errors/failures detail
+     */
+    public function showImportErrors()
+    {
+        $details = session('import_details');
+
+        if (!$details) {
+            return redirect()->route('admin.kk.index')
+                ->with('error', 'Tidak ada detail error yang tersedia');
+        }
+
+        return view('admin.kk.import-errors', [
+            'failures' => $details['failures'] ?? [],
+            'errors' => $details['errors'] ?? [],
+            'titleHeader' => 'Detail Error Import KK'
+        ]);
+    }
+
+    /**
+     * Validate import file (AJAX endpoint)
+     */
+    public function validateImportFile(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx,xls|max:10240'
         ]);
 
         try {
             $file = $request->file('file');
-            $handle = fopen($file->getPathname(), 'r');
 
-            // Skip header row
-            fgetcsv($handle);
+            // Basic file validation
+            $data = Excel::toArray(new HeadingRowImport(), $file);
 
-            $imported = 0;
-            $errors = [];
-
-            while (($data = fgetcsv($handle, 1000, ',')) !== FALSE) {
-                try {
-                    KK::create([
-                        'no_kk' => $data[0],
-                        'nama_kepala_keluarga' => $data[1],
-                        'alamat' => $data[2],
-                        'rt' => $data[3],
-                        'rw' => $data[4],
-                        'desa' => $data[5],
-                        'kecamatan' => $data[6],
-                        'kabupaten' => $data[7],
-                        'provinsi' => $data[8],
-                        'kode_pos' => $data[9],
-                    ]);
-                    $imported++;
-                } catch (\Exception $e) {
-                    $errors[] = "Baris dengan No. KK {$data[0]}: " . $e->getMessage();
-                }
+            if (empty($data) || empty($data[0])) {
+                return response()->json([
+                    'valid' => false,
+                    'message' => 'File Excel kosong atau tidak valid'
+                ]);
             }
 
-            fclose($handle);
+            $headers = array_keys($data[0][0] ?? []);
+            $requiredHeaders = [
+                'no_kk',
+                'nama_kepala_keluarga',
+                'alamat',
+                'rt',
+                'rw',
+                'desa',
+                'kecamatan',
+                'kabupaten',
+                'provinsi',
+                'kode_pos'
+            ];
 
-            $message = "Berhasil import {$imported} data";
-            if (count($errors) > 0) {
-                $message .= ". " . count($errors) . " data gagal import.";
+            $missingHeaders = array_diff($requiredHeaders, $headers);
+
+            if (!empty($missingHeaders)) {
+                return response()->json([
+                    'valid' => false,
+                    'message' => 'Header tidak lengkap. Missing: ' . implode(', ', $missingHeaders)
+                ]);
             }
 
-            return redirect()->route('admin.kk.index')
-                ->with('success', $message)
-                ->with('import_errors', $errors);
+            $rowCount = count($data[0]) - 1; // Exclude header row
+
+            return response()->json([
+                'valid' => true,
+                'message' => 'File valid',
+                'preview' => [
+                    'headers' => $headers,
+                    'row_count' => $rowCount,
+                    'sample_data' => array_slice($data[0], 1, 3) // First 3 rows as preview
+                ]
+            ]);
         } catch (\Exception $e) {
-            return redirect()->back()
-                ->with('error', 'Gagal import data: ' . $e->getMessage());
+            return response()->json([
+                'valid' => false,
+                'message' => 'Error validating file: ' . $e->getMessage()
+            ]);
         }
+    }
+
+    /**
+     * Get import progress (for real-time updates)
+     */
+    public function getImportProgress(Request $request)
+    {
+        $sessionKey = $request->get('session_key');
+
+        // This would typically use cache or session to track progress
+        // For now, return a simple response
+        return response()->json([
+            'progress' => 100,
+            'status' => 'completed',
+            'message' => 'Import completed'
+        ]);
     }
 }

@@ -76,14 +76,20 @@ Route::middleware(['auth', 'admin'])->group(function () {
     Route::prefix('admin')->name('admin.')->group(function () {
 
         // KK Routes
-        Route::resource('kk', KKController::class);
         Route::get('kk/export', [KKController::class, 'export'])->name('kk.export');
         Route::post('kk/import', [KKController::class, 'import'])->name('kk.import');
+        Route::get('kk-template', [KKController::class, 'downloadTemplate'])->name('kk.template');
+        Route::get('kk-import-errors', [KKController::class, 'showImportErrors'])->name('kk.import-errors');
+        Route::resource('kk', KKController::class);
+
 
         // Penduduk Routes
         Route::resource('penduduk', PendudukController::class);
         Route::get('penduduk-print', [PendudukController::class, 'print'])->name('penduduk.print');
         Route::get('penduduk-export', [PendudukController::class, 'export'])->name('penduduk.export');
+        Route::get('penduduk-template', [PendudukController::class, 'downloadTemplate'])->name('penduduk.template');
+        Route::get('penduduk-import-errors', [PendudukController::class, 'showImportErrors'])->name('penduduk.import-errors');
+
         Route::post('penduduk-bulk-action', [PendudukController::class, 'bulkAction'])->name('penduduk.bulk-action');
         Route::get('penduduk-statistics', [PendudukController::class, 'statistics'])->name('penduduk.statistics');
 

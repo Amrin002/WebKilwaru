@@ -463,6 +463,125 @@
                 align-items: stretch;
             }
         }
+
+        /* Import Modal Specific Styles */
+        .import-step {
+            background: rgba(45, 80, 22, 0.05);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-left: 4px solid var(--primary-green);
+        }
+
+        .import-step h6 {
+            color: var(--primary-green);
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .template-download {
+            background: linear-gradient(135deg, rgba(255, 140, 66, 0.1), rgba(255, 140, 66, 0.05));
+            border: 1px solid rgba(255, 140, 66, 0.3);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .file-drop-zone {
+            border: 2px dashed #ccc;
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            background: var(--cream);
+        }
+
+        .file-drop-zone:hover,
+        .file-drop-zone.dragover {
+            border-color: var(--primary-green);
+            background: rgba(45, 80, 22, 0.05);
+        }
+
+        .file-drop-zone.has-file {
+            border-color: var(--primary-green);
+            background: rgba(40, 167, 69, 0.1);
+        }
+
+        .file-info {
+            display: none;
+            margin-top: 15px;
+            padding: 10px;
+            background: rgba(40, 167, 69, 0.1);
+            border-radius: 8px;
+            border-left: 4px solid #28a745;
+        }
+
+        .progress-container {
+            display: none;
+            margin-top: 20px;
+        }
+
+        .import-progress {
+            height: 8px;
+            background: #e9ecef;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .import-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-green), var(--secondary-green));
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        /* Additional styles for better UX */
+        .btn-template {
+            background: linear-gradient(135deg, var(--accent-orange), #ffa726);
+            border: none;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-template:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 140, 66, 0.3);
+            color: white;
+        }
+
+        .import-tips {
+            background: rgba(32, 201, 151, 0.1);
+            border: 1px solid rgba(32, 201, 151, 0.3);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+
+        .import-tips h6 {
+            color: #20c997;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .import-tips ul {
+            margin-bottom: 0;
+            padding-left: 20px;
+        }
+
+        .import-tips li {
+            margin-bottom: 5px;
+            color: var(--soft-gray);
+            font-size: 0.9rem;
+        }
     </style>
 @endpush
 
@@ -719,52 +838,110 @@
 
     <!-- Import Modal -->
     <!-- Import Modal -->
-    <div class="modal fade" id="importModal" tabindex="-1">
-        <div class="modal-dialog">
+    <div class="modal fade" id="importModal" tabindex="-1" aria-labelledby="importModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">
-                        <i class="bi bi-upload me-2"></i>Import Data KK
+                    <h5 class="modal-title" id="importModalLabel">
+                        <i class="bi bi-upload me-2"></i>Import Data Kartu Keluarga
                     </h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form action="{{ route('admin.kk.import') }}" method="POST" enctype="multipart/form-data">
-                    @csrf
-                    <div class="modal-body">
-                        <div class="mb-3">
-                            <label class="form-label">File CSV</label>
-                            <input type="file" class="form-control" name="file" accept=".csv,.txt" required>
-                            <div class="form-text">
-                                <strong>Format CSV:</strong> No. KK, Nama Kepala Keluarga, Alamat, RT, RW, Desa, Kecamatan,
-                                Kabupaten, Provinsi, Kode Pos
+
+                <div class="modal-body">
+                    <!-- Step 1: Download Template -->
+                    <div class="import-step">
+                        <h6><i class="bi bi-1-circle me-2"></i>Download Template Excel</h6>
+                        <p class="mb-2">Download template Excel terlebih dahulu untuk memastikan format data yang benar.
+                        </p>
+                        <div class="template-download">
+                            <i class="bi bi-file-earmark-excel" style="font-size: 2rem; color: #28a745;"></i>
+                            <div class="mt-2">
+                                <a href="{{ route('admin.kk.template') }}" class="btn-template">
+                                    <i class="bi bi-download"></i>
+                                    Download Template Excel
+                                </a>
                             </div>
+                            <small class="text-muted mt-2 d-block">Template berisi format dan contoh data yang
+                                benar</small>
                         </div>
+                    </div>
 
-                        <div class="alert alert-info">
+                    <!-- Step 2: Prepare Data -->
+                    <div class="import-step">
+                        <h6><i class="bi bi-2-circle me-2"></i>Siapkan Data Excel</h6>
+                        <p class="mb-2">Isi template Excel dengan data kartu keluarga yang akan diimport.</p>
+                        <div class="alert alert-info mb-0">
                             <i class="bi bi-info-circle me-2"></i>
-                            <strong>Contoh format CSV:</strong><br>
-                            <code>1234567890123456,Budi Santoso,Jl. Merdeka No. 1,001,002,Sukamaju,Cikarang
-                                Pusat,Bekasi,Jawa Barat,17530</code>
+                            <strong>Format kolom yang diperlukan:</strong><br>
+                            <code>no_kk | nama_kepala_keluarga | alamat | rt | rw | desa | kecamatan | kabupaten | provinsi
+                                | kode_pos</code>
                         </div>
+                    </div>
 
-                        <div class="alert alert-warning">
-                            <i class="bi bi-exclamation-triangle me-2"></i>
-                            <strong>Perhatian:</strong>
-                            <ul class="mb-0 mt-2">
-                                <li>Nomor KK harus 16 digit angka</li>
-                                <li>Nama kepala keluarga hanya boleh huruf dan spasi</li>
-                                <li>Kode pos harus 5 digit angka</li>
-                                <li>Pastikan format file CSV sesuai dengan template</li>
-                            </ul>
-                        </div>
+                    <!-- Step 3: Upload File -->
+                    <div class="import-step">
+                        <h6><i class="bi bi-3-circle me-2"></i>Upload File Excel</h6>
+                        <form action="{{ route('admin.kk.import') }}" method="POST" enctype="multipart/form-data"
+                            id="importForm">
+                            @csrf
+
+                            <!-- File Drop Zone -->
+                            <div class="file-drop-zone" id="fileDropZone">
+                                <i class="bi bi-cloud-upload" style="font-size: 3rem; color: #6c757d;"></i>
+                                <h6 class="mt-3 mb-2">Drag & Drop file Excel di sini</h6>
+                                <p class="text-muted mb-3">atau klik untuk memilih file</p>
+                                <input type="file" class="d-none" name="file" id="fileInput" accept=".xlsx,.xls"
+                                    required>
+                                <button type="button" class="btn btn-outline-primary"
+                                    onclick="document.getElementById('fileInput').click()">
+                                    <i class="bi bi-folder2-open me-2"></i>Pilih File
+                                </button>
+                            </div>
+
+                            <!-- File Info -->
+                            <div class="file-info" id="fileInfo">
+                                <i class="bi bi-file-earmark-excel text-success me-2"></i>
+                                <span id="fileName"></span>
+                                <span class="badge bg-success ms-2" id="fileSize"></span>
+                                <button type="button" class="btn btn-sm btn-outline-danger ms-2" onclick="clearFile()">
+                                    <i class="bi bi-x"></i>
+                                </button>
+                            </div>
+
+                            <!-- Progress Container -->
+                            <div class="progress-container" id="progressContainer">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <small class="text-muted">Importing data...</small>
+                                    <small class="text-muted" id="progressText">0%</small>
+                                </div>
+                                <div class="import-progress">
+                                    <div class="import-progress-bar" id="progressBar"></div>
+                                </div>
+                            </div>
+                        </form>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-outline-primary" data-bs-dismiss="modal">Batal</button>
-                        <button type="submit" class="btn btn-primary">
-                            <i class="bi bi-upload me-2"></i>Import
-                        </button>
+
+                    <!-- Import Tips -->
+                    <div class="import-tips">
+                        <h6><i class="bi bi-lightbulb me-2"></i>Tips Import Data</h6>
+                        <ul>
+                            <li>Pastikan nomor KK belum ada dalam sistem</li>
+                            <li>Nomor KK harus 16 digit dan hanya berisi angka</li>
+                            <li>Nama kepala keluarga hanya boleh berisi huruf dan spasi</li>
+                            <li>Kode pos harus 5 digit angka</li>
+                            <li>Maksimal 1000 data per file untuk performa optimal</li>
+                            <li>Data yang error akan dilewati dan ditampilkan dalam laporan</li>
+                        </ul>
                     </div>
-                </form>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="submit" form="importForm" class="btn btn-primary" id="importBtn" disabled>
+                        <i class="bi bi-upload me-2"></i>Import Data
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -781,13 +958,202 @@
                     bsAlert.close();
                 }, 5000);
             });
-        });
 
-        // Confirm delete
-        function confirmDelete(url) {
-            if (confirm('Yakin ingin menghapus data KK ini?')) {
-                window.location.href = url;
+
+            // Confirm delete
+            function confirmDelete(url) {
+                if (confirm('Yakin ingin menghapus data KK ini?')) {
+                    window.location.href = url;
+                }
             }
-        }
+
+            // Import Modal functionality
+            const fileDropZone = document.getElementById('fileDropZone');
+            const fileInput = document.getElementById('fileInput');
+            const fileInfo = document.getElementById('fileInfo');
+            const fileName = document.getElementById('fileName');
+            const fileSize = document.getElementById('fileSize');
+            const importBtn = document.getElementById('importBtn');
+            const importForm = document.getElementById('importForm');
+            const progressContainer = document.getElementById('progressContainer');
+            const progressBar = document.getElementById('progressBar');
+            const progressText = document.getElementById('progressText');
+
+            // Global function untuk clear file
+            window.clearFile = function() {
+                fileInput.value = '';
+                fileDropZone.classList.remove('has-file');
+                fileInfo.style.display = 'none';
+                importBtn.disabled = true;
+            }
+
+            // Prevent default behavior on click
+            fileDropZone.addEventListener('click', function(e) {
+                if (e.target.tagName !== 'BUTTON' && e.target.tagName !== 'INPUT') {
+                    e.preventDefault();
+                    fileInput.click();
+                }
+            });
+
+            // File drag and drop handlers
+            fileDropZone.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                fileDropZone.classList.add('dragover');
+            });
+
+            fileDropZone.addEventListener('dragleave', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                fileDropZone.classList.remove('dragover');
+            });
+
+            fileDropZone.addEventListener('drop', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                fileDropZone.classList.remove('dragover');
+
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    // Set file ke input
+                    fileInput.files = files;
+                    handleFileSelect(files[0]);
+                }
+            });
+
+            fileInput.addEventListener('change', function(e) {
+                if (e.target.files.length > 0) {
+                    handleFileSelect(e.target.files[0]);
+                }
+            });
+
+            function handleFileSelect(file) {
+                // Validate file type
+                const allowedTypes = [
+                    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                    'application/vnd.ms-excel',
+                    'text/csv',
+                    'application/csv'
+                ];
+
+                const fileExtension = file.name.split('.').pop().toLowerCase();
+                if (!['xlsx', 'xls', 'csv'].includes(fileExtension)) {
+                    alert('Hanya file Excel (.xlsx, .xls) atau CSV yang diperbolehkan!');
+                    clearFile();
+                    return;
+                }
+
+                // Validate file size (max 10MB)
+                if (file.size > 10 * 1024 * 1024) {
+                    alert('Ukuran file maksimal 10MB!');
+                    clearFile();
+                    return;
+                }
+
+                // Update UI
+                fileName.textContent = file.name;
+                fileSize.textContent = formatFileSize(file.size);
+                fileDropZone.classList.add('has-file');
+                fileInfo.style.display = 'block';
+                importBtn.disabled = false;
+            }
+
+            function formatFileSize(bytes) {
+                if (bytes === 0) return '0 Bytes';
+                const k = 1024;
+                const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+            }
+
+            // Form submission dengan progress yang benar
+            importForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                // Validasi file ada
+                if (!fileInput.files || fileInput.files.length === 0) {
+                    alert('Silakan pilih file terlebih dahulu!');
+                    return;
+                }
+
+                const formData = new FormData(importForm);
+
+                // Disable button dan show loading
+                importBtn.disabled = true;
+                importBtn.innerHTML =
+                    '<span class="spinner-border spinner-border-sm me-2"></span>Importing...';
+                progressContainer.style.display = 'block';
+
+                // Progress animation
+                let progress = 0;
+                const progressInterval = setInterval(() => {
+                    progress += Math.random() * 15;
+                    if (progress > 90) progress = 90;
+                    updateProgress(progress);
+                }, 500);
+
+                // Submit form dengan AJAX
+                fetch(importForm.action, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'Accept': 'application/json'
+                        }
+                    })
+                    .then(response => {
+                        clearInterval(progressInterval);
+                        updateProgress(100);
+
+                        if (!response.ok) {
+                            throw new Error('Import failed with status: ' + response.status);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            // Tunggu sebentar untuk animasi selesai
+                            setTimeout(() => {
+                                // Tampilkan pesan sukses
+                                alert(data.message || 'Import berhasil!');
+                                // Reload halaman
+                                window.location.reload();
+                            }, 1000);
+                        } else {
+                            throw new Error(data.message || 'Import gagal!');
+                        }
+                    })
+                    .catch(error => {
+                        clearInterval(progressInterval);
+                        console.error('Error:', error);
+                        alert(error.message || 'Terjadi kesalahan saat import data!');
+
+                        // Reset form
+                        resetImportForm();
+                    });
+            });
+
+            function updateProgress(value) {
+                progressBar.style.width = value + '%';
+                progressText.textContent = Math.round(value) + '%';
+            }
+
+            function resetImportForm() {
+                importBtn.disabled = false;
+                importBtn.innerHTML = '<i class="bi bi-upload me-2"></i>Import Data';
+                progressContainer.style.display = 'none';
+                progressBar.style.width = '0%';
+                progressText.textContent = '0%';
+            }
+
+            // Reset form ketika modal ditutup
+            const importModal = document.getElementById('importModal');
+            if (importModal) {
+                importModal.addEventListener('hidden.bs.modal', function() {
+                    clearFile();
+                    resetImportForm();
+                });
+            }
+        });
     </script>
 @endpush

@@ -2,12 +2,16 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\PendudukExport;
+use App\Imports\PendudukImport;
 use App\Models\Penduduk;
 use App\Models\KK;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 use Illuminate\Validation\Rule;
+use Maatwebsite\Excel\Facades\Excel;
 
 class PendudukController extends Controller
 {
@@ -189,17 +193,191 @@ class PendudukController extends Controller
     }
 
     /**
-     * Export data penduduk to Excel/CSV
+     * Export data penduduk to Excel
      */
     public function export(Request $request)
     {
-        // TODO: Implement export functionality
-        // Bisa menggunakan Laravel Excel atau export manual
-        return redirect()
-            ->route('admin.penduduk.index')
-            ->with('info', 'Fitur export akan segera tersedia!');
+        try {
+            $filename = 'data_penduduk_' . date('Y-m-d_H-i-s') . '.xlsx';
+
+            return Excel::download(new PendudukExport($request), $filename);
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Gagal mengexport data: ' . $e->getMessage());
+        }
     }
 
+    /**
+     * Import data penduduk from Excel
+     */
+    public function import(Request $request): RedirectResponse
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:xlsx,xls,csv|max:10240' // Max 10MB
+        ], [
+            'file.required' => 'File wajib dipilih',
+            'file.mimes' => 'File harus berformat Excel (.xlsx, .xls) atau CSV',
+            'file.max' => 'Ukuran file maksimal 10MB'
+        ]);
+
+        try {
+            DB::beginTransaction();
+
+            $import = new PendudukImport();
+            Excel::import($import, $request->file('file'));
+
+            DB::commit();
+
+            $importedCount = $import->getImportedCount();
+            $skippedCount = $import->getSkippedCount();
+            $errorCount = count($import->failures()) + count($import->errors());
+
+            $message = "Import selesai! ";
+            $message .= "Berhasil: {$importedCount} data, ";
+            $message .= "Dilewati: {$skippedCount} data";
+
+            if ($errorCount > 0) {
+                $message .= ", Error: {$errorCount} data";
+            }
+
+            // Store detailed errors in session for display
+            if (count($import->failures()) > 0 || count($import->errors()) > 0) {
+                session(['penduduk_import_details' => [
+                    'failures' => $import->failures(),
+                    'errors' => $import->errors()
+                ]]);
+            }
+
+            return redirect()->route('admin.penduduk.index')
+                ->with('success', $message);
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return redirect()->back()
+                ->with('error', 'Gagal import data: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Download template Excel untuk import
+     */
+    public function downloadTemplate()
+    {
+        try {
+            $filename = 'template_import_penduduk.xlsx';
+
+            // Create sample data for template
+            $sampleData = collect([
+                [
+                    'nik' => '1234567890123456',
+                    'no_kk' => '1234567890123456',
+                    'nama_lengkap' => 'John Doe',
+                    'tempat_lahir' => 'Jakarta',
+                    'tanggal_lahir' => '01/01/1990',
+                    'jenis_kelamin' => 'Laki-laki',
+                    'agama' => 'Islam',
+                    'pendidikan' => 'S1',
+                    'pekerjaan' => 'Pegawai Swasta',
+                    'status' => 'Kawin',
+                    'status_keluarga' => 'Kepala Keluarga',
+                    'golongan_darah' => 'A',
+                    'kewarganegaraan' => 'WNI',
+                    'nama_ayah' => 'John Sr.',
+                    'nama_ibu' => 'Jane Doe'
+                ]
+            ]);
+
+            return Excel::download(new class($sampleData) implements
+                \Maatwebsite\Excel\Concerns\FromCollection,
+                \Maatwebsite\Excel\Concerns\WithHeadings,
+                \Maatwebsite\Excel\Concerns\WithStyles,
+                \Maatwebsite\Excel\Concerns\WithColumnWidths
+            {
+                protected $data;
+
+                public function __construct($data)
+                {
+                    $this->data = $data;
+                }
+
+                public function collection()
+                {
+                    return $this->data;
+                }
+
+                public function headings(): array
+                {
+                    return [
+                        'nik',
+                        'no_kk',
+                        'nama_lengkap',
+                        'tempat_lahir',
+                        'tanggal_lahir',
+                        'jenis_kelamin',
+                        'agama',
+                        'pendidikan',
+                        'pekerjaan',
+                        'status',
+                        'status_keluarga',
+                        'golongan_darah',
+                        'kewarganegaraan',
+                        'nama_ayah',
+                        'nama_ibu'
+                    ];
+                }
+
+                public function styles(\PhpOffice\PhpSpreadsheet\Worksheet\Worksheet $sheet)
+                {
+                    return [
+                        1 => ['font' => ['bold' => true]],
+                    ];
+                }
+
+                public function columnWidths(): array
+                {
+                    return [
+                        'A' => 20, // NIK
+                        'B' => 20, // No. KK
+                        'C' => 25, // Nama Lengkap
+                        'D' => 18, // Tempat Lahir
+                        'E' => 15, // Tanggal Lahir
+                        'F' => 15, // Jenis Kelamin
+                        'G' => 15, // Agama
+                        'H' => 18, // Pendidikan
+                        'I' => 20, // Pekerjaan
+                        'J' => 15, // Status
+                        'K' => 18, // Status Keluarga
+                        'L' => 15, // Golongan Darah
+                        'M' => 18, // Kewarganegaraan
+                        'N' => 25, // Nama Ayah
+                        'O' => 25, // Nama Ibu
+                    ];
+                }
+            }, $filename);
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Gagal mendownload template: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Show import errors/failures detail
+     */
+    public function showImportErrors()
+    {
+        $details = session('penduduk_import_details');
+
+        if (!$details) {
+            return redirect()->route('admin.penduduk.index')
+                ->with('error', 'Tidak ada detail error yang tersedia');
+        }
+
+        return view('admin.penduduk.import-errors', [
+            'failures' => $details['failures'] ?? [],
+            'errors' => $details['errors'] ?? [],
+            'titleHeader' => 'Detail Error Import Penduduk'
+        ]);
+    }
     /**
      * Print data penduduk
      */
