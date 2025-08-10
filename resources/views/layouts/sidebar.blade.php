@@ -74,8 +74,7 @@
 
         <!-- Administrasi dengan Sub Menu -->
         <li class="nav-item">
-            <div class="nav-link has-submenu {{ request()->routeIs('admin.administrasi.*') ? 'expanded' : '' }}"
-                data-page="administrasi">
+            <div class="nav-link has-submenu {{ request()->routeIs('admin.arsip-surat.*') }}" data-page="administrasi">
                 <i class="bi bi-file-earmark-text"></i>
                 <span class="nav-text">Administrasi</span>
                 <i class="bi bi-chevron-down dropdown-arrow"></i>
@@ -106,11 +105,11 @@
                     </a>
                 </li>
                 <li class="sub-menu-item">
-                    <a href="#"
-                        class="sub-menu-link {{ request()->routeIs('admin.administrasi.template-surat.*') ? 'active' : '' }}"
+                    <a href="{{ route('admin.arsip-surat.index') }}"
+                        class="sub-menu-link {{ request()->routeIs('admin.arsip-surat.*') ? 'active' : '' }}"
                         data-subpage="template-surat">
                         <i class="bi bi-file-earmark-plus"></i>
-                        <span>Template Surat</span>
+                        <span>Arsip Surat</span>
                     </a>
                 </li>
             </ul>

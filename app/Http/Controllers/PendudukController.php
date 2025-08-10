@@ -3,12 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Exports\PendudukExport;
+use App\Exports\PendudukTemplateExport;
 use App\Imports\PendudukImport;
 use App\Models\Penduduk;
 use App\Models\KK;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\View\View;
 use Illuminate\Validation\Rule;
 use Maatwebsite\Excel\Facades\Excel;
@@ -124,8 +126,8 @@ class PendudukController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
-     * Using route model binding with NIK
+     *  Show the form for editing the specified resource.
+     *  Using route model binding with NIK
      */
     public function edit(string $nik): View
     {
@@ -176,7 +178,7 @@ class PendudukController extends Controller
      * Remove the specified resource from storage.
      * Using route model binding with NIK
      */
-    public function destroy(string $nik): RedirectResponse
+    public function destroy(string $nik)
     {
         try {
             $penduduk = Penduduk::where('nik', $nik)->firstOrFail();
@@ -210,7 +212,7 @@ class PendudukController extends Controller
     /**
      * Import data penduduk from Excel
      */
-    public function import(Request $request): RedirectResponse
+    public function import(Request $request)
     {
         $request->validate([
             'file' => 'required|file|mimes:xlsx,xls,csv|max:10240' // Max 10MB
@@ -230,6 +232,7 @@ class PendudukController extends Controller
 
             $importedCount = $import->getImportedCount();
             $skippedCount = $import->getSkippedCount();
+            $gagal = $import->getGagal();
             $errorCount = count($import->failures()) + count($import->errors());
 
             $message = "Import selesai! ";
@@ -241,11 +244,38 @@ class PendudukController extends Controller
             }
 
             // Store detailed errors in session for display
-            if (count($import->failures()) > 0 || count($import->errors()) > 0) {
+            if (count($gagal) > 0 || count($import->failures()) > 0 || count($import->errors()) > 0) {
                 session(['penduduk_import_details' => [
+                    'gagal' => $gagal,
                     'failures' => $import->failures(),
                     'errors' => $import->errors()
                 ]]);
+
+                // Jika ada data gagal, tampilkan warning
+                if (count($gagal) > 0) {
+                    $message .= ". Ada " . count($gagal) . " data yang gagal diimport (cek detail error).";
+                }
+            }
+
+            // Return JSON response for AJAX requests
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => $message,
+                    'data' => [
+                        'imported' => $importedCount,
+                        'skipped' => $skippedCount,
+                        'errors' => $errorCount,
+                        'gagal' => $gagal
+                    ]
+                ]);
+            }
+
+            // Jika ada data gagal, redirect dengan warning
+            if (count($gagal) > 0) {
+                return redirect()->route('admin.penduduk.index')
+                    ->with('warning', $message)
+                    ->with('import_gagal', $gagal);
             }
 
             return redirect()->route('admin.penduduk.index')
@@ -253,107 +283,35 @@ class PendudukController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
 
+            Log::error('Penduduk Import Failed: ' . $e->getMessage());
+            Log::error('Stack trace: ' . $e->getTraceAsString());
+
+            // Return JSON response for AJAX requests
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Gagal import data: ' . $e->getMessage()
+                ], 500);
+            }
+
             return redirect()->back()
                 ->with('error', 'Gagal import data: ' . $e->getMessage());
         }
     }
-
     /**
      * Download template Excel untuk import
+     */
+    /**
+     * Download template Excel untuk import
+     * Update method ini di PendudukController.php
      */
     public function downloadTemplate()
     {
         try {
             $filename = 'template_import_penduduk.xlsx';
 
-            // Create sample data for template
-            $sampleData = collect([
-                [
-                    'nik' => '1234567890123456',
-                    'no_kk' => '1234567890123456',
-                    'nama_lengkap' => 'John Doe',
-                    'tempat_lahir' => 'Jakarta',
-                    'tanggal_lahir' => '01/01/1990',
-                    'jenis_kelamin' => 'Laki-laki',
-                    'agama' => 'Islam',
-                    'pendidikan' => 'S1',
-                    'pekerjaan' => 'Pegawai Swasta',
-                    'status' => 'Kawin',
-                    'status_keluarga' => 'Kepala Keluarga',
-                    'golongan_darah' => 'A',
-                    'kewarganegaraan' => 'WNI',
-                    'nama_ayah' => 'John Sr.',
-                    'nama_ibu' => 'Jane Doe'
-                ]
-            ]);
-
-            return Excel::download(new class($sampleData) implements
-                \Maatwebsite\Excel\Concerns\FromCollection,
-                \Maatwebsite\Excel\Concerns\WithHeadings,
-                \Maatwebsite\Excel\Concerns\WithStyles,
-                \Maatwebsite\Excel\Concerns\WithColumnWidths
-            {
-                protected $data;
-
-                public function __construct($data)
-                {
-                    $this->data = $data;
-                }
-
-                public function collection()
-                {
-                    return $this->data;
-                }
-
-                public function headings(): array
-                {
-                    return [
-                        'nik',
-                        'no_kk',
-                        'nama_lengkap',
-                        'tempat_lahir',
-                        'tanggal_lahir',
-                        'jenis_kelamin',
-                        'agama',
-                        'pendidikan',
-                        'pekerjaan',
-                        'status',
-                        'status_keluarga',
-                        'golongan_darah',
-                        'kewarganegaraan',
-                        'nama_ayah',
-                        'nama_ibu'
-                    ];
-                }
-
-                public function styles(\PhpOffice\PhpSpreadsheet\Worksheet\Worksheet $sheet)
-                {
-                    return [
-                        1 => ['font' => ['bold' => true]],
-                    ];
-                }
-
-                public function columnWidths(): array
-                {
-                    return [
-                        'A' => 20, // NIK
-                        'B' => 20, // No. KK
-                        'C' => 25, // Nama Lengkap
-                        'D' => 18, // Tempat Lahir
-                        'E' => 15, // Tanggal Lahir
-                        'F' => 15, // Jenis Kelamin
-                        'G' => 15, // Agama
-                        'H' => 18, // Pendidikan
-                        'I' => 20, // Pekerjaan
-                        'J' => 15, // Status
-                        'K' => 18, // Status Keluarga
-                        'L' => 15, // Golongan Darah
-                        'M' => 18, // Kewarganegaraan
-                        'N' => 25, // Nama Ayah
-                        'O' => 25, // Nama Ibu
-                    ];
-                }
-            }, $filename);
+            // Gunakan PendudukTemplateExport yang sudah dibuat
+            return Excel::download(new PendudukTemplateExport, $filename);
         } catch (\Exception $e) {
             return redirect()->back()
                 ->with('error', 'Gagal mendownload template: ' . $e->getMessage());

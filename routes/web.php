@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AdminDashboardController;
+use App\Http\Controllers\ArsipSuratController;
 use App\Http\Controllers\BeritaController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\KategoriBeritaController;
@@ -89,7 +90,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
         Route::get('penduduk-export', [PendudukController::class, 'export'])->name('penduduk.export');
         Route::get('penduduk-template', [PendudukController::class, 'downloadTemplate'])->name('penduduk.template');
         Route::get('penduduk-import-errors', [PendudukController::class, 'showImportErrors'])->name('penduduk.import-errors');
-
+        Route::post('penduduk/import', [PendudukController::class, 'import'])->name('penduduk.import');
         Route::post('penduduk-bulk-action', [PendudukController::class, 'bulkAction'])->name('penduduk.bulk-action');
         Route::get('penduduk-statistics', [PendudukController::class, 'statistics'])->name('penduduk.statistics');
 
@@ -148,6 +149,24 @@ Route::middleware(['auth', 'admin'])->group(function () {
         Route::post('struktur-desa-bulk-action', [StrukturDesaController::class, 'bulkAction'])->name('struktur-desa.bulk-action');
         Route::get('struktur-desa-export', [StrukturDesaController::class, 'export'])->name('struktur-desa.export');
         Route::get('struktur-desa-print', [StrukturDesaController::class, 'print'])->name('struktur-desa.print');
+
+
+        Route::prefix('arsip-surat')->name('arsip-surat.')->group(function () {
+            Route::get('/', [ArsipSuratController::class, 'index'])->name('index');
+            Route::get('/create', [ArsipSuratController::class, 'create'])->name('create');
+            Route::post('/', [ArsipSuratController::class, 'store'])->name('store');
+            Route::get('/{arsipSurat}', [ArsipSuratController::class, 'show'])->name('show');
+            Route::get('/{arsipSurat}/edit', [ArsipSuratController::class, 'edit'])->name('edit');
+            Route::put('/{arsipSurat}', [ArsipSuratController::class, 'update'])->name('update');
+            Route::delete('/{arsipSurat}', [ArsipSuratController::class, 'destroy'])->name('destroy');
+
+            // Extra routes
+            Route::get('/ajax/generate-nomor', [ArsipSuratController::class, 'generateNomor'])->name('generate-nomor');
+            Route::get('/page/statistik', [ArsipSuratController::class, 'statistik'])->name('statistik');
+            Route::get('/action/export', [ArsipSuratController::class, 'export'])->name('export');
+            Route::get('/page/import', [ArsipSuratController::class, 'showImport'])->name('show-import');
+            Route::post('/action/import', [ArsipSuratController::class, 'import'])->name('import');
+        });
     });
 });
 
