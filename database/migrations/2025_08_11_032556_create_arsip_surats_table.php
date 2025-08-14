@@ -23,11 +23,16 @@ return new class extends Migration
             $table->text('tentang')->nullable()->comment('Untuk surat keluar');
             $table->text('keterangan')->nullable()->comment('Catatan tambahan');
 
+            // Tambah kolom polymorphic untuk relasi ke detail surat
+            $table->string('surat_detail_type')->nullable()->after('keterangan');
+            $table->unsignedBigInteger('surat_detail_id')->nullable()->after('surat_detail_type');
+
             $table->timestamps();
 
             // Index
             $table->index(['nomor_surat']);
             $table->index(['tanggal_surat']);
+            $table->index(['surat_detail_type', 'surat_detail_id']);
         });
     }
 

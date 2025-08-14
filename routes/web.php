@@ -11,6 +11,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PublicBeritaController;
 use App\Http\Controllers\StatistikPertumbuhanController;
 use App\Http\Controllers\StrukturDesaController;
+use App\Http\Controllers\SuratKtmController; // TAMBAHAN BARU
 use Illuminate\Support\Facades\Route;
 
 // Public routes
@@ -20,9 +21,7 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/berita/rss-info', function () {
     return view('public.berita.rss-info');
 })->name('berita.rss-info');
-// Route::get('/tampil', function () {
-//     return view('admin.index');
-// });
+
 //Berita routes (public)
 Route::prefix('berita')->name('berita.')->group(function () {
     Route::get('/', [PublicBeritaController::class, 'index'])->name('index');
@@ -37,6 +36,7 @@ Route::prefix('berita')->name('berita.')->group(function () {
     Route::get('/kategori/{slug}', [PublicBeritaController::class, 'kategori'])->name('kategori');
     Route::get('/{slug}', [PublicBeritaController::class, 'show'])->name('show');
 });
+
 // API endpoints untuk AJAX
 Route::prefix('api/berita')->name('api.berita.')->group(function () {
     Route::get('/search', [PublicBeritaController::class, 'search'])->name('search');
@@ -44,6 +44,31 @@ Route::prefix('api/berita')->name('api.berita.')->group(function () {
     Route::get('/latest', [PublicBeritaController::class, 'latest'])->name('latest');
     Route::get('/featured', [PublicBeritaController::class, 'featured'])->name('featured');
     Route::get('/categories', [PublicBeritaController::class, 'categories'])->name('categories');
+});
+
+// ========================================
+// SURAT KTM - GUEST ROUTES (Public - Landing Page)
+// ========================================
+Route::prefix('surat-ktm')->name('public.surat-ktm.')->group(function () {
+    // Form pengajuan untuk guest
+    Route::get('pengajuan', [SuratKtmController::class, 'guestForm'])
+        ->name('form');
+
+    // Submit pengajuan guest
+    Route::post('pengajuan', [SuratKtmController::class, 'guestStore'])
+        ->name('store');
+
+    // Track surat dengan token
+    Route::get('track/{token}', [SuratKtmController::class, 'guestTrack'])
+        ->name('track');
+
+    // Update data surat via token
+    Route::put('track/{token}', [SuratKtmController::class, 'guestUpdate'])
+        ->name('update');
+
+    // Download surat yang sudah disetujui via token
+    Route::get('download/{id}/{token}', [SuratKtmController::class, 'download'])
+        ->name('download');
 });
 
 Route::get('/terms', function () {
@@ -66,6 +91,39 @@ Route::middleware(['auth', 'user'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    // ========================================
+    // SURAT KTM - USER ROUTES (Login Required)
+    // ========================================
+    Route::prefix('user/surat-ktm')->name('user.surat-ktm.')->group(function () {
+        // Dashboard user - daftar surat milik user
+        Route::get('/', [SuratKtmController::class, 'userIndex'])
+            ->name('index');
+
+        // Form pengajuan surat baru
+        Route::get('create', [SuratKtmController::class, 'userForm'])
+            ->name('create');
+
+        // Submit pengajuan user
+        Route::post('/', [SuratKtmController::class, 'userStore'])
+            ->name('store');
+
+        // Detail surat milik user
+        Route::get('{id}', [SuratKtmController::class, 'userShow'])
+            ->name('show');
+
+        // Edit surat milik user (hanya yang masih diproses)
+        Route::get('{id}/edit', [SuratKtmController::class, 'userEdit'])
+            ->name('edit');
+
+        // Update surat milik user
+        Route::put('{id}', [SuratKtmController::class, 'userUpdate'])
+            ->name('update');
+
+        // Download surat yang sudah disetujui
+        Route::get('{id}/download', [SuratKtmController::class, 'download'])
+            ->name('download');
+    });
 });
 
 // Admin only routes
@@ -82,7 +140,6 @@ Route::middleware(['auth', 'admin'])->group(function () {
         Route::get('kk-template', [KKController::class, 'downloadTemplate'])->name('kk.template');
         Route::get('kk-import-errors', [KKController::class, 'showImportErrors'])->name('kk.import-errors');
         Route::resource('kk', KKController::class);
-
 
         // Penduduk Routes
         Route::resource('penduduk', PendudukController::class);
@@ -144,12 +201,70 @@ Route::middleware(['auth', 'admin'])->group(function () {
         Route::prefix('api')->name('api.')->group(function () {
             Route::get('/kategori-berita/list', [KategoriBeritaController::class, 'getKategoriList'])->name('kategori-berita.list');
         });
+
         Route::resource('struktur-desa', StrukturDesaController::class);
         Route::post('struktur-desa/{struktur_desa}/toggle-status', [StrukturDesaController::class, 'toggleStatus'])->name('struktur-desa.toggle-status');
         Route::post('struktur-desa-bulk-action', [StrukturDesaController::class, 'bulkAction'])->name('struktur-desa.bulk-action');
         Route::get('struktur-desa-export', [StrukturDesaController::class, 'export'])->name('struktur-desa.export');
         Route::get('struktur-desa-print', [StrukturDesaController::class, 'print'])->name('struktur-desa.print');
 
+        // ========================================
+        // SURAT KTM - ADMIN ROUTES (Admin Only)
+        // ========================================
+
+        Route::prefix('surat-ktm')->name('surat-ktm.')->group(function () {
+            // Dashboard admin - daftar semua surat
+            Route::get('/', [SuratKtmController::class, 'adminIndex'])
+                ->name('index');
+
+            // Form create surat oleh admin
+            Route::get('create', [SuratKtmController::class, 'adminCreate'])
+                ->name('create');
+
+            // Store surat oleh admin
+            Route::post('/', [SuratKtmController::class, 'adminStore'])
+                ->name('store');
+
+            // Detail surat (admin view)
+            Route::get('{id}', [SuratKtmController::class, 'adminShow'])
+                ->name('show');
+
+            // Edit surat oleh admin
+            Route::get('{id}/edit', [SuratKtmController::class, 'adminEdit'])
+                ->name('edit');
+
+            // Update surat oleh admin
+            Route::put('{id}', [SuratKtmController::class, 'adminUpdate'])
+                ->name('update');
+
+            // PERBAIKAN: Update status surat (AJAX) - GUNAKAN PATCH
+            Route::patch('{id}/update-status', [SuratKtmController::class, 'adminUpdateStatus'])
+                ->name('update-status');
+
+            // Delete surat
+            Route::delete('{id}', [SuratKtmController::class, 'adminDestroy'])
+                ->name('destroy');
+
+            // Bulk actions
+            Route::post('bulk-action', [SuratKtmController::class, 'adminBulkAction'])
+                ->name('bulk-action');
+
+            // Export data
+            Route::get('export', [SuratKtmController::class, 'export'])
+                ->name('export');
+
+            // API Statistik untuk admin - PERBAIKAN PATH
+            Route::get('api/statistik', [SuratKtmController::class, 'apiStatistik'])
+                ->name('api.statistik');
+
+            // Download surat untuk admin
+            Route::get('{id}/download', [SuratKtmController::class, 'download'])
+                ->name('download');
+            // AJAX Routes
+            Route::patch('/{id}/update-status', [SuratKtmController::class, 'adminUpdateStatus'])->name('update-status');
+            Route::post('/generate-nomor', [SuratKtmController::class, 'generateNomor'])->name('generate-nomor'); // Route baru
+            Route::post('/bulk-action', [SuratKtmController::class, 'adminBulkAction'])->name('bulk-action');
+        });
 
         Route::prefix('arsip-surat')->name('arsip-surat.')->group(function () {
             Route::get('/', [ArsipSuratController::class, 'index'])->name('index');
@@ -168,6 +283,15 @@ Route::middleware(['auth', 'admin'])->group(function () {
             Route::post('/action/import', [ArsipSuratController::class, 'import'])->name('import');
         });
     });
+});
+
+// ========================================
+// SURAT KTM - API ROUTES
+// ========================================
+Route::prefix('api')->middleware(['auth'])->group(function () {
+    // Statistik untuk dashboard
+    Route::get('surat-ktm/statistik', [SuratKtmController::class, 'apiStatistik'])
+        ->name('api.surat-ktm.statistik');
 });
 
 // Redirect old berita URLs (jika ada)

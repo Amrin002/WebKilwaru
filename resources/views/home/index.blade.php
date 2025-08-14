@@ -392,6 +392,21 @@
                         </div>
                     </div>
                 </div>
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="card h-100 fade-in">
+                        <div class="card-body text-center p-4">
+                            <div class="feature-icon">
+                                <i class="bi bi-globe"></i>
+                            </div>
+                            <h5 class="card-title">Layanan Surat</h5>
+                            <p class="card-text">Pembuatan surat keterangan, surat pengantar, dan dokumen administrasi
+                                lainnya secara online.</p>
+                            <a href="#" class="btn-service">
+                                <i class="bi bi-arrow-right me-2"></i>Ajukan Surat
+                            </a>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
@@ -536,9 +551,6 @@
 
 @push('scripts')
     <script>
-        // Landing Page Specific JavaScript for Desa Kilwaru
-        // This file handles functionality specific to the home/index page
-
         // Counter animation for statistics (Landing page only)
         function animateCounters() {
             const counters = document.querySelectorAll('.stat-number');
@@ -548,7 +560,6 @@
                 const animate = () => {
                     const value = +counter.getAttribute('data-target') || +counter.innerText.replace(/,/g, '');
                     const data = +counter.innerText.replace(/,/g, '') || 0;
-
                     const time = value / speed;
 
                     if (data < value) {
@@ -557,16 +568,19 @@
                     } else {
                         counter.innerText = value.toLocaleString();
                     }
-                }; // Set target values and start animation when visible if
-                (!counter.getAttribute('data-target')) {
+                };
+                // Set target values and start animation when visible
+                if (!counter.getAttribute('data-target')) {
                     const originalValue = counter.innerText.replace(/,/g, '');
                     counter.setAttribute('data-target', originalValue);
                     counter.innerText = '0';
                 }
                 animate();
             });
-        } // Trigger counter
-        animation when stats section is visible(Landing page) const statsSection = document.querySelector('.stats-section');
+        }
+
+        // Trigger counter animation when stats section is visible (Landing page)
+        const statsSection = document.querySelector('.stats-section');
         const statsObserver = new IntersectionObserver(function(entries) {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
@@ -606,8 +620,10 @@
                 }
             }
             type();
-        } // Initialize
-        typing effect after page load(Landing page) window.addEventListener('load', () => {
+        }
+
+        // Initialize typing effect after page load (Landing page)
+        window.addEventListener('load', () => {
             setTimeout(() => {
                 const heroTitle = document.querySelector('.hero-content h1');
                 if (heroTitle) {
@@ -627,120 +643,134 @@
             for (let i = 0; i < particleCount; i++) {
                 const particle = document.createElement('div');
                 particle.style.cssText = `
-                position: absolute; width: 4px; height: 4px; background: rgba(255, 255, 255, 0.3); border-radius: 50%;
-                animation: float ${3 + Math.random() * 4}s ease-in-out infinite; animation-delay: ${Math.random() * 2}s;
-                left: ${Math.random() * 100}%; top: ${Math.random() * 100}%; pointer-events: none; `;
+                    position: absolute; width: 4px; height: 4px; background: rgba(255, 255, 255, 0.3); border-radius: 50%;
+                    animation: float ${3 + Math.random() * 4}s ease-in-out infinite; animation-delay: ${Math.random() * 2}s;
+                    left: ${Math.random() * 100}%; top: ${Math.random() * 100}%; pointer-events: none;
+                `;
                 hero.appendChild(particle);
-            } // Add float animation CSS const floatStyle=document.createElement('style');
-            floatStyle.textContent = ` @keyframes float { 0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 1;
-                } 33% { transform: translateY(-20px) rotate(120deg); opacity: 0.7; } 66% { transform: translateY(20px)
-                rotate(240deg); opacity: 0.4; } } `;
+            }
+            // Add float animation CSS
+            const floatStyle = document.createElement('style');
+            floatStyle.textContent = `
+                @keyframes float {
+                    0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 1; }
+                    33% { transform: translateY(-20px) rotate(120deg); opacity: 0.7; }
+                    66% { transform: translateY(20px) rotate(240deg); opacity: 0.4; }
+                }
+            `;
             document.head.appendChild(floatStyle);
-        } // Initialize particles
-        (Landing page) createParticles(); // Chart initialization for demographics (Landing page only) function
-        initCharts() { // Age Distribution Chart const ageCtx=document.getElementById('ageChart'); if (ageCtx) {
-        const ageChart = new Chart(ageCtx.getContext('2d'), {
+        }
+        // Initialize particles (Landing page)
+        createParticles();
+
+        // Chart initialization for demographics (Landing page only)
+        function initCharts() {
+            // Age Distribution Chart
+            const ageCtx = document.getElementById('ageChart');
+            if (ageCtx) {
+                const ageChart = new Chart(ageCtx.getContext('2d'), {
                     type: 'pie',
                     data: {
-                        labels: ['0-17
-                            Tahun ', '
-                            18 - 35 Tahun ' , '
-                            36 - 50 Tahun ' , '
-                            51 - 65 Tahun ' , '
-                            65 + Tahun ' ], datasets: [{ data: [642, 1089, 736,
-                            285, 95
+                        labels: [
+                            '0-17 Tahun',
+                            '18-35 Tahun',
+                            '36-50 Tahun',
+                            '51-65 Tahun',
+                            '65+ Tahun'
                         ],
-                        backgroundColor: ['#4a7c59', '#8fbc8f', '#ff8c42', '#2d5016', '#6c757d'],
-                        borderColor: '#fff',
-                        borderWidth: 3,
-                        hoverOffset: 10
-                    }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'bottom',
-                        labels: {
-                            padding: 20,
-                            font: {
-                                size: 12,
-                                family: 'Segoe UI'
-                            }
-                        }
+                        datasets: [{
+                            data: [642, 1089, 736, 285, 95],
+                            backgroundColor: ['#4a7c59', '#8fbc8f', '#ff8c42', '#2d5016', '#6c757d'],
+                            borderColor: '#fff',
+                            borderWidth: 3,
+                            hoverOffset: 10
+                        }]
                     },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                const
-                                    total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                const percentage = ((context.parsed / total) * 100).toFixed(1);
-                                return context.label + ': ' + context.parsed + ' orang (' + percentage + '%)';
-                            }
-                        }
-                    }
-                },
-                animation: {
-                    animateScale: true,
-                    animateRotate: true,
-                    duration: 1500
-                }
-            }
-        });
-        }
-
-        // Gender Distribution Chart
-        const genderCtx = document.getElementById('genderChart');
-        if (genderCtx) {
-            const genderChart = new Chart(genderCtx.getContext('2d'), {
-                type: 'pie',
-                data: {
-                    labels: ['Laki-laki', 'Perempuan'],
-                    datasets: [{
-                        data: [1456, 1391],
-                        backgroundColor: [
-                            '#4a7c59',
-                            '#ff8c42'
-                        ],
-                        borderColor: '#fff',
-                        borderWidth: 3,
-                        hoverOffset: 15
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom',
-                            labels: {
-                                padding: 20,
-                                font: {
-                                    size: 14,
-                                    family: 'Segoe UI'
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    padding: 20,
+                                    font: {
+                                        size: 12,
+                                        family: 'Segoe UI'
+                                    }
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                        const percentage = ((context.parsed / total) * 100).toFixed(1);
+                                        return context.label + ': ' + context.parsed + ' orang (' + percentage +
+                                            '%)';
+                                    }
                                 }
                             }
                         },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                                    const percentage = ((context.parsed / total) * 100).toFixed(1);
-                                    return context.label + ': ' + context.parsed + ' orang (' + percentage +
-                                        '%)';
+                        animation: {
+                            animateScale: true,
+                            animateRotate: true,
+                            duration: 1500
+                        }
+                    }
+                });
+            }
+
+            // Gender Distribution Chart
+            const genderCtx = document.getElementById('genderChart');
+            if (genderCtx) {
+                const genderChart = new Chart(genderCtx.getContext('2d'), {
+                    type: 'pie',
+                    data: {
+                        labels: ['Laki-laki', 'Perempuan'],
+                        datasets: [{
+                            data: [1456, 1391],
+                            backgroundColor: [
+                                '#4a7c59',
+                                '#ff8c42'
+                            ],
+                            borderColor: '#fff',
+                            borderWidth: 3,
+                            hoverOffset: 15
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    padding: 20,
+                                    font: {
+                                        size: 14,
+                                        family: 'Segoe UI'
+                                    }
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                        const percentage = ((context.parsed / total) * 100).toFixed(1);
+                                        return context.label + ': ' + context.parsed + ' orang (' + percentage +
+                                            '%)';
+                                    }
                                 }
                             }
+                        },
+                        animation: {
+                            animateScale: true,
+                            animateRotate: true,
+                            duration: 1500
                         }
-                    },
-                    animation: {
-                        animateScale: true,
-                        animateRotate: true,
-                        duration: 1500
                     }
-                }
-            });
-        }
+                });
+            }
         }
 
         // Initialize charts when demographic section becomes visible (Landing page)

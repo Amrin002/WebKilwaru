@@ -74,18 +74,20 @@
 
         <!-- Administrasi dengan Sub Menu -->
         <li class="nav-item">
-            <div class="nav-link has-submenu {{ request()->routeIs('admin.arsip-surat.*') }}" data-page="administrasi">
+            <div class="nav-link has-submenu {{ request()->routeIs('admin.surat-ktm.*', 'admin.arsip-surat.*', 'admin.administrasi.*') ? 'active' : '' }}"
+                data-page="administrasi">
                 <i class="bi bi-file-earmark-text"></i>
                 <span class="nav-text">Administrasi</span>
                 <i class="bi bi-chevron-down dropdown-arrow"></i>
             </div>
-            <ul class="sub-menu {{ request()->routeIs('admin.administrasi.*') ? 'expanded' : '' }}">
+            <ul
+                class="sub-menu {{ request()->routeIs('admin.surat-ktm.*', 'admin.arsip-surat.*', 'admin.administrasi.*') ? 'expanded' : '' }}">
                 <li class="sub-menu-item">
-                    <a href="#"
-                        class="sub-menu-link {{ request()->routeIs('admin.administrasi.surat-keterangan.*') ? 'active' : '' }}"
-                        data-subpage="surat-keterangan">
+                    <a href="{{ route('admin.surat-ktm.index') }}"
+                        class="sub-menu-link {{ request()->routeIs('admin.surat-ktm.*') ? 'active' : '' }}"
+                        data-subpage="surat-ktm">
                         <i class="bi bi-file-earmark-check"></i>
-                        <span>Surat Keterangan</span>
+                        <span>Surat Keterangan Tidak Mampu</span>
                     </a>
                 </li>
                 <li class="sub-menu-item">
@@ -107,8 +109,8 @@
                 <li class="sub-menu-item">
                     <a href="{{ route('admin.arsip-surat.index') }}"
                         class="sub-menu-link {{ request()->routeIs('admin.arsip-surat.*') ? 'active' : '' }}"
-                        data-subpage="template-surat">
-                        <i class="bi bi-file-earmark-plus"></i>
+                        data-subpage="arsip-surat">
+                        <i class="bi bi-archive"></i>
                         <span>Arsip Surat</span>
                     </a>
                 </li>

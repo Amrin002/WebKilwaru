@@ -5,6 +5,7 @@ namespace App\Models;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Request;
 
 class ArsipSurat extends Model
 {
@@ -22,7 +23,9 @@ class ArsipSurat extends Model
         'perihal',
         'tujuan_surat',
         'tentang',
-        'keterangan'
+        'keterangan',
+        'surat_detail_type',
+        'surat_detail_id'
     ];
 
     /**
@@ -33,6 +36,20 @@ class ArsipSurat extends Model
         'created_at' => 'datetime',
         'updated_at' => 'datetime'
     ];
+
+
+    // ========================================
+    // RELATIONSHIPS
+    // ========================================
+
+    /**
+     * Relasi polymorphic ke detail surat
+     */
+    public function suratDetail()
+    {
+        return $this->morphTo();
+    }
+
 
     // ========================================
     // SCOPES
@@ -86,6 +103,25 @@ class ArsipSurat extends Model
         });
     }
 
+    /**
+     * Scope berdasarkan jenis surat detail
+     */
+    public function scopeJenisSurat($query, string $jenis)
+    {
+        $modelMap = [
+            'ktm' => SuratKtm::class,
+            // 'skpt' => SuratSkpt::class,
+            // 'skd' => SuratSkd::class,
+            // Tambah jenis surat lainnya
+        ];
+
+        if (isset($modelMap[$jenis])) {
+            return $query->where('surat_detail_type', $modelMap[$jenis]);
+        }
+
+        return $query;
+    }
+
     // ========================================
     // ACCESSORS
     // ========================================
@@ -128,6 +164,24 @@ class ArsipSurat extends Model
         return $this->pengirim ?: $this->tujuan_surat ?: '-';
     }
 
+    /**
+     * Nama jenis surat berdasarkan detail type
+     */
+    public function getJenisSuratAttribute(): string
+    {
+        if (!$this->surat_detail_type) {
+            return 'Manual';
+        }
+
+        $typeMap = [
+            SuratKtm::class => 'KTM',
+            // SuratSkpt::class => 'SKPT',
+            // SuratSkd::class => 'SKD',
+        ];
+
+        return $typeMap[$this->surat_detail_type] ?? 'Unknown';
+    }
+
     // ========================================
     // HELPER METHODS
     // ========================================
@@ -149,21 +203,34 @@ class ArsipSurat extends Model
     }
 
     /**
+     * Cek apakah memiliki detail surat
+     */
+    public function hasDetailSurat(): bool
+    {
+        return !is_null($this->surat_detail_type) && !is_null($this->surat_detail_id);
+    }
+
+    /**
      * Generate nomor urut berikutnya untuk tahun ini
      */
-    public static function generateNomorUrut(int $tahun = null): int
+    public static function generateNomorUrut(int $tahun = null, string $jenisSurat = null): int
     {
         $tahun = $tahun ?: date('Y');
 
-        // Ambil dari SURAT KELUAR saja
-        $lastNumber = static::suratKeluar() // filter surat keluar
-            ->whereYear('tanggal_surat', $tahun)
-            ->selectRaw('MAX(CAST(SUBSTRING_INDEX(nomor_surat, "/", 1) AS UNSIGNED)) as max_number')
+        // Jika ada jenis surat, filter berdasarkan jenis surat juga
+        $query = static::suratKeluar() // filter surat keluar
+            ->whereYear('tanggal_surat', $tahun);
+
+        // Filter berdasarkan jenis surat jika diperlukan
+        if ($jenisSurat) {
+            $query->where('nomor_surat', 'like', "%/{$jenisSurat}/%");
+        }
+
+        $lastNumber = $query->selectRaw('MAX(CAST(SUBSTRING_INDEX(nomor_surat, "/", 1) AS UNSIGNED)) as max_number')
             ->value('max_number') ?? 0;
 
         return $lastNumber + 1;
     }
-
     /**
      * Statistik surat per bulan
      */
@@ -217,30 +284,41 @@ class ArsipSurat extends Model
      * 
      * TODO: Implementasi ketika mulai buat sistem surat
      */
-    /*
+
     public function generateNomorSuratOtomatis(Request $request)
     {
-        $jenisSurat = $request->input('jenis_surat'); // SKPT, SKD, dll
+        $jenisSurat = $request->input('jenis_surat'); // SKTM, SKPT, SKD, dll
         $tahun = $request->input('tahun', date('Y'));
         $bulan = $request->input('bulan', date('n'));
-        
+
         // Cek nomor terakhir di arsip untuk tahun ini
-        $nomorUrut = ArsipSurat::generateNomorUrut($tahun);
-        
+        $nomorUrut = static::generateNomorUrut($tahun);
+
         // Format bulan ke romawi
         $bulanRomawi = [
-            1 => 'I', 2 => 'II', 3 => 'III', 4 => 'IV', 5 => 'V', 6 => 'VI',
-            7 => 'VII', 8 => 'VIII', 9 => 'IX', 10 => 'X', 11 => 'XI', 12 => 'XII'
+            1 => 'I',
+            2 => 'II',
+            3 => 'III',
+            4 => 'IV',
+            5 => 'V',
+            6 => 'VI',
+            7 => 'VII',
+            8 => 'VIII',
+            9 => 'IX',
+            10 => 'X',
+            11 => 'XI',
+            12 => 'XII'
         ];
-        
-        // Generate nomor surat sesuai format
+
+        // Generate nomor surat sesuai format: 001/JENIS/NK/I/2025
         $nomorSurat = sprintf(
-            '%03d/NK/%s/%d',
+            '%03d/%s/NK/%s/%d',
             $nomorUrut,
+            strtoupper($jenisSurat),
             $bulanRomawi[$bulan],
             $tahun
         );
-        
+
         return response()->json([
             'status' => 'success',
             'data' => [
@@ -252,7 +330,7 @@ class ArsipSurat extends Model
             ]
         ]);
     }
-    */
+
 
     /**
      * Simpan arsip surat otomatis ketika buat surat baru
@@ -260,7 +338,7 @@ class ArsipSurat extends Model
      * 
      * TODO: Implementasi ketika mulai buat sistem surat
      */
-    /*
+
     public function simpanArsipOtomatis($dataSurat, $detailSuratType = null, $detailSuratId = null)
     {
         $arsipData = [
@@ -277,19 +355,18 @@ class ArsipSurat extends Model
             $arsipData['surat_detail_id'] = $detailSuratId;
         }
 
-        return ArsipSurat::create($arsipData);
+        return static::create($arsipData);
     }
-    */
+
 
     /**
      * Update arsip ketika detail surat diupdate
      * 
      * TODO: Implementasi ketika mulai buat sistem surat
      */
-    /*
     public function updateArsipOtomatis($arsipId, $dataSurat)
     {
-        $arsip = ArsipSurat::find($arsipId);
+        $arsip = static::find($arsipId);
         if ($arsip) {
             $arsip->update([
                 'tujuan_surat' => $dataSurat['nama_penerima'],
@@ -299,27 +376,25 @@ class ArsipSurat extends Model
         }
         return $arsip;
     }
-    */
+
 
     /**
      * Hapus arsip ketika detail surat dihapus
      * 
      * TODO: Implementasi ketika mulai buat sistem surat
      */
-    /*
     public function hapusArsipOtomatis($detailSuratType, $detailSuratId)
     {
-        $arsip = ArsipSurat::where('surat_detail_type', $detailSuratType)
-                          ->where('surat_detail_id', $detailSuratId)
-                          ->first();
-        
+        $arsip = static::where('surat_detail_type', $detailSuratType)
+            ->where('surat_detail_id', $detailSuratId)
+            ->first();
+
         if ($arsip) {
             $arsip->delete();
             return true;
         }
         return false;
     }
-    */
 
     /**
      * Cek konsistensi nomor surat dengan arsip
@@ -327,108 +402,104 @@ class ArsipSurat extends Model
      * 
      * TODO: Implementasi ketika mulai buat sistem surat
      */
-    /*
-    public function cekKonsistensiNomor(Request $request)
+    public function cekKonsistensiNomor(\Illuminate\Http\Request $request)
     {
         $tahun = $request->input('tahun', date('Y'));
-        
+
         // Ambil semua nomor urut yang ada
-        $nomorAda = ArsipSurat::whereYear('tanggal_surat', $tahun)
-                             ->selectRaw('CAST(SUBSTRING_INDEX(nomor_surat, "/", 1) AS UNSIGNED) as nomor_urut')
-                             ->orderBy('nomor_urut')
-                             ->pluck('nomor_urut')
-                             ->toArray();
-        
+        $nomorAda = static::whereYear('tanggal_surat', $tahun)
+            ->selectRaw('CAST(SUBSTRING_INDEX(nomor_surat, "/", 1) AS UNSIGNED) as nomor_urut')
+            ->orderBy('nomor_urut')
+            ->pluck('nomor_urut')
+            ->toArray();
+
         // Cek nomor yang hilang
         $nomorHilang = [];
-        $maxNomor = max($nomorAda);
-        
-        for ($i = 1; $i <= $maxNomor; $i++) {
-            if (!in_array($i, $nomorAda)) {
-                $nomorHilang[] = $i;
+        if (!empty($nomorAda)) {
+            $maxNomor = max($nomorAda);
+
+            for ($i = 1; $i <= $maxNomor; $i++) {
+                if (!in_array($i, $nomorAda)) {
+                    $nomorHilang[] = $i;
+                }
             }
         }
-        
+
         return response()->json([
             'status' => 'success',
             'data' => [
                 'tahun' => $tahun,
                 'total_surat' => count($nomorAda),
-                'nomor_terakhir' => $maxNomor,
+                'nomor_terakhir' => !empty($nomorAda) ? max($nomorAda) : 0,
                 'nomor_hilang' => $nomorHilang,
                 'konsisten' => empty($nomorHilang)
             ]
         ]);
     }
-    */
-
     /**
      * Sync arsip dengan detail surat yang sudah ada
      * Untuk data existing yang belum di-link
      * 
      * TODO: Implementasi ketika mulai buat sistem surat
      */
-    /*
     public function syncArsipDenganDetail()
     {
         // Ambil arsip yang belum ada detail
-        $arsipTanpaDetail = ArsipSurat::whereNull('surat_detail_type')
-                                    ->orWhereNull('surat_detail_id')
-                                    ->get();
-        
+        $arsipTanpaDetail = static::whereNull('surat_detail_type')
+            ->orWhereNull('surat_detail_id')
+            ->get();
+
         $synced = 0;
         $errors = [];
-        
+
         foreach ($arsipTanpaDetail as $arsip) {
             try {
                 // Coba cari detail surat berdasarkan nomor surat
-                // Logic pencarian di berbagai tabel surat (skpt, skd, dll)
-                
-                // Contoh untuk SKPT:
-                if (str_contains($arsip->tentang, 'SKPT') || str_contains($arsip->tentang, 'Penghasilan')) {
-                    // $detailSurat = \App\Models\Skpt::where('nomor_surat', $arsip->nomor_surat)->first();
-                    // if ($detailSurat) {
-                    //     $arsip->update([
-                    //         'surat_detail_type' => 'skpt',
-                    //         'surat_detail_id' => $detailSurat->id
-                    //     ]);
-                    //     $synced++;
-                    // }
+
+                // Untuk KTM:
+                if (str_contains($arsip->tentang, 'KTM') || str_contains($arsip->tentang, 'Tidak Mampu')) {
+                    $detailSurat = SuratKtm::where('nomor_surat', $arsip->nomor_surat)->first();
+                    if ($detailSurat) {
+                        $arsip->update([
+                            'surat_detail_type' => SuratKtm::class,
+                            'surat_detail_id' => $detailSurat->id
+                        ]);
+                        $synced++;
+                    }
                 }
-                
+
                 // Tambah logic untuk jenis surat lainnya...
-                
+
             } catch (\Exception $e) {
                 $errors[] = "Arsip ID {$arsip->id}: " . $e->getMessage();
             }
         }
-        
+
         return response()->json([
             'status' => 'success',
             'message' => "Berhasil sync {$synced} arsip",
+            'synced' => $synced,
             'errors' => $errors
         ]);
     }
-    */
 
     /**
      * Statistik integrasi arsip dengan detail surat
      * 
      * TODO: Implementasi ketika mulai buat sistem surat
      */
-    /*
-    public function statistikIntegrasi(Request $request)
+    public function statistikIntegrasi(\Illuminate\Http\Request $request)
     {
         $tahun = $request->input('tahun', date('Y'));
-        
-        $totalArsip = ArsipSurat::whereYear('tanggal_surat', $tahun)->count();
-        $arsipAdaDetail = ArsipSurat::whereYear('tanggal_surat', $tahun)
-                                  ->whereNotNull('surat_detail_type')
-                                  ->whereNotNull('surat_detail_id')
-                                  ->count();
-        
+
+        $totalArsip = static::whereYear('tanggal_surat', $tahun)->count();
+        $arsipAdaDetail = static::whereYear('tanggal_surat', $tahun)
+            ->whereNotNull('surat_detail_type')
+            ->whereNotNull('surat_detail_id')
+            ->count();
+
         $persentaseIntegrasi = $totalArsip > 0 ? round(($arsipAdaDetail / $totalArsip) * 100, 2) : 0;
-        
+
         return response()->json([
             'status' => 'success',
             'data' => [
@@ -440,5 +511,120 @@ class ArsipSurat extends Model
             ]
         ]);
     }
-    */
+    /**
+     * Generate nomor surat berdasarkan jenis
+     */
+    public static function generateNomorSuratByJenis(string $jenisSurat, int $tahun = null, int $bulan = null): string
+    {
+        $tahun = $tahun ?: date('Y');
+        $bulan = $bulan ?: date('n');
+
+        // Ambil nomor urut berdasarkan jenis surat
+        $nomorUrut = static::generateNomorUrut($tahun, $jenisSurat);
+
+        // Format bulan ke romawi
+        $bulanRomawi = [
+            1 => 'I',
+            2 => 'II',
+            3 => 'III',
+            4 => 'IV',
+            5 => 'V',
+            6 => 'VI',
+            7 => 'VII',
+            8 => 'VIII',
+            9 => 'IX',
+            10 => 'X',
+            11 => 'XI',
+            12 => 'XII'
+        ];
+
+        // Format: 001/JENIS/NK/I/2025
+        return sprintf(
+            '%03d/%s/NK/%s/%d',
+            $nomorUrut,
+            strtoupper($jenisSurat),
+            $bulanRomawi[$bulan],
+            $tahun
+        );
+    }
+
+    /**
+     * Helper untuk jenis surat yang umum
+     */
+    public static function generateNomorSKTM(int $tahun = null, int $bulan = null): string
+    {
+        return static::generateNomorSuratByJenis('SKTM', $tahun, $bulan);
+    }
+
+    public static function generateNomorSKPT(int $tahun = null, int $bulan = null): string
+    {
+        return static::generateNomorSuratByJenis('SKPT', $tahun, $bulan);
+    }
+
+    public static function generateNomorSKD(int $tahun = null, int $bulan = null): string
+    {
+        return static::generateNomorSuratByJenis('SKD', $tahun, $bulan);
+    }
+
+    public static function generateNomorSKU(int $tahun = null, int $bulan = null): string
+    {
+        return static::generateNomorSuratByJenis('SKU', $tahun, $bulan);
+    }
+
+    /**
+     * Statistik per jenis surat
+     */
+    public static function statistikPerJenis(int $tahun = null): array
+    {
+        $query = static::selectRaw('surat_detail_type, COUNT(*) as total')
+            ->whereNotNull('surat_detail_type');
+
+        if ($tahun) {
+            $query->whereYear('tanggal_surat', $tahun);
+        }
+
+        $result = $query->groupBy('surat_detail_type')
+            ->pluck('total', 'surat_detail_type')
+            ->toArray();
+
+        // Convert class names to readable names
+        $readable = [];
+        foreach ($result as $class => $total) {
+            $typeMap = [
+                SuratKtm::class => 'SKTM',
+                // SuratSkpt::class => 'SKPT',
+                // SuratSkd::class => 'SKD',
+            ];
+
+            $name = $typeMap[$class] ?? basename(str_replace('\\', '/', $class));
+            $readable[$name] = $total;
+        }
+
+        return $readable;
+    }
+
+    /**
+     * Statistik nomor surat per jenis berdasarkan format nomor
+     */
+    public static function statistikPerJenisDariNomor(int $tahun = null): array
+    {
+        $query = static::selectRaw("
+            CASE 
+                WHEN nomor_surat LIKE '%/SKTM/%' THEN 'SKTM'
+                WHEN nomor_surat LIKE '%/SKPT/%' THEN 'SKPT'
+                WHEN nomor_surat LIKE '%/SKD/%' THEN 'SKD'
+                WHEN nomor_surat LIKE '%/SKU/%' THEN 'SKU'
+                ELSE 'LAINNYA'
+            END as jenis_surat,
+            COUNT(*) as total
+        ");
+
+        if ($tahun) {
+            $query->whereYear('tanggal_surat', $tahun);
+        }
+
+        return $query->groupBy('jenis_surat')
+            ->pluck('total', 'jenis_surat')
+            ->toArray();
+    }
 }

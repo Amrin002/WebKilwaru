@@ -74,4 +74,22 @@ class User extends Authenticatable
             default => 'Tidak Diketahui'
         };
     }
+    /**
+     * Relasi ke surat KTM
+     */
+    public function suratKtm()
+    {
+        return $this->hasMany(SuratKtm::class);
+    }
+
+    /**
+     * Ambil surat KTM terbaru milik user
+     */
+    public function latestSuratKtm(int $limit = 5)
+    {
+        return $this->suratKtm()
+            ->orderBy('created_at', 'desc')
+            ->limit($limit)
+            ->get();
+    }
 }
