@@ -680,9 +680,9 @@
                             <i class="bi bi-download me-2"></i>Export/Actions
                         </button>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="{{ route('admin.surat-ktm.export', request()->query()) }}">
+                            {{-- <li><a class="dropdown-item" href="{{ route('admin.surat-ktm.export', request()->query()) }}">
                                     <i class="bi bi-file-earmark-excel me-2"></i>Export Data
-                                </a></li>
+                                </a></li> --}}
                             <li><a class="dropdown-item" href="#" onclick="toggleBulkActions()">
                                     <i class="bi bi-check-square me-2"></i>Bulk Actions
                                 </a></li>
@@ -908,7 +908,7 @@
                                                 <i class="bi bi-pencil"></i>
                                             </a>
                                             @if ($surat->status == 'disetujui' && $surat->nomor_surat)
-                                                <a href="{{ route('admin.surat-ktm.download', $surat->id) }}"
+                                                <a href="{{ route('admin.surat-ktm.export', $surat->id) }}"
                                                     class="btn btn-sm btn-success" title="Download" target="_blank">
                                                     <i class="bi bi-download"></i>
                                                 </a>

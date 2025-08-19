@@ -686,7 +686,7 @@
             </button>
 
             @if ($surat->status === 'disetujui' && $surat->nomor_surat)
-                <a href="{{ route('admin.surat-ktm.download', $surat->id) }}" class="btn btn-success" target="_blank">
+                <a href="{{ route('admin.surat-ktm.export', $surat->id) }}" class="btn btn-success" target="_blank">
                     <i class="bi bi-download"></i>Download Surat
                 </a>
             @endif

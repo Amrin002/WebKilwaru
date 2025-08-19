@@ -2,14 +2,17 @@
 
 namespace App\Models;
 
+use App\HasQrCode;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Request;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class ArsipSurat extends Model
 {
-    use HasFactory;
+    use HasFactory, HasQrCode;
 
     protected $table = 'arsip_surat';
 
@@ -50,6 +53,13 @@ class ArsipSurat extends Model
         return $this->morphTo();
     }
 
+    /**
+     * Relasi ke verifikasi logs
+     */
+    public function verifikasiLogs()
+    {
+        return $this->hasMany(VerifikasiSurat::class, 'nomor_surat', 'nomor_surat');
+    }
 
     // ========================================
     // SCOPES
@@ -626,5 +636,20 @@ class ArsipSurat extends Model
         return $query->groupBy('jenis_surat')
             ->pluck('total', 'jenis_surat')
             ->toArray();
+    }
+
+    // ========================================
+    // QR CODE METHODS
+    // ========================================
+
+
+
+
+    /**
+     * Auto generate QR Code jika nomor surat berubah
+     */
+    protected static function boot()
+    {
+        parent::boot();
     }
 }

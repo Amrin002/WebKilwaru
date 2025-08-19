@@ -392,17 +392,19 @@
                         </div>
                     </div>
                 </div>
+                {{-- Layanana surat --}}
+                <!-- Layanan Surat -->
                 <div class="col-lg-4 col-md-6 mb-4">
                     <div class="card h-100 fade-in">
                         <div class="card-body text-center p-4">
                             <div class="feature-icon">
-                                <i class="bi bi-globe"></i>
+                                <i class="bi bi-file-earmark-text"></i>
                             </div>
                             <h5 class="card-title">Layanan Surat</h5>
                             <p class="card-text">Pembuatan surat keterangan, surat pengantar, dan dokumen administrasi
                                 lainnya secara online.</p>
-                            <a href="#" class="btn-service">
-                                <i class="bi bi-arrow-right me-2"></i>Ajukan Surat
+                            <a href="{{ route('public.surat.index') }}" class="btn btn-primary mt-auto">
+                                <i class="bi bi-arrow-right me-2"></i>Lihat Layanan
                             </a>
                         </div>
                     </div>

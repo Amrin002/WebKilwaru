@@ -9,20 +9,50 @@ use App\Http\Controllers\KKController;
 use App\Http\Controllers\PendudukController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PublicBeritaController;
+use App\Http\Controllers\QrCodeController;
 use App\Http\Controllers\StatistikPertumbuhanController;
 use App\Http\Controllers\StrukturDesaController;
-use App\Http\Controllers\SuratKtmController; // TAMBAHAN BARU
+use App\Http\Controllers\SuratKtmController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\VerifikasiSuratController;
 
 // Public routes
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
-// Di routes/web.php, tambahkan:
+// ========================================
+// QR CODE & VERIFIKASI ROUTES (Public)
+// ========================================
+// Halaman verifikasi utama (untuk scan QR code)
+Route::get('/verifikasi/{nomorSurat}', [VerifikasiSuratController::class, 'verify'])
+    ->name('verifikasi.surat')
+    ->where('nomorSurat', '[A-Za-z0-9\-\/]+'); // Allow nomor surat format
+
+// QR Code public routes
+Route::prefix('qr-code')->name('qr-code.')->group(function () {
+    // Preview QR Code
+    Route::get('{nomorSurat}/preview', [QrCodeController::class, 'preview'])
+        ->name('preview');
+
+    // Download QR Code sebagai file
+    Route::get('{nomorSurat}/download', [QrCodeController::class, 'download'])
+        ->name('download');
+
+    // Embed QR Code untuk iframe/widget
+    Route::get('{nomorSurat}/embed', [QrCodeController::class, 'embed'])
+        ->name('embed');
+
+    // Validasi QR Code integrity
+    Route::get('{nomorSurat}/validate', [QrCodeController::class, 'validate'])
+        ->name('validate');
+});
+
+// ========================================
+// BERITA ROUTES (Public)
+// ========================================
 Route::get('/berita/rss-info', function () {
     return view('public.berita.rss-info');
 })->name('berita.rss-info');
 
-//Berita routes (public)
 Route::prefix('berita')->name('berita.')->group(function () {
     Route::get('/', [PublicBeritaController::class, 'index'])->name('index');
     Route::get('/search', [PublicBeritaController::class, 'search'])->name('search');
@@ -37,7 +67,7 @@ Route::prefix('berita')->name('berita.')->group(function () {
     Route::get('/{slug}', [PublicBeritaController::class, 'show'])->name('show');
 });
 
-// API endpoints untuk AJAX
+// API endpoints untuk AJAX berita
 Route::prefix('api/berita')->name('api.berita.')->group(function () {
     Route::get('/search', [PublicBeritaController::class, 'search'])->name('search');
     Route::get('/popular', [PublicBeritaController::class, 'popular'])->name('popular');
@@ -46,11 +76,19 @@ Route::prefix('api/berita')->name('api.berita.')->group(function () {
     Route::get('/categories', [PublicBeritaController::class, 'categories'])->name('categories');
 });
 
+// Landing page untuk semua layanan surat
+Route::get('/surat', function () {
+    return view('public.surat.index');
+})->name('public.surat.index');
+
 // ========================================
 // SURAT KTM - GUEST ROUTES (Public - Landing Page)
 // ========================================
 Route::prefix('surat-ktm')->name('public.surat-ktm.')->group(function () {
     // Form pengajuan untuk guest
+    Route::get('/', [SuratKtmController::class, 'indexPublic'])
+        ->name('index');
+
     Route::get('pengajuan', [SuratKtmController::class, 'guestForm'])
         ->name('form');
 
@@ -66,11 +104,20 @@ Route::prefix('surat-ktm')->name('public.surat-ktm.')->group(function () {
     Route::put('track/{token}', [SuratKtmController::class, 'guestUpdate'])
         ->name('update');
 
+    // API untuk mencari surat berdasarkan token
+    Route::post('api/track', [SuratKtmController::class, 'apiTrackSurat'])
+        ->name('api.track');
+
     // Download surat yang sudah disetujui via token
     Route::get('download/{id}/{token}', [SuratKtmController::class, 'download'])
         ->name('download');
+
+    // Export PDF surat via token
+    Route::get('export/{id}/{token}', [SuratKtmController::class, 'export'])
+        ->name('export');
 });
 
+// Static pages
 Route::get('/terms', function () {
     return view('pages.terms');
 })->name('terms');
@@ -79,14 +126,16 @@ Route::get('/privacy', function () {
     return view('pages.privacy');
 })->name('privacy');
 
+Route::get('/struktur-desa', [StrukturDesaController::class, 'publicStructure'])->name('struktur-desa.public');
+
 // User dashboard (untuk semua user yang sudah login dan verified)
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified', 'user'])->name('dashboard');
 
-Route::get('/sturktur-desa', [StrukturDesaController::class, 'publicStructure'])->name('struktur-desa.public');
-
-// Routes untuk authenticated users (user & admin bisa akses profile)
+// ========================================
+// AUTHENTICATED USER ROUTES
+// ========================================
 Route::middleware(['auth', 'user'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
@@ -123,10 +172,16 @@ Route::middleware(['auth', 'user'])->group(function () {
         // Download surat yang sudah disetujui
         Route::get('{id}/download', [SuratKtmController::class, 'download'])
             ->name('download');
+
+        // Export PDF surat milik user
+        Route::get('{id}/export', [SuratKtmController::class, 'export'])
+            ->name('export');
     });
 });
 
-// Admin only routes
+// ========================================
+// ADMIN ROUTES
+// ========================================
 Route::middleware(['auth', 'admin'])->group(function () {
     // Admin Dashboard
     Route::get('/admin', [AdminDashboardController::class, 'index'])->name('admin.index');
@@ -155,21 +210,16 @@ Route::middleware(['auth', 'admin'])->group(function () {
         Route::prefix('statistik')->name('statistik.')->group(function () {
             Route::get('/pertumbuhan', [StatistikPertumbuhanController::class, 'index'])
                 ->name('pertumbuhan');
-
             Route::get('/pertumbuhan/export', [StatistikPertumbuhanController::class, 'export'])
                 ->name('pertumbuhan.export');
-
             Route::get('/pertumbuhan/print', [StatistikPertumbuhanController::class, 'print'])
                 ->name('pertumbuhan.print');
-
             Route::get('/pertumbuhan/chart-data', [StatistikPertumbuhanController::class, 'getChartData'])
                 ->name('pertumbuhan.chart-data');
         });
 
         // Berita Management Routes
         Route::resource('berita', BeritaController::class);
-
-        // Additional berita routes
         Route::prefix('berita')->name('berita.')->group(function () {
             Route::post('/bulk-action', [BeritaController::class, 'bulkAction'])->name('bulk-action');
             Route::get('/{slug}/duplicate', [BeritaController::class, 'duplicate'])->name('duplicate');
@@ -181,19 +231,10 @@ Route::middleware(['auth', 'admin'])->group(function () {
 
         // Kategori Berita Management Routes
         Route::resource('kategori-berita', KategoriBeritaController::class);
-
-        // Additional kategori berita routes - FIXED
         Route::prefix('kategori-berita')->name('kategori-berita.')->group(function () {
-            // Bulk action route
             Route::post('/bulk-action', [KategoriBeritaController::class, 'bulkAction'])->name('bulk-action');
-
-            // Toggle active route - FIXED method
             Route::patch('/{kategori:slug}/toggle-active', [KategoriBeritaController::class, 'toggleActive'])->name('toggle-active');
-
-            // Update urutan route
             Route::post('/update-urutan', [KategoriBeritaController::class, 'updateUrutan'])->name('update-urutan');
-
-            // Statistics route
             Route::get('/statistics', [KategoriBeritaController::class, 'statistics'])->name('statistics');
         });
 
@@ -202,6 +243,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
             Route::get('/kategori-berita/list', [KategoriBeritaController::class, 'getKategoriList'])->name('kategori-berita.list');
         });
 
+        // Struktur Desa Routes
         Route::resource('struktur-desa', StrukturDesaController::class);
         Route::post('struktur-desa/{struktur_desa}/toggle-status', [StrukturDesaController::class, 'toggleStatus'])->name('struktur-desa.toggle-status');
         Route::post('struktur-desa-bulk-action', [StrukturDesaController::class, 'bulkAction'])->name('struktur-desa.bulk-action');
@@ -209,9 +251,8 @@ Route::middleware(['auth', 'admin'])->group(function () {
         Route::get('struktur-desa-print', [StrukturDesaController::class, 'print'])->name('struktur-desa.print');
 
         // ========================================
-        // SURAT KTM - ADMIN ROUTES (Admin Only)
+        // SURAT KTM - ADMIN ROUTES (Admin Only) - UPDATED WITH QR CODE
         // ========================================
-
         Route::prefix('surat-ktm')->name('surat-ktm.')->group(function () {
             // Dashboard admin - daftar semua surat
             Route::get('/', [SuratKtmController::class, 'adminIndex'])
@@ -237,7 +278,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
             Route::put('{id}', [SuratKtmController::class, 'adminUpdate'])
                 ->name('update');
 
-            // PERBAIKAN: Update status surat (AJAX) - GUNAKAN PATCH
+            // Update status surat (AJAX)
             Route::patch('{id}/update-status', [SuratKtmController::class, 'adminUpdateStatus'])
                 ->name('update-status');
 
@@ -249,23 +290,46 @@ Route::middleware(['auth', 'admin'])->group(function () {
             Route::post('bulk-action', [SuratKtmController::class, 'adminBulkAction'])
                 ->name('bulk-action');
 
-            // Export data
-            Route::get('export', [SuratKtmController::class, 'export'])
-                ->name('export');
+            // Generate nomor surat otomatis (AJAX)
+            Route::post('generate-nomor', [SuratKtmController::class, 'generateNomor'])
+                ->name('generate-nomor');
 
-            // API Statistik untuk admin - PERBAIKAN PATH
-            Route::get('api/statistik', [SuratKtmController::class, 'apiStatistik'])
-                ->name('api.statistik');
+            // Export PDF surat
+            Route::get('{id}/export', [SuratKtmController::class, 'export'])
+                ->name('export');
 
             // Download surat untuk admin
             Route::get('{id}/download', [SuratKtmController::class, 'download'])
                 ->name('download');
-            // AJAX Routes
-            Route::patch('/{id}/update-status', [SuratKtmController::class, 'adminUpdateStatus'])->name('update-status');
-            Route::post('/generate-nomor', [SuratKtmController::class, 'generateNomor'])->name('generate-nomor'); // Route baru
-            Route::post('/bulk-action', [SuratKtmController::class, 'adminBulkAction'])->name('bulk-action');
+
+            // API Statistik untuk admin
+            Route::get('api/statistik', [SuratKtmController::class, 'apiStatistik'])
+                ->name('api.statistik');
+
+            // ========================================
+            // QR CODE MANAGEMENT ROUTES - BARU
+            // ========================================
+
+            // Generate QR Code manual
+            Route::post('{id}/generate-qr', [SuratKtmController::class, 'generateQrCode'])
+                ->name('generate-qr');
+
+            // Regenerate QR Code
+            Route::post('{id}/regenerate-qr', [SuratKtmController::class, 'regenerateQrCode'])
+                ->name('regenerate-qr');
+
+            // Get QR Code info (AJAX)
+            Route::get('{id}/qr-info', [SuratKtmController::class, 'getQrCodeInfo'])
+                ->name('qr-info');
+
+            // Download QR Code khusus untuk surat tertentu
+            Route::get('{id}/download-qr', [SuratKtmController::class, 'downloadQrCode'])
+                ->name('download-qr');
         });
 
+        // ========================================
+        // ARSIP SURAT ROUTES
+        // ========================================
         Route::prefix('arsip-surat')->name('arsip-surat.')->group(function () {
             Route::get('/', [ArsipSuratController::class, 'index'])->name('index');
             Route::get('/create', [ArsipSuratController::class, 'create'])->name('create');
@@ -282,23 +346,78 @@ Route::middleware(['auth', 'admin'])->group(function () {
             Route::get('/page/import', [ArsipSuratController::class, 'showImport'])->name('show-import');
             Route::post('/action/import', [ArsipSuratController::class, 'import'])->name('import');
         });
+
+        // ========================================
+        // VERIFIKASI SURAT ADMIN ROUTES
+        // ========================================
+
+        // Dashboard verifikasi
+        Route::get('/verifikasi-dashboard', [VerifikasiSuratController::class, 'dashboard'])
+            ->name('verifikasi.dashboard');
+
+        // Log verifikasi
+        Route::get('/verifikasi-logs', [VerifikasiSuratController::class, 'logs'])
+            ->name('verifikasi.logs');
+
+        // Detail log tertentu
+        Route::get('/verifikasi-logs/{verifikasiSurat}', [VerifikasiSuratController::class, 'logDetail'])
+            ->name('verifikasi.log-detail');
+
+        // Export logs
+        Route::get('/export-verifikasi-logs', [VerifikasiSuratController::class, 'exportLogs'])
+            ->name('verifikasi.export');
+
+        // Maintenance: Cleanup old logs
+        Route::post('/cleanup-logs', [VerifikasiSuratController::class, 'cleanupLogs'])
+            ->name('verifikasi.cleanup');
     });
 });
 
 // ========================================
-// SURAT KTM - API ROUTES
+// API ROUTES
 // ========================================
-Route::prefix('api')->middleware(['auth'])->group(function () {
-    // Statistik untuk dashboard
-    Route::get('surat-ktm/statistik', [SuratKtmController::class, 'apiStatistik'])
-        ->name('api.surat-ktm.statistik');
+Route::prefix('api')->group(function () {
+    // Public API (tidak perlu auth)
+    Route::prefix('public')->group(function () {
+        // API untuk tracking surat guest
+        Route::post('surat-ktm/track', [SuratKtmController::class, 'apiTrackSurat'])
+            ->name('api.public.surat-ktm.track');
+    });
+
+    // Authenticated API
+    Route::middleware(['auth'])->group(function () {
+        // Statistik untuk dashboard
+        Route::get('surat-ktm/statistik', [SuratKtmController::class, 'apiStatistik'])
+            ->name('api.surat-ktm.statistik');
+
+        // QR Code API untuk user yang login
+        Route::prefix('qr-code')->name('api.qr-code.')->group(function () {
+            Route::get('{nomorSurat}/info', [QrCodeController::class, 'getInfo'])
+                ->name('info');
+            Route::get('{nomorSurat}/stats', [QrCodeController::class, 'getStats'])
+                ->name('stats');
+        });
+    });
+
+    // Admin only API
+    Route::middleware(['auth', 'admin'])->prefix('admin')->name('api.admin.')->group(function () {
+        // QR Code bulk operations
+        Route::post('qr-code/bulk-generate', [QrCodeController::class, 'bulkGenerate'])
+            ->name('qr-code.bulk-generate');
+        Route::post('qr-code/cleanup', [QrCodeController::class, 'cleanup'])
+            ->name('qr-code.cleanup');
+        Route::get('qr-code/statistics', [QrCodeController::class, 'getStatistics'])
+            ->name('qr-code.statistics');
+    });
 });
 
-// Redirect old berita URLs (jika ada)
+// ========================================
+// REDIRECT ROUTES (untuk backward compatibility)
+// ========================================
+
+// Redirect old berita URLs
 Route::redirect('/news', '/berita', 301);
 Route::redirect('/news/{slug}', '/berita/{slug}', 301);
-
-// Redirect kategori lama (jika ada)
 Route::redirect('/category/{slug}', '/berita/kategori/{slug}', 301);
 
 require __DIR__ . '/auth.php';

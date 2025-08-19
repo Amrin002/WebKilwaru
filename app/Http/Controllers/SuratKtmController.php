@@ -3,8 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\SuratKtm;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
 class SuratKtmController extends Controller
@@ -12,6 +15,14 @@ class SuratKtmController extends Controller
     // ========================================
     // GUEST METHODS (Landing Page)
     // ========================================
+
+    /**
+     * Index Surat KTM untuk guest
+     */
+    public function indexPublic()
+    {
+        return view('public.surat-ktm.index');
+    }
 
     /**
      * Form pengajuan surat untuk guest
@@ -67,7 +78,53 @@ class SuratKtmController extends Controller
 
         return view('public.surat-ktm.track', compact('surat'));
     }
+    /**
+     * API untuk mencari surat berdasarkan token (AJAX)
+     */
+    public function apiTrackSurat(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'token' => 'required|string|min:10|max:50',
+        ]);
 
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Token tidak valid',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        try {
+            $token = trim($request->token);
+            $surat = SuratKtm::findByPublicToken($token);
+
+            if (!$surat) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Surat tidak ditemukan. Pastikan kode tracking yang Anda masukkan benar.',
+                ], 404);
+            }
+
+            // Return URL untuk redirect
+            return response()->json([
+                'success' => true,
+                'message' => 'Surat ditemukan!',
+                'redirect_url' => route('public.surat-ktm.track', $token),
+                'data' => [
+                    'nama' => $surat->nama,
+                    'status' => $surat->status,
+                    'tanggal_pengajuan' => $surat->created_at->format('d/m/Y H:i')
+                ]
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan sistem. Silakan coba lagi.',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
     /**
      * Update surat oleh guest menggunakan token
      */
@@ -255,16 +312,19 @@ class SuratKtmController extends Controller
         }
 
         try {
-            // Admin bisa update semua field
-            $surat->fill($request->all());
+            $oldStatus = $surat->status;
+            // Update data surat
+            $surat->fill($request->except(['status'])); // Update semua kecuali status
 
-            // Jika status berubah ke disetujui dan belum ada nomor surat
+
+            // Handle nomor surat jika status disetujui
             if ($request->status === 'disetujui' && !$surat->nomor_surat) {
-                $surat->nomor_surat = $request->nomor_surat ?: SuratKtm::generateNomorSurat();
+                $surat->nomor_surat = $request->nomor_surat ?: null; // Akan di-generate di updateStatus
             }
 
             $surat->save();
-
+            // Update status menggunakan method yang terintegrasi QR code
+            $surat->updateStatus($request->status, $request->keterangan);
             // Simpan ke arsip jika disetujui
             if ($request->status === 'disetujui') {
                 $surat->simpanKeArsip();
@@ -302,20 +362,18 @@ class SuratKtmController extends Controller
         try {
             $surat = SuratKtm::findOrFail($id);
 
-            $surat->status = $request->status;
-            $surat->keterangan = $request->keterangan;
-
-            // Generate nomor surat jika disetujui
-            if ($request->status === 'disetujui') {
-                $surat->nomor_surat = $request->nomor_surat ?: SuratKtm::generateNomorSurat();
+            // Set nomor surat jika disetujui dan disediakan
+            if ($request->status === 'disetujui' && $request->nomor_surat) {
+                $surat->nomor_surat = $request->nomor_surat;
+                $surat->save();
             }
 
-            $surat->save();
-
-            // Simpan ke arsip jika disetujui
-            if ($request->status === 'disetujui') {
-                $surat->simpanKeArsip();
+            // GUNAKAN method updateStatus() dari model untuk memastikan QR code tergenerate
+            $result = $surat->updateStatus($request->status, $request->keterangan);
+            if (!$result) {
+                throw new \Exception('Gagal mengupdate status surat');
             }
+
 
             return response()->json([
                 'success' => true,
@@ -333,7 +391,6 @@ class SuratKtmController extends Controller
             ], 500);
         }
     }
-
     /**
      * Delete surat oleh admin
      */
@@ -412,6 +469,148 @@ class SuratKtmController extends Controller
             return back()->withErrors(['error' => 'Gagal melakukan bulk action: ' . $e->getMessage()]);
         }
     }
+    // ========================================
+    // QR CODE SPECIFIC METHODS - BARU
+    // ========================================
+
+    /**
+     * Generate QR Code manual untuk surat tertentu
+     */
+    public function generateQrCode(Request $request, $id)
+    {
+        try {
+            $surat = SuratKtm::findOrFail($id);
+
+            // Check permission
+            if (!Auth::user()->isAdmin()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Hanya admin yang dapat generate QR Code'
+                ], 403);
+            }
+
+            // Check if can generate QR code
+            if (!$surat->canGenerateQrCode()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Surat belum disetujui atau nomor surat belum ada'
+                ], 400);
+            }
+
+            // Generate QR Code
+            $result = $surat->generateQrCodeForSurat();
+
+            if ($result['success']) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'QR Code berhasil di-generate',
+                    'data' => $surat->getQrCodeInfoForSurat()
+                ]);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Gagal generate QR Code: ' . $result['error']
+                ], 500);
+            }
+        } catch (\Exception $e) {
+            Log::error('Manual QR Code generation failed', [
+                'surat_id' => $id,
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Regenerate QR Code untuk surat tertentu
+     */
+    public function regenerateQrCode(Request $request, $id)
+    {
+        try {
+            $surat = SuratKtm::findOrFail($id);
+
+            // Check permission
+            if (!Auth::user()->isAdmin()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Hanya admin yang dapat regenerate QR Code'
+                ], 403);
+            }
+
+            // Regenerate QR Code
+            $result = $surat->regenerateQrCode();
+
+            if ($result['success']) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'QR Code berhasil di-regenerate',
+                    'data' => $surat->getQrCodeInfoForSurat()
+                ]);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Gagal regenerate QR Code: ' . $result['error']
+                ], 500);
+            }
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Get QR Code info untuk AJAX
+     */
+    public function getQrCodeInfo($id)
+    {
+        try {
+            $surat = SuratKtm::findOrFail($id);
+
+            return response()->json([
+                'success' => true,
+                'data' => $surat->getQrCodeInfoForSurat()
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Surat tidak ditemukan'
+            ], 404);
+        }
+    }
+
+    /**
+     * Download QR Code untuk surat tertentu
+     */
+    public function downloadQrCode($id)
+    {
+        try {
+            $surat = SuratKtm::findOrFail($id);
+
+            if (!$surat->canAccess()) {
+                abort(403, 'Anda tidak memiliki akses ke surat ini');
+            }
+
+            if (!$surat->hasValidQrCode()) {
+                return back()->withErrors(['error' => 'QR Code tidak tersedia untuk surat ini']);
+            }
+
+            // Generate download URL dengan parameter
+            $downloadUrl = $surat->getQrCodeDownloadUrl([
+                'size' => 400,
+                'format' => 'png'
+            ]);
+
+            return redirect($downloadUrl);
+        } catch (\Exception $e) {
+            return back()->withErrors(['error' => 'Gagal download QR Code: ' . $e->getMessage()]);
+        }
+    }
 
     // ========================================
     // SHARED METHODS
@@ -437,9 +636,10 @@ class SuratKtmController extends Controller
         if (!$surat->isDisetujui()) {
             abort(403, 'Surat belum disetujui');
         }
-
+        // Ambil info QR Code untuk ditampilkan di halaman print
+        $qrCodeInfo = $surat->getQrCodeInfoForSurat();
         // Generate PDF atau redirect ke view print
-        return view('surat-ktm.print', compact('surat'));
+        return view('surat-ktm.print', compact('surat', 'qrCodeInfo'));
     }
 
     /**
@@ -468,12 +668,46 @@ class SuratKtmController extends Controller
     }
 
     /**
-     * Export data surat ke Excel/PDF
+     * Export data surat ke PDF - DENGAN QR CODE OTOMATIS
      */
-    public function export(Request $request)
+    public function export(Request $request, $id, $token = null)
     {
-        // Implementasi export menggunakan Laravel Excel
-        // return Excel::download(new SuratKtmExport($request->all()), 'surat-ktm.xlsx');
+        if ($token) {
+            // Guest access - pakai token
+            $surat = SuratKtm::where('public_token', $token)->findOrFail($id);
+        } else {
+            // Admin/User access - pakai login
+            $surat = SuratKtm::findOrFail($id);
+
+            // Check access untuk user (bukan admin)
+            if ($request->user() && !$request->user()->isAdmin() && !$surat->canAccess()) {
+                abort(403, 'Anda tidak memiliki akses ke surat ini');
+            }
+        }
+
+        // Validasi status surat
+        if ($surat->status !== 'disetujui') {
+            return redirect()
+                ->back()
+                ->withErrors(['error' => 'Surat belum disetujui, tidak bisa diekspor']);
+        }
+
+        $tanggal_dikeluarkan = $surat->updated_at->format('d/m/Y');
+
+        // SIMPLE: Ambil QR Code base64 - otomatis generate jika belum ada
+        $qrCodeBase64 = $surat->getQrCodeForPdf();
+
+        // URL verifikasi untuk QR Code  
+        $verifikasiUrl = route('verifikasi.surat', ['nomorSurat' => $surat->nomor_surat]);
+
+        $response = Pdf::loadView('admin.surat-ktm.pdf', compact(
+            'surat',
+            'tanggal_dikeluarkan',
+            'qrCodeBase64',
+            'verifikasiUrl'
+        ))->download('surat-ktm-' . $surat->nama . '.pdf');
+
+        return $response;
     }
 
     // ========================================
@@ -541,8 +775,10 @@ class SuratKtmController extends Controller
         if (!$surat->canAccess()) {
             abort(403, 'Anda tidak memiliki akses ke surat ini');
         }
+        // Ambil info QR Code jika surat disetujui
+        $qrCodeInfo = $surat->isDisetujui() ? $surat->getQrCodeInfoForSurat() : null;
 
-        return view('user.surat-ktm.show', compact('surat'));
+        return view('user.surat-ktm.show', compact('surat', 'qrCodeInfo'));
     }
 
     /**

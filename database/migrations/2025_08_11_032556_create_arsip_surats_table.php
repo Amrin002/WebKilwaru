@@ -22,6 +22,7 @@ return new class extends Migration
             $table->string('tujuan_surat', 255)->nullable()->comment('Untuk surat keluar');
             $table->text('tentang')->nullable()->comment('Untuk surat keluar');
             $table->text('keterangan')->nullable()->comment('Catatan tambahan');
+            $table->string('qr_code_path')->nullable();
 
             // Tambah kolom polymorphic untuk relasi ke detail surat
             $table->string('surat_detail_type')->nullable()->after('keterangan');
@@ -33,6 +34,7 @@ return new class extends Migration
             $table->index(['nomor_surat']);
             $table->index(['tanggal_surat']);
             $table->index(['surat_detail_type', 'surat_detail_id']);
+            $table->index('qr_code_path');
         });
     }
 
