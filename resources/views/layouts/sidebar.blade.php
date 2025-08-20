@@ -172,7 +172,7 @@
             <ul class="sub-menu {{ request()->routeIs('admin.berita.*') ? 'expanded' : '' }}">
                 <li class="sub-menu-item">
                     <a href="{{ route('admin.berita.index') }}"
-                        class="sub-menu-link {{ request()->routeIs('admin.berita.kelola.*') ? 'active' : '' }}"
+                        class="sub-menu-link {{ request()->routeIs('admin.berita.*') ? 'active' : '' }}"
                         data-subpage="kelola-berita">
                         <i class="bi bi-pencil-square"></i>
                         <span>Kelola Berita</span>
@@ -187,8 +187,8 @@
                     </a>
                 </li>
                 <li class="sub-menu-item">
-                    <a href="#"
-                        class="sub-menu-link {{ request()->routeIs('admin.berita.galeri.*') ? 'active' : '' }}"
+                    <a href="{{ route('admin.galeri.index') }}"
+                        class="sub-menu-link {{ request()->routeIs('admin.galeri.*') ? 'active' : '' }}"
                         data-subpage="galeri">
                         <i class="bi bi-image"></i>
                         <span>Galeri Foto</span>
