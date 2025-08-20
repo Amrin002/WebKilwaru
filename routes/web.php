@@ -3,6 +3,7 @@
 use App\Http\Controllers\AdminDashboardController;
 use App\Http\Controllers\ArsipSuratController;
 use App\Http\Controllers\BeritaController;
+use App\Http\Controllers\GaleriController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\KategoriBeritaController;
 use App\Http\Controllers\KKController;
@@ -128,6 +129,19 @@ Route::get('/privacy', function () {
 
 Route::get('/struktur-desa', [StrukturDesaController::class, 'publicStructure'])->name('struktur-desa.public');
 
+// ===== PUBLIC ROUTES =====
+Route::group(['prefix' => 'galeri'], function () {
+    // Halaman utama galeri
+    Route::get('/', [GaleriController::class, 'publicIndex'])->name('public.galeri.index');
+
+    // Detail foto galeri
+    Route::get('/{id}', [GaleriController::class, 'publicShow'])
+        ->where('id', '[0-9]+')
+        ->name('public.galeri.show');
+
+    // Search API untuk live search
+    Route::get('/search/api', [GaleriController::class, 'search'])->name('galeri.search');
+});
 // User dashboard (untuk semua user yang sudah login dan verified)
 Route::get('/dashboard', function () {
     return view('dashboard');
@@ -218,6 +232,18 @@ Route::middleware(['auth', 'admin'])->group(function () {
                 ->name('pertumbuhan.chart-data');
         });
 
+        // Galeri Routes
+        Route::resource('galeri', GaleriController::class);
+        // Additional admin routes
+        Route::group(['prefix' => 'galeri'], function () {
+            // Bulk operations
+            Route::post('/bulk-delete', [GaleriController::class, 'bulkDelete'])->name('admin.galeri.bulk-delete');
+
+            // Statistics and exports
+            Route::get('/statistics/api', [GaleriController::class, 'getStatistics'])->name('admin.galeri.statistics');
+            Route::get('/export', [GaleriController::class, 'export'])->name('admin.galeri.export');
+        });
+        
         // Berita Management Routes
         Route::resource('berita', BeritaController::class);
         Route::prefix('berita')->name('berita.')->group(function () {

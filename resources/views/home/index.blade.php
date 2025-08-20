@@ -471,7 +471,139 @@
             @endif
         </div>
     </section>
+    {{-- BAGIAN GALERI SECTION YANG DIPERBAIKI --}}
+    <section id="galeri" class="py-5 bg-light">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="section-title">Galeri Foto</h2>
+                <p class="lead">Dokumentasi kegiatan dan momen berharga Desa Kilwaru</p>
+            </div>
 
+            @if (isset($latestGaleri) && $latestGaleri->count() > 0)
+                <!-- Galeri Carousel -->
+                <div id="galeriCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="4000">
+                    <div class="carousel-indicators">
+                        @foreach ($latestGaleri->chunk(3) as $chunkIndex => $chunk)
+                            <button type="button" data-bs-target="#galeriCarousel"
+                                data-bs-slide-to="{{ $chunkIndex }}" class="{{ $chunkIndex == 0 ? 'active' : '' }}"
+                                aria-label="Slide {{ $chunkIndex + 1 }}">
+                            </button>
+                        @endforeach
+                    </div>
+
+                    <div class="carousel-inner">
+                        @foreach ($latestGaleri->chunk(3) as $chunkIndex => $chunk)
+                            <div class="carousel-item {{ $chunkIndex == 0 ? 'active' : '' }}">
+                                <div class="row">
+                                    @foreach ($chunk as $galeri)
+                                        <div class="col-lg-4 col-md-6 mb-4">
+                                            <div class="galeri-card fade-in">
+                                                <div class="galeri-image-wrapper">
+                                                    <img src="{{ $galeri->foto_url }}"
+                                                        alt="{{ $galeri->nama_kegiatan }}" class="galeri-image"
+                                                        loading="lazy">
+                                                    <div class="galeri-overlay">
+                                                        <div class="galeri-actions">
+                                                            <button class="btn btn-light btn-sm galeri-zoom"
+                                                                data-bs-toggle="modal" data-bs-target="#galeriModal"
+                                                                data-image="{{ $galeri->foto_url }}"
+                                                                data-title="{{ $galeri->nama_kegiatan }}"
+                                                                data-description="{{ $galeri->keterangan }}"
+                                                                data-date="{{ $galeri->formatted_date }}">
+                                                                <i class="bi bi-zoom-in"></i>
+                                                            </button>
+                                                        </div>
+                                                        <div class="galeri-info">
+                                                            <h6 class="galeri-title">{{ $galeri->nama_kegiatan }}</h6>
+                                                            <p class="galeri-date">{{ $galeri->relative_date }}</p>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="galeri-content">
+                                                    <h6 class="fw-bold mb-2">{{ $galeri->nama_kegiatan }}</h6>
+                                                    @if ($galeri->keterangan)
+                                                        <p class="text-muted small mb-2">{{ $galeri->getExcerpt(80) }}</p>
+                                                    @endif
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <small class="text-muted">
+                                                            <i
+                                                                class="bi bi-calendar me-1"></i>{{ $galeri->formatted_date }}
+                                                        </small>
+                                                        @if ($galeri->image_dimensions)
+                                                            <small class="text-muted">
+                                                                <i
+                                                                    class="bi bi-aspect-ratio me-1"></i>{{ $galeri->image_dimensions['formatted'] }}
+                                                            </small>
+                                                        @endif
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+
+                    <!-- Carousel Controls -->
+                    @if ($latestGaleri->chunk(3)->count() > 1)
+                        <button class="carousel-control-prev" type="button" data-bs-target="#galeriCarousel"
+                            data-bs-slide="prev">
+                            <div class="carousel-control-icon-wrapper">
+                                <i class="bi bi-chevron-left"></i>
+                            </div>
+                            <span class="visually-hidden">Previous</span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#galeriCarousel"
+                            data-bs-slide="next">
+                            <div class="carousel-control-icon-wrapper">
+                                <i class="bi bi-chevron-right"></i>
+                            </div>
+                            <span class="visually-hidden">Next</span>
+                        </button>
+                    @endif
+                </div>
+
+                <!-- View All Button - CONTAINER TERPISAH DENGAN SPACING YANG TEPAT -->
+                <div class="view-all-container">
+                    <div class="text-center">
+                        <a href="#" class="btn btn-primary btn-lg">
+                            <i class="bi bi-images me-2"></i>Lihat Semua Galeri
+                        </a>
+                    </div>
+                </div>
+            @else
+                <!-- Empty State -->
+                <div class="text-center py-5">
+                    <i class="bi bi-camera" style="font-size: 4rem; color: var(--soft-gray);"></i>
+                    <h5 class="mt-3 text-muted">Belum ada foto galeri</h5>
+                    <p class="text-muted">Foto kegiatan desa akan ditampilkan di sini</p>
+                </div>
+            @endif
+        </div>
+    </section>
+
+    <!-- Galeri Modal -->
+    <div class="modal fade" id="galeriModal" tabindex="-1" aria-labelledby="galeriModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header border-0">
+                    <h5 class="modal-title" id="galeriModalLabel">Detail Foto</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-0">
+                    <img id="modalImage" src="" alt="" class="img-fluid w-100">
+                    <div class="p-4">
+                        <h6 id="modalTitle" class="fw-bold mb-2"></h6>
+                        <p id="modalDescription" class="text-muted mb-2"></p>
+                        <small id="modalDate" class="text-muted">
+                            <i class="bi bi-calendar me-1"></i>
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
     {{-- Demographics Section - Optional, jika ada chart --}}
     @if (isset($showDemographics) && $showDemographics)
         <section class="py-5 bg-light demographics-section">
@@ -826,7 +958,344 @@
             // Initialize news refresh
             refreshNews();
         }
+        // Galeri Modal Handler
+        const galeriModal = document.getElementById('galeriModal');
+        if (galeriModal) {
+            galeriModal.addEventListener('show.bs.modal', function(event) {
+                const button = event.relatedTarget;
+                const image = button.getAttribute('data-image');
+                const title = button.getAttribute('data-title');
+                const description = button.getAttribute('data-description');
+                const date = button.getAttribute('data-date');
+
+                const modalImage = galeriModal.querySelector('#modalImage');
+                const modalTitle = galeriModal.querySelector('#modalTitle');
+                const modalDescription = galeriModal.querySelector('#modalDescription');
+                const modalDate = galeriModal.querySelector('#modalDate');
+
+                modalImage.src = image;
+                modalImage.alt = title;
+                modalTitle.textContent = title;
+                modalDescription.textContent = description || 'Tidak ada deskripsi';
+                modalDate.innerHTML = '<i class="bi bi-calendar me-1"></i>' + date;
+            });
+        }
+
+        // Lazy loading untuk carousel images
+        const observerOptions = {
+            root: null,
+            rootMargin: '50px',
+            threshold: 0.1
+        };
+
+        const imageObserver = new IntersectionObserver(function(entries) {
+            entries.forEach(function(entry) {
+                if (entry.isIntersecting) {
+                    const img = entry.target;
+                    if (img.dataset.src) {
+                        img.src = img.dataset.src;
+                        img.removeAttribute('data-src');
+                        imageObserver.unobserve(img);
+                    }
+                }
+            });
+        }, observerOptions);
+
+        // Apply lazy loading to carousel images
+        document.querySelectorAll('.galeri-image[data-src]').forEach(function(img) {
+            imageObserver.observe(img);
+        });
+
+        // Galeri carousel autoplay control
+        const galeriCarousel = document.getElementById('galeriCarousel');
+        if (galeriCarousel) {
+            // Pause on hover
+            galeriCarousel.addEventListener('mouseenter', function() {
+                const carousel = bootstrap.Carousel.getInstance(galeriCarousel);
+                if (carousel) carousel.pause();
+            });
+
+            // Resume on mouse leave
+            galeriCarousel.addEventListener('mouseleave', function() {
+                const carousel = bootstrap.Carousel.getInstance(galeriCarousel);
+                if (carousel) carousel.cycle();
+            });
+        }
 
         console.log('Desa Kilwaru landing page scripts loaded successfully! 🏡');
     </script>
+@endpush
+
+@push('styles')
+    <style>
+        .galeri-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .galeri-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+        }
+
+        .galeri-image-wrapper {
+            position: relative;
+            overflow: hidden;
+            height: 250px;
+        }
+
+        .galeri-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .galeri-card:hover .galeri-image {
+            transform: scale(1.05);
+        }
+
+        .galeri-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(to bottom,
+                    rgba(0, 0, 0, 0.1) 0%,
+                    rgba(0, 0, 0, 0.3) 60%,
+                    rgba(0, 0, 0, 0.7) 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 15px;
+        }
+
+        .galeri-card:hover .galeri-overlay {
+            opacity: 1;
+        }
+
+        .galeri-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .galeri-zoom {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            background: rgba(255, 255, 255, 0.9);
+            color: var(--primary-green);
+            transition: all 0.3s ease;
+        }
+
+        .galeri-zoom:hover {
+            background: white;
+            transform: scale(1.1);
+        }
+
+        .galeri-info {
+            color: white;
+        }
+
+        .galeri-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin: 0;
+            line-height: 1.3;
+        }
+
+        .galeri-date {
+            font-size: 0.85rem;
+            margin: 0;
+            opacity: 0.9;
+        }
+
+        .galeri-content {
+            padding: 20px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        /* Carousel Custom Styles - PERBAIKAN UTAMA */
+        #galeriCarousel {
+            margin-bottom: 4rem;
+            /* Increased margin untuk memberi ruang lebih */
+            position: relative;
+        }
+
+        /* Carousel Indicators - PERBAIKAN POSITIONING */
+        .carousel-indicators {
+            bottom: -60px;
+            /* Moved further down */
+            margin-bottom: 0;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            width: auto;
+            margin-left: 0;
+            margin-right: 0;
+        }
+
+        .carousel-indicators [data-bs-target] {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: var(--primary-green);
+            opacity: 0.5;
+            border: none;
+            margin: 0 5px;
+            transition: all 0.3s ease;
+        }
+
+        .carousel-indicators .active {
+            opacity: 1;
+            transform: scale(1.2);
+        }
+
+        /* View All Button Container - PERBAIKAN SPACING */
+        .view-all-container {
+            margin-top: 5rem;
+            /* Increased margin untuk memberi jarak dari carousel indicators */
+            clear: both;
+            position: relative;
+            z-index: 10;
+        }
+
+        .carousel-control-prev,
+        .carousel-control-next {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--primary-green);
+            border: none;
+            top: 50%;
+            transform: translateY(-50%);
+            opacity: 0.8;
+            transition: all 0.3s ease;
+        }
+
+        .carousel-control-prev {
+            left: -30px;
+        }
+
+        .carousel-control-next {
+            right: -30px;
+        }
+
+        .carousel-control-prev:hover,
+        .carousel-control-next:hover {
+            opacity: 1;
+            transform: translateY(-50%) scale(1.05);
+        }
+
+        .carousel-control-icon-wrapper {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+        }
+
+        .carousel-control-prev-icon,
+        .carousel-control-next-icon {
+            display: none;
+        }
+
+        /* Modal Styles */
+        .modal-content {
+            border-radius: 15px;
+            border: none;
+            overflow: hidden;
+        }
+
+        .modal-header {
+            background: var(--primary-green);
+            color: white;
+        }
+
+        .modal-header .btn-close {
+            filter: invert(1);
+        }
+
+        /* Responsive - PERBAIKAN RESPONSIVE */
+        @media (max-width: 768px) {
+            .galeri-image-wrapper {
+                height: 200px;
+            }
+
+            #galeriCarousel {
+                margin-bottom: 3rem;
+            }
+
+            .carousel-indicators {
+                bottom: -40px;
+            }
+
+            .view-all-container {
+                margin-top: 3.5rem;
+            }
+
+            .carousel-control-prev,
+            .carousel-control-next {
+                width: 50px;
+                height: 50px;
+                font-size: 1.2rem;
+            }
+
+            .carousel-control-prev {
+                left: -15px;
+            }
+
+            .carousel-control-next {
+                right: -15px;
+            }
+
+            .galeri-content {
+                padding: 15px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            #galeriCarousel {
+                margin-bottom: 2rem;
+            }
+
+            .carousel-control-prev,
+            .carousel-control-next {
+                position: static;
+                width: auto;
+                height: auto;
+                margin: 20px auto;
+                display: block;
+            }
+
+            .carousel-indicators {
+                position: static;
+                margin-top: 20px;
+                bottom: auto;
+            }
+
+            .view-all-container {
+                margin-top: 2rem;
+            }
+        }
+    </style>
 @endpush
