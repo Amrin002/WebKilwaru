@@ -25,8 +25,8 @@ return new class extends Migration
             $table->string('qr_code_path')->nullable();
 
             // Tambah kolom polymorphic untuk relasi ke detail surat
-            $table->string('surat_detail_type')->nullable()->after('keterangan');
-            $table->unsignedBigInteger('surat_detail_id')->nullable()->after('surat_detail_type');
+            $table->string('surat_detail_type')->nullable();
+            $table->unsignedBigInteger('surat_detail_id')->nullable();
 
             $table->timestamps();
 

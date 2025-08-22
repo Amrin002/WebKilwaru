@@ -5,18 +5,16 @@ namespace App\Models;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 
-class SuratKtm extends Model
+class SuratKtu extends Model
 {
     use HasFactory;
-
-    protected $table = 'surat_ktms';
-
+    protected $table = 'surat_ktus';
     protected $fillable = [
         'nomor_surat',
         'public_token',
@@ -24,14 +22,18 @@ class SuratKtm extends Model
         'tempat_lahir',
         'tanggal_lahir',
         'jenis_kelamin',
-        'status_kawin',
         'kewarganegaraan',
+        'agama',
+        'pekerjaan',
         'alamat',
+        'nama_usaha',
+        'jenis_usaha',
+        'alamat_usaha',
+        'pemilik_usaha',
         'keterangan',
         'status',
-        'qr_code_path', // Tambah kolom QR Code
         'nomor_telepon',
-        'user_id'
+        'user_id',
     ];
 
     protected $casts = [
@@ -40,165 +42,99 @@ class SuratKtm extends Model
         'updated_at' => 'datetime'
     ];
 
-    // ========================================
     // RELATIONSHIPS
-    // ========================================
 
-    /**
-     * Relasi ke User
-     */
     public function user()
     {
         return $this->belongsTo(User::class);
     }
-
-    /**
-     * Relasi polymorphic ke ArsipSurat
-     */
     public function arsip()
     {
         return $this->morphOne(ArsipSurat::class, 'surat_detail');
     }
 
-    // ========================================
     // SCOPES
-    // ========================================
-
-    /**
-     * Scope berdasarkan status
-     */
     public function scopeStatus($query, string $status)
     {
         return $query->where('status', $status);
     }
 
-    /**
-     * Scope surat yang diproses
-     */
     public function scopeDiproses($query)
     {
         return $query->where('status', 'diproses');
     }
 
-    /**
-     * Scope surat yang disetujui
-     */
     public function scopeDisetujui($query)
     {
         return $query->where('status', 'disetujui');
     }
-
-    /**
-     * Scope surat yang ditolak
-     */
     public function scopeDitolak($query)
     {
         return $query->where('status', 'ditolak');
     }
 
-    /**
-     * Scope berdasarkan tahun
-     */
-    public function scopeTahun($query, int $tahun)
+    public function scopeTahun($query, $tahun)
     {
         return $query->whereYear('created_at', $tahun);
     }
 
-    /**
-     * Scope berdasarkan bulan dan tahun
-     */
     public function scopeBulanTahun($query, int $bulan, int $tahun)
     {
         return $query->whereMonth('created_at', $bulan)
             ->whereYear('created_at', $tahun);
     }
-
-    /**
-     * Scope untuk pencarian
-     */
-    public function scopeSearch($query, string $search)
-    {
-        return $query->where(function ($q) use ($search) {
-            $q->where('nama', 'like', "%{$search}%")
-                ->orWhere('nomor_surat', 'like', "%{$search}%")
-                ->orWhere('tempat_lahir', 'like', "%{$search}%")
-                ->orWhere('alamat', 'like', "%{$search}%")
-                ->orWhere('keterangan', 'like', "%{$search}%");
-        });
-    }
-
-    /**
-     * Scope berdasarkan user
-     */
-    public function scopeByUser($query, $userId)
+    public function scopeUserId($query, $userId)
     {
         return $query->where('user_id', $userId);
     }
 
-    /**
-     * Scope surat guest (user_id null)
-     */
+    public function scopeSearch($query, $search)
+    {
+        return $query->where(function ($q) use ($search) {
+            $q->where('nama', 'like', '%' . $search . '%')
+                ->orWhere('no_surat', 'like', '%' . $search . '%')
+                ->orWhere('alamat', 'like', '%' . $search . '%')
+                ->orWhere('nama_usaha', 'like', '%' . $search . '%');
+        });
+    }
     public function scopeGuest($query)
     {
         return $query->whereNull('user_id');
     }
-
-    /**
-     * Scope surat user terdaftar (user_id tidak null)
-     */
     public function scopeRegistered($query)
     {
         return $query->whereNotNull('user_id');
     }
 
-    // ========================================
-    // ACCESSORS
-    // ========================================
 
-    /**
-     * Format tanggal lahir untuk display Indonesia
-     */
-    public function getTanggalLahirFormattedAttribute(): string
+    // ACCESSORS
+    public function getTanggalLahirFormattedAttribute()
     {
-        return $this->tanggal_lahir ?
-            Carbon::parse($this->tanggal_lahir)->format('d/m/Y') : '-';
+        return $this->tanggal_lahir ? Carbon::parse($this->tanggal_lahir)->format('d/m/Y') : '-';
     }
-    // Accessor khusus untuk form edit (format Y-m-d)
-    public function getTanggalLahirForFormAttribute(): ?string
+    public function getTanggalLahirForFormAttribute()
     {
-        return $this->tanggal_lahir ?
-            Carbon::parse($this->tanggal_lahir)->format('Y-m-d') : null;
+        return $this->tanggal_lahir ? Carbon::parse($this->tanggal_lahir)->format('Y-m-d') : null;
     }
-    /**
-     * Nama lengkap dengan tempat, tanggal lahir
-     */
-    public function getNamaLengkapAttribute(): string
+    public function getNamaLengkapAttribute()
     {
         return $this->nama . ', ' . $this->tempat_lahir . ', ' . $this->tanggal_lahir_formatted;
     }
 
-    /**
-     * Status badge untuk display
-     */
-    public function getStatusBadgeAttribute(): string
+    public function getStatusBadgeAttribute()
     {
         $badges = [
             'diproses' => '<span class="badge bg-warning">Diproses</span>',
             'disetujui' => '<span class="badge bg-success">Disetujui</span>',
             'ditolak' => '<span class="badge bg-danger">Ditolak</span>',
         ];
-
         return $badges[$this->status] ?? '<span class="badge bg-secondary">Unknown</span>';
     }
 
-    /**
-     * Umur berdasarkan tanggal lahir
-     */
-    public function getUmurAttribute(): int
+    public function getUmurAttribute()
     {
-        return $this->tanggal_lahir ? $this->tanggal_lahir->age : 0;
+        return $this->tanggal_lahir ? Carbon::parse($this->tanggal_lahir)->age : 0;
     }
-
     /**
      * Cek apakah surat dibuat oleh guest
      */
@@ -214,11 +150,6 @@ class SuratKtm extends Model
     {
         return $this->is_guest ? 'Guest' : 'User Terdaftar';
     }
-
-    // ========================================
-    // MUTATORS
-    // ========================================
-
     /**
      * Set nama to title case
      */
@@ -243,33 +174,23 @@ class SuratKtm extends Model
         $this->attributes['alamat'] = ucwords(strtolower($value));
     }
 
-    // ========================================
-    // USER ROLE BASED METHODS
-    // ========================================
-
-    /**
-     * Buat surat baru untuk guest (dari landing page)
-     */
+    // User Role Based Methods
     public static function createForGuest(array $data): self
     {
-        // Validasi nomor telepon wajib untuk guest
         if (!isset($data['nomor_telepon']) || empty($data['nomor_telepon'])) {
-            throw new \InvalidArgumentException('Nomor telepon wajib diisi untuk pendaftar guest');
+            throw new \InvalidArgumentException('Nomor telepon tidak boleh kosong.');
         }
-
         $suratData = array_merge($data, [
-            'user_id' => null,
+            'user_id' => null, // Guest user
             'status' => 'diproses',
-            'public_token' => Str::random(32)
+            'public_token' => Str::random(32),
         ]);
-
         return static::create($suratData);
     }
-
     /**
      * Buat surat baru untuk user terdaftar
      */
-    public static function createForUser(array $data, $userId = null): self
+    public static function createForUser(array $data, $userId = null)
     {
         $userId = $userId ?? Auth::id();
 
@@ -285,11 +206,10 @@ class SuratKtm extends Model
 
         return static::create($suratData);
     }
-
     /**
      * Admin dapat membuat surat atas nama siapa saja
      */
-    public static function createByAdmin(array $data, $userId = null): self
+    public static function createByAdmin(array $data, $userId = null)
     {
         if (!Auth::user() || !Auth::user()->isAdmin()) {
             throw new \Exception('Hanya admin yang dapat menggunakan method ini');
@@ -315,11 +235,10 @@ class SuratKtm extends Model
 
         return $surat;
     }
-
     /**
      * Cek apakah user dapat mengakses surat ini
      */
-    public function canAccess($user = null): bool
+    public function canAccess($user = null)
     {
         $user = $user ?? Auth::user();
 
@@ -336,7 +255,6 @@ class SuratKtm extends Model
         // Guest tidak bisa akses lewat method ini (harus lewat public token)
         return false;
     }
-
     /**
      * Cek apakah user dapat mengedit surat ini
      */
@@ -446,56 +364,61 @@ class SuratKtm extends Model
      */
     public static function generateNomorSurat(): string
     {
-        return ArsipSurat::generateNomorSuratByJenis('SKTM');
-    }
 
+        // Format: 001/SKTU/NK/I/2025
+        return ArsipSurat::generateNomorSuratByJenis('SKTU');
+    }
     /**
      * Simpan ke arsip otomatis ketika disetujui - DIPERBAIKI
      * Menghindari duplikasi dan memastikan arsip tersimpan
      */
     public function simpanKeArsip(): ?ArsipSurat
     {
+        // Cek apakah surat sudah disetujui dan memiliki nomor surat.
+        // Jika tidak, tidak perlu menyimpan ke arsip.
         if ($this->status !== 'disetujui' || !$this->nomor_surat) {
             return null;
         }
 
-        // Cek apakah sudah ada arsip untuk surat ini
+        // Cek apakah sudah ada arsip untuk surat ini.
         $existingArsip = ArsipSurat::where('surat_detail_type', self::class)
             ->where('surat_detail_id', $this->id)
             ->first();
 
         if ($existingArsip) {
-            // Update arsip yang sudah ada
+            // Update arsip yang sudah ada.
             $existingArsip->update([
                 'nomor_surat' => $this->nomor_surat,
                 'tanggal_surat' => now()->toDateString(),
                 'tujuan_surat' => $this->nama,
-                'tentang' => 'Surat Keterangan Tidak Mampu - ' . $this->nama,
+                'tentang' => 'Surat Keterangan Tempat Usaha - ' . $this->nama,
                 'keterangan' => 'Diupdate melalui sistem pada ' . now()->format('d/m/Y H:i')
             ]);
-            // Generate QR Code setelah arsip berhasil dibuat/diupdate
+
+            // Generate QR Code setelah arsip berhasil diupdate.
             $this->autoGenerateQrCodeOnApproval();
             return $existingArsip;
         }
 
-        // Buat arsip baru menggunakan DB transaction untuk memastikan konsistensi
+        // Buat arsip baru menggunakan transaksi database untuk memastikan konsistensi.
         return DB::transaction(function () {
             $arsip = ArsipSurat::create([
                 'nomor_surat' => $this->nomor_surat,
                 'tanggal_surat' => now()->toDateString(),
                 'tujuan_surat' => $this->nama,
-                'tentang' => 'Surat Keterangan Tidak Mampu - ' . $this->nama,
+                'tentang' => 'Surat Keterangan Tempat Usaha - ' . $this->nama,
                 'keterangan' => 'Dibuat melalui sistem',
                 'surat_detail_type' => self::class,
                 'surat_detail_id' => $this->id
             ]);
 
+            // QR Code akan dibuat secara otomatis di boot() method pada model ArsipSurat
+            // jika `nomor_surat` diisi.
+
             return $arsip;
         });
     }
-    /**
-     * Ambil nomor surat dari ArsipSurat (ArsipSurat yang generate)
-     */
+
 
     /**
      * Update status dan generate nomor surat jika disetujui - DIPERBAIKI
@@ -513,6 +436,7 @@ class SuratKtm extends Model
             if ($status === 'disetujui' && !$this->nomor_surat) {
                 $this->nomor_surat = self::generateNomorSurat();
             }
+
 
             $saved = $this->save();
 
@@ -613,7 +537,6 @@ class SuratKtm extends Model
             'user' => 0
         ], $result);
     }
-
     /**
      * Surat terbaru
      */
@@ -678,7 +601,6 @@ class SuratKtm extends Model
         return static::where('user_id', $userId)
             ->orderBy('created_at', 'desc');
     }
-
     // ========================================
     // QR CODE SIMPLE INTEGRATION
     // ========================================
@@ -749,7 +671,7 @@ class SuratKtm extends Model
                 $filePath = 'qr_codes/' . $fileName;
 
                 // Simpan file ke storage/app/public/qr_codes/
-                $saved = \Illuminate\Support\Facades\Storage::disk('public')->put($filePath, $qrContent);
+                $saved = Storage::disk('public')->put($filePath, $qrContent);
 
                 if ($saved) {
                     // Update path di database (bukan data base64)
@@ -778,43 +700,6 @@ class SuratKtm extends Model
             return ['success' => false, 'error' => $e->getMessage()];
         }
     }
-    /**
-     * Get QR Code untuk PDF - ambil dari file yang tersimpan
-     */
-    public function getQrCodeForPdf(): ?string
-    {
-        if (!$this->nomor_surat || $this->status !== 'disetujui') {
-            return null;
-        }
-
-        try {
-            // Cek apakah ada file QR Code
-            if ($this->qr_code_path && Storage::disk('public')->exists($this->qr_code_path)) {
-                // Baca file dan convert ke base64
-                $fileContent = Storage::disk('public')->get($this->qr_code_path);
-                return 'data:image/png;base64,' . base64_encode($fileContent);
-            }
-
-            // Jika belum ada file, generate baru
-            $result = $this->generateQrCodeForSurat();
-
-            if ($result['success'] && $this->qr_code_path) {
-                $fileContent = \Illuminate\Support\Facades\Storage::disk('public')->get($this->qr_code_path);
-                return 'data:image/png;base64,' . base64_encode($fileContent);
-            }
-
-            return null;
-        } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error('QR Code for PDF failed', [
-                'surat_id' => $this->id,
-                'error' => $e->getMessage()
-            ]);
-
-            return null;
-        }
-    }
-    // QUICK FIX: Ganti method getQrCodeBase64() yang sudah ada dengan ini
-    // Method ini tidak memerlukan Imagick extension
 
     /**
      * Get QR Code base64 untuk PDF - NO IMAGICK REQUIRED
@@ -843,7 +728,7 @@ class SuratKtm extends Model
                     return 'data:image/svg+xml;base64,' . base64_encode($qrCodeSvg);
                 } catch (\Exception $e) {
                     // Jika SVG juga gagal, lanjut ke method fallback
-                    \Illuminate\Support\Facades\Log::info('SVG QR generation failed, using fallback', [
+                    Log::info('SVG QR generation failed, using fallback', [
                         'error' => $e->getMessage()
                     ]);
                 }
@@ -869,7 +754,7 @@ class SuratKtm extends Model
             // Method 3: Fallback terakhir - buat QR code sederhana dengan HTML/CSS
             return $this->generateSimpleQrCodeFallback($verifikasiUrl);
         } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::warning('All QR Code generation methods failed', [
+            Log::warning('All QR Code generation methods failed', [
                 'surat_id' => $this->id,
                 'error' => $e->getMessage()
             ]);
@@ -983,7 +868,7 @@ class SuratKtm extends Model
         if (!$this->hasValidQrCode()) {
             return null;
         }
-        return route('admin.surat-ktm.download-qr', array_merge(['id' => $this->id], $params));
+        return route('admin.surat-ktu.download-qr', array_merge(['id' => $this->id], $params));
     }
 
 
@@ -998,13 +883,13 @@ class SuratKtm extends Model
             try {
                 $result = $this->generateQrCodeForSurat();
                 if ($result['success']) {
-                    \Illuminate\Support\Facades\Log::info('QR Code auto-generated', [
+                    Log::info('QR Code auto-generated', [
                         'surat_id' => $this->id,
                         'file_path' => $this->qr_code_path
                     ]);
                 }
             } catch (\Exception $e) {
-                \Illuminate\Support\Facades\Log::warning('Auto QR generation failed', [
+                Log::warning('Auto QR generation failed', [
                     'surat_id' => $this->id,
                     'error' => $e->getMessage()
                 ]);

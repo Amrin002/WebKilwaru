@@ -14,6 +14,7 @@ use App\Http\Controllers\QrCodeController;
 use App\Http\Controllers\StatistikPertumbuhanController;
 use App\Http\Controllers\StrukturDesaController;
 use App\Http\Controllers\SuratKtmController;
+use App\Http\Controllers\SuratKtuController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\VerifikasiSuratController;
 
@@ -118,6 +119,42 @@ Route::prefix('surat-ktm')->name('public.surat-ktm.')->group(function () {
         ->name('export');
 });
 
+// ========================================
+// SURAT KTU - GUEST ROUTES (Public - Landing Page) - BARU DITAMBAHKAN
+// ========================================
+Route::prefix('surat-ktu')->name('public.surat-ktu.')->group(function () {
+    // Form pengajuan untuk guest (Landing Page)
+    Route::get('/', [SuratKtuController::class, 'indexPublic'])
+        ->name('index');
+
+    Route::get('pengajuan', [SuratKtuController::class, 'guestForm'])
+        ->name('form');
+
+    // Submit pengajuan guest
+    Route::post('pengajuan', [SuratKtuController::class, 'guestStore'])
+        ->name('store');
+
+    // Track surat dengan token
+    Route::get('track/{token}', [SuratKtuController::class, 'guestTrack'])
+        ->name('track');
+
+    // Update data surat via token
+    Route::put('track/{token}', [SuratKtuController::class, 'guestUpdate'])
+        ->name('update');
+
+    // API untuk mencari surat berdasarkan token (AJAX)
+    Route::post('api/track', [SuratKtuController::class, 'apiTrackSurat'])
+        ->name('api.track');
+
+    // Download surat yang sudah disetujui via token
+    Route::get('download/{id}/{token}', [SuratKtuController::class, 'download'])
+        ->name('download');
+
+    // Export PDF surat via token
+    Route::get('export/{id}/{token}', [SuratKtuController::class, 'export'])
+        ->name('export');
+});
+
 // Static pages
 Route::get('/terms', function () {
     return view('pages.terms');
@@ -142,6 +179,7 @@ Route::group(['prefix' => 'galeri'], function () {
     // Search API untuk live search
     Route::get('/search/api', [GaleriController::class, 'search'])->name('galeri.search');
 });
+
 // User dashboard (untuk semua user yang sudah login dan verified)
 Route::get('/dashboard', function () {
     return view('dashboard');
@@ -190,6 +228,47 @@ Route::middleware(['auth', 'user'])->group(function () {
         // Export PDF surat milik user
         Route::get('{id}/export', [SuratKtmController::class, 'export'])
             ->name('export');
+    });
+
+    // ========================================
+    // SURAT KTU - USER ROUTES (Login Required) - DIPERBAIKI
+    // ========================================
+    Route::prefix('user/surat-ktu')->name('user.surat-ktu.')->group(function () {
+        // Dashboard user - daftar surat milik user
+        Route::get('/', [SuratKtuController::class, 'userIndex'])
+            ->name('index');
+
+        // Form pengajuan surat baru
+        Route::get('create', [SuratKtuController::class, 'userForm'])
+            ->name('create');
+
+        // Submit pengajuan user
+        Route::post('/', [SuratKtuController::class, 'userStore'])
+            ->name('store');
+
+        // Detail surat milik user
+        Route::get('{id}', [SuratKtuController::class, 'userShow'])
+            ->name('show');
+
+        // Edit surat milik user (hanya yang masih diproses)
+        Route::get('{id}/edit', [SuratKtuController::class, 'userEdit'])
+            ->name('edit');
+
+        // Update surat milik user
+        Route::put('{id}', [SuratKtuController::class, 'userUpdate'])
+            ->name('update');
+
+        // Download surat yang sudah disetujui
+        Route::get('{id}/download', [SuratKtuController::class, 'download'])
+            ->name('download');
+
+        // Export PDF surat milik user
+        Route::get('{id}/export', [SuratKtuController::class, 'export'])
+            ->name('export');
+
+        // Download QR Code khusus untuk surat milik user
+        Route::get('{id}/download-qr', [SuratKtuController::class, 'downloadQrCode'])
+            ->name('download-qr');
     });
 });
 
@@ -243,7 +322,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
             Route::get('/statistics/api', [GaleriController::class, 'getStatistics'])->name('admin.galeri.statistics');
             Route::get('/export', [GaleriController::class, 'export'])->name('admin.galeri.export');
         });
-        
+
         // Berita Management Routes
         Route::resource('berita', BeritaController::class);
         Route::prefix('berita')->name('berita.')->group(function () {
@@ -354,6 +433,76 @@ Route::middleware(['auth', 'admin'])->group(function () {
         });
 
         // ========================================
+        // SURAT KTU - ADMIN ROUTES (Admin Only) - LENGKAP
+        // ========================================
+        Route::prefix('surat-ktu')->name('surat-ktu.')->group(function () {
+            // Dashboard admin - daftar semua surat
+            Route::get('/', [SuratKtuController::class, 'adminIndex'])
+                ->name('index');
+
+            // Form create surat oleh admin
+            Route::get('create', [SuratKtuController::class, 'adminCreate'])
+                ->name('create');
+
+            // Store surat oleh admin
+            Route::post('/', [SuratKtuController::class, 'adminStore'])
+                ->name('store');
+
+            // Detail surat (admin view)
+            Route::get('{id}', [SuratKtuController::class, 'adminShow'])
+                ->name('show');
+
+            // Edit surat oleh admin
+            Route::get('{id}/edit', [SuratKtuController::class, 'adminEdit'])
+                ->name('edit');
+
+            // Update surat oleh admin
+            Route::put('{id}', [SuratKtuController::class, 'adminUpdate'])
+                ->name('update');
+
+            // Update status surat (AJAX)
+            Route::patch('{id}/update-status', [SuratKtuController::class, 'adminUpdateStatus'])
+                ->name('update-status');
+
+            // Delete surat
+            Route::delete('{id}', [SuratKtuController::class, 'adminDestroy'])
+                ->name('destroy');
+
+            // Bulk actions
+            Route::post('bulk-action', [SuratKtuController::class, 'adminBulkAction'])
+                ->name('bulk-action');
+
+            // Generate nomor surat otomatis (AJAX)
+            Route::post('generate-nomor', [SuratKtuController::class, 'generateNomor'])
+                ->name('generate-nomor');
+
+            // Export PDF surat
+            Route::get('{id}/export', [SuratKtuController::class, 'export'])
+                ->name('export');
+
+            // Download surat untuk admin
+            Route::get('{id}/download', [SuratKtuController::class, 'download'])
+                ->name('download');
+
+            // API Statistik untuk admin
+            Route::get('api/statistik', [SuratKtuController::class, 'apiStatistik'])
+                ->name('api.statistik');
+
+            // QR CODE MANAGEMENT ROUTES
+            Route::post('{id}/generate-qr', [SuratKtuController::class, 'generateQrCode'])
+                ->name('generate-qr');
+
+            Route::post('{id}/regenerate-qr', [SuratKtuController::class, 'regenerateQrCode'])
+                ->name('regenerate-qr');
+
+            Route::get('{id}/qr-info', [SuratKtuController::class, 'getQrCodeInfo'])
+                ->name('qr-info');
+
+            Route::get('{id}/download-qr', [SuratKtuController::class, 'downloadQrCode'])
+                ->name('download-qr');
+        });
+
+        // ========================================
         // ARSIP SURAT ROUTES
         // ========================================
         Route::prefix('arsip-surat')->name('arsip-surat.')->group(function () {
@@ -408,6 +557,10 @@ Route::prefix('api')->group(function () {
         // API untuk tracking surat guest
         Route::post('surat-ktm/track', [SuratKtmController::class, 'apiTrackSurat'])
             ->name('api.public.surat-ktm.track');
+
+        // API untuk tracking surat guest KTU
+        Route::post('surat-ktu/track', [SuratKtuController::class, 'apiTrackSurat'])
+            ->name('api.public.surat-ktu.track');
     });
 
     // Authenticated API
@@ -415,6 +568,10 @@ Route::prefix('api')->group(function () {
         // Statistik untuk dashboard
         Route::get('surat-ktm/statistik', [SuratKtmController::class, 'apiStatistik'])
             ->name('api.surat-ktm.statistik');
+
+        // Statistik untuk dashboard KTU
+        Route::get('surat-ktu/statistik', [SuratKtuController::class, 'apiStatistik'])
+            ->name('api.surat-ktu.statistik');
 
         // QR Code API untuk user yang login
         Route::prefix('qr-code')->name('api.qr-code.')->group(function () {

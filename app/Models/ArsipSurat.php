@@ -185,7 +185,7 @@ class ArsipSurat extends Model
 
         $typeMap = [
             SuratKtm::class => 'KTM',
-            // SuratSkpt::class => 'SKPT',
+            SuratKtu::class => 'KTU',
             // SuratSkd::class => 'SKD',
         ];
 
@@ -219,6 +219,11 @@ class ArsipSurat extends Model
     {
         return !is_null($this->surat_detail_type) && !is_null($this->surat_detail_id);
     }
+    /**
+     * Generate nomor urut GLOBAL untuk SEMUA jenis surat
+     * Nomor berkelanjutan tanpa memandang jenis surat
+     */
+
 
     /**
      * Generate nomor urut berikutnya untuk tahun ini
@@ -241,6 +246,23 @@ class ArsipSurat extends Model
 
         return $lastNumber + 1;
     }
+
+    /**
+     * Generate nomor urut GLOBAL untuk SEMUA jenis surat
+     * Nomor berkelanjutan tanpa memandang jenis surat
+     */
+    public static function generateNomorUrutGlobal(int $tahun = null): int
+    {
+        $tahun = $tahun ?: date('Y');
+
+        $lastNumber = static::suratKeluar()
+            ->whereYear('tanggal_surat', $tahun)
+            ->selectRaw('MAX(CAST(SUBSTRING_INDEX(nomor_surat, "/", 1) AS UNSIGNED)) as max_number')
+            ->value('max_number') ?? 0;
+
+        return $lastNumber + 1;
+    }
+
     /**
      * Statistik surat per bulan
      */
@@ -529,9 +551,8 @@ class ArsipSurat extends Model
         $tahun = $tahun ?: date('Y');
         $bulan = $bulan ?: date('n');
 
-        // Ambil nomor urut berdasarkan jenis surat
-        $nomorUrut = static::generateNomorUrut($tahun, $jenisSurat);
-
+        // Dengan panggilan ini untuk penomoran global:
+        $nomorUrut = static::generateNomorUrutGlobal($tahun);
         // Format bulan ke romawi
         $bulanRomawi = [
             1 => 'I',

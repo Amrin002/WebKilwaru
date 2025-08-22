@@ -99,8 +99,8 @@
                     </a>
                 </li>
                 <li class="sub-menu-item">
-                    <a href="#"
-                        class="sub-menu-link {{ request()->routeIs('admin.administrasi.surat-usaha.*') ? 'active' : '' }}"
+                    <a href="{{ route('admin.surat-ktu.index') }}"
+                        class="sub-menu-link {{ request()->routeIs('admin.surat-ktu.*') ? 'active' : '' }}"
                         data-subpage="surat-usaha">
                         <i class="bi bi-briefcase"></i>
                         <span>Surat Usaha</span>

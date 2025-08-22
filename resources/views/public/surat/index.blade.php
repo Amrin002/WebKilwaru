@@ -1,8 +1,13 @@
 @extends('template.main')
 
 @section('title', 'Layanan Surat Online - ' . config('app.village_name', 'Desa Kilwaru'))
-@section('description', 'Pilih jenis surat yang ingin Anda ajukan secara online di ' . config('app.village_name', 'Desa
-    Kilwaru'))
+@section('description',
+    'Pilih jenis surat yang ingin Anda ajukan secara online di ' .
+    config(
+    'app.village_name',
+    'Desa
+    Kilwaru',
+    ))
 
     @push('styles')
         <style>
@@ -380,25 +385,25 @@
                     <!-- Surat Keterangan Usaha -->
                     <div class="col-lg-4 col-md-6 mb-4">
                         <div class="surat-card">
-                            <span class="badge-status badge-coming-soon">Segera Hadir</span>
+                            <span class="badge-status badge-available">Tersedia</span>
                             <div class="surat-icon">
                                 <i class="bi bi-shop"></i>
                             </div>
-                            <h4 class="mb-3">Surat Keterangan Usaha</h4>
+                            <h4 class="mb-3">Surat Keterangan Tempat Usaha</h4>
                             <p class="text-muted mb-4">
                                 Surat keterangan untuk pelaku usaha/UMKM.
                                 Digunakan untuk pengajuan kredit, perizinan, atau bantuan modal.
                             </p>
                             <div class="mb-3">
-                                <small class="text-warning">
-                                    <i class="bi bi-tools me-1"></i>
-                                    Dalam pengembangan
+                                <small class="text-success">
+                                    <i class="bi bi-clock me-1"></i>
+                                    Proses: 1-2 hari kerja
                                 </small>
                             </div>
-                            <button class="btn btn-surat text-white" disabled>
-                                <i class="bi bi-clock me-2"></i>
-                                Segera Hadir
-                            </button>
+                            <a href="{{ route('public.surat-ktu.index') }}" class="btn btn-surat text-white">
+                                <i class="bi bi-arrow-right me-2"></i>
+                                Ajukan Sekarang
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -722,7 +727,8 @@
         // Coming soon notification
         function showComingSoon(suratType) {
             alert(
-            `Layanan ${suratType} sedang dalam pengembangan dan akan segera hadir. Terima kasih atas kesabaran Anda.`);
+                `Layanan ${suratType} sedang dalam pengembangan dan akan segera hadir. Terima kasih atas kesabaran Anda.`
+            );
         }
     </script>
 @endpush
