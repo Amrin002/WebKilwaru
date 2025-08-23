@@ -32,6 +32,7 @@ class SuratKtu extends Model
         'pemilik_usaha',
         'keterangan',
         'status',
+        'qr_code_path',
         'nomor_telepon',
         'user_id',
     ];
@@ -701,6 +702,41 @@ class SuratKtu extends Model
         }
     }
 
+    /**
+     * Get QR Code untuk PDF - ambil dari file yang tersimpan
+     */
+    public function getQrCodeForPdf(): ?string
+    {
+        if (!$this->nomor_surat || $this->status !== 'disetujui') {
+            return null;
+        }
+
+        try {
+            // Cek apakah ada file QR Code
+            if ($this->qr_code_path && Storage::disk('public')->exists($this->qr_code_path)) {
+                // Baca file dan convert ke base64
+                $fileContent = Storage::disk('public')->get($this->qr_code_path);
+                return 'data:image/png;base64,' . base64_encode($fileContent);
+            }
+
+            // Jika belum ada file, generate baru
+            $result = $this->generateQrCodeForSurat();
+
+            if ($result['success'] && $this->qr_code_path) {
+                $fileContent = Storage::disk('public')->get($this->qr_code_path);
+                return 'data:image/png;base64,' . base64_encode($fileContent);
+            }
+
+            return null;
+        } catch (\Exception $e) {
+            Log::error('QR Code for PDF failed', [
+                'surat_id' => $this->id,
+                'error' => $e->getMessage()
+            ]);
+
+            return null;
+        }
+    }
     /**
      * Get QR Code base64 untuk PDF - NO IMAGICK REQUIRED
      */

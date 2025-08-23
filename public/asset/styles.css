@@ -15,35 +15,7 @@
             line-height: 1.6;
         }
 
-        .hero-section {
-            background:
-                linear-gradient(rgba(45, 80, 22, 0.7), rgba(74, 124, 89, 0.7)),
-                url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2532&q=80') center/cover no-repeat;
-            color: white;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            position: relative;
-            overflow: hidden;
-            background-attachment: fixed;
-        }
-
         
-        .hero-section::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><path d="M0,300 C300,200 700,400 1000,300 L1000,1000 L0,1000 Z" fill="%23ffffff08"/></svg>');
-            opacity: 0.2;
-        }
-
-        .hero-content {
-            position: relative;
-            z-index: 2;
-        }
 
         .navbar {
             background: transparent !important;
