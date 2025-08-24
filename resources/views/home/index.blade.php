@@ -51,7 +51,6 @@
         </style>
     @endpush
 @section('content')
-    <!-- Hero Section -->
     <section id="home" class="hero-section">
         <div class="floating-elements"></div>
         <div class="container">
@@ -87,7 +86,6 @@
         </div>
     </section>
 
-    <!-- Stats Section -->
     <section class="stats-section">
         <div class="container">
             <div class="row">
@@ -119,7 +117,6 @@
         </div>
     </section>
 
-    <!-- About Section -->
     <section id="about" class="py-5">
         <div class="container">
             <div class="row align-items-center">
@@ -233,7 +230,6 @@
         </div>
     </section>
 
-    <!-- Struktur Desa Section -->
     <section id="struktur" class="py-5 bg-light">
         <div class="container">
             <div class="text-center mb-5">
@@ -242,7 +238,6 @@
             </div>
 
             @if (isset($strukturDesa) && $strukturDesa->isNotEmpty())
-                <!-- Kepala Desa & Sekretaris Row -->
                 @if (isset($strukturDesa['kepala_desa']) || isset($strukturDesa['sekretaris']))
                     <div class="row mb-5">
                         @if (isset($strukturDesa['kepala_desa']) && $strukturDesa['kepala_desa']->first())
@@ -339,7 +334,6 @@
                     </div>
                 @endif
 
-                <!-- Other Officials Grid -->
                 <div class="row">
                     @php
                         $otherOfficials = collect();
@@ -393,7 +387,6 @@
                     </a>
                 </div>
             @else
-                <!-- Fallback Display if no data from database -->
                 <div class="row">
                     <div class="col-lg-4 col-md-6 mb-4">
                         <div class="card h-100 fade-in">
@@ -439,7 +432,6 @@
         </div>
     </section>
 
-    <!-- Services Section -->
     <section id="services" class="py-5 bg-light">
         <div class="container">
             <div class="text-center mb-5">
@@ -484,7 +476,6 @@
                     </div>
                 </div>
                 {{-- Layanana surat --}}
-                <!-- Layanan Surat -->
                 <div class="col-lg-4 col-md-6 mb-4">
                     <div class="card h-100 fade-in">
                         <div class="card-body text-center p-4">
@@ -504,7 +495,6 @@
         </div>
     </section>
 
-    <!-- News Section -->
     <section id="news" class="py-5">
         <div class="container">
             <div class="text-center mb-5">
@@ -571,7 +561,6 @@
             </div>
 
             @if (isset($latestGaleri) && $latestGaleri->count() > 0)
-                <!-- Galeri Carousel -->
                 <div id="galeriCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="4000">
                     <div class="carousel-indicators">
                         @foreach ($latestGaleri->chunk(3) as $chunkIndex => $chunk)
@@ -636,7 +625,6 @@
                         @endforeach
                     </div>
 
-                    <!-- Carousel Controls -->
                     @if ($latestGaleri->chunk(3)->count() > 1)
                         <button class="carousel-control-prev" type="button" data-bs-target="#galeriCarousel"
                             data-bs-slide="prev">
@@ -655,7 +643,6 @@
                     @endif
                 </div>
 
-                <!-- View All Button - CONTAINER TERPISAH DENGAN SPACING YANG TEPAT -->
                 <div class="view-all-container">
                     <div class="text-center">
                         <a href="#" class="btn btn-primary btn-lg">
@@ -664,7 +651,6 @@
                     </div>
                 </div>
             @else
-                <!-- Empty State -->
                 <div class="text-center py-5">
                     <i class="bi bi-camera" style="font-size: 4rem; color: var(--soft-gray);"></i>
                     <h5 class="mt-3 text-muted">Belum ada foto galeri</h5>
@@ -674,7 +660,49 @@
         </div>
     </section>
 
-    <!-- Galeri Modal -->
+    <section id="umkm" class="py-5">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="section-title">UMKM Desa</h2>
+                <p class="lead">Dukung dan jelajahi produk lokal dari Usaha Mikro, Kecil, dan Menengah Desa Kilwaru</p>
+            </div>
+            @if (isset($latestUmkm) && $latestUmkm->count() > 0)
+                <div class="row">
+                    @foreach ($latestUmkm->take(3) as $umkm)
+                        <div class="col-lg-4 col-md-6 mb-4">
+                            <div class="card h-100 fade-in">
+                                <img src="{{ $umkm->foto_produk_url }}" class="card-img-top"
+                                    alt="{{ $umkm->nama_umkm }}" style="height: 200px; object-fit: cover;">
+                                <div class="card-body">
+                                    <h5 class="card-title fw-bold">{{ $umkm->nama_umkm }}</h5>
+                                    <p class="card-text text-muted small">{{ $umkm->jenis_usaha }}</p>
+                                    <p class="card-text">{{ Str::limit($umkm->deskripsi, 100) }}</p>
+                                </div>
+                                <div
+                                    class="card-footer bg-white border-0 d-flex justify-content-between align-items-center">
+                                    <a href="{{ route('umkm.productShow', $umkm->id) }}"
+                                        class="btn btn-sm btn-primary">Lihat Produk</a>
+                                    <small class="text-muted"><i
+                                            class="bi bi-clock me-1"></i>{{ $umkm->formatted_date }}</small>
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+                <div class="text-center mt-4">
+                    <a href="{{ route('umkm.index') }}" class="btn btn-primary btn-lg">
+                        <i class="bi bi-shop-window me-2"></i>Lihat Semua UMKM
+                    </a>
+                </div>
+            @else
+                <div class="text-center py-5">
+                    <i class="bi bi-shop" style="font-size: 4rem; color: var(--soft-gray);"></i>
+                    <h5 class="mt-3 text-muted">Belum ada data UMKM</h5>
+                    <p class="text-muted">Data UMKM terbaru akan ditampilkan di sini.</p>
+                </div>
+            @endif
+        </div>
+    </section>
     <div class="modal fade" id="galeriModal" tabindex="-1" aria-labelledby="galeriModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered">
             <div class="modal-content">
@@ -729,7 +757,6 @@
         </section>
     @endif
 
-    <!-- Contact Section -->
     <section id="contact" class="py-5 bg-light">
         <div class="container">
             <div class="text-center mb-5">
@@ -1119,6 +1146,36 @@
 
 @push('styles')
     <style>
+        .hero-section {
+            background:
+                linear-gradient(rgba(45, 80, 22, 0.7), rgba(74, 124, 89, 0.7)),
+                url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2532&q=80') center/cover no-repeat;
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            background-attachment: fixed;
+        }
+
+
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><path d="M0,300 C300,200 700,400 1000,300 L1000,1000 L0,1000 Z" fill="%23ffffff08"/></svg>');
+            opacity: 0.2;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+        }
+
         .galeri-card {
             background: white;
             border-radius: 15px;

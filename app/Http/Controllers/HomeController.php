@@ -6,6 +6,7 @@ use App\Models\Apbdes;
 use App\Models\Berita;
 use App\Models\Galeri;
 use App\Models\StrukturDesa;
+use App\Models\Umkm;
 use Illuminate\Http\Request;
 
 class HomeController extends Controller
@@ -42,7 +43,9 @@ class HomeController extends Controller
             ->get()
             ->groupBy('kategori');
 
-        return view('home.index', compact('latestBerita', 'strukturDesa', 'latestGaleri', 'currentApbdes', 'kepalaDesa'));
+        $latestUmkm = Umkm::approved()->with('penduduk')->latest()->limit(4)->get();
+
+        return view('home.index', compact('latestBerita', 'strukturDesa', 'latestGaleri', 'currentApbdes', 'kepalaDesa', 'latestUmkm'));
     }
     public function beritaLatest()
     {
