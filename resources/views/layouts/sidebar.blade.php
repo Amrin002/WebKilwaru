@@ -72,6 +72,14 @@
             </a>
         </li>
 
+        <li class="nav-item">
+            <a href="{{ route('admin.umkm.index') }}"
+                class="nav-link {{ request()->routeIs('admin.umkm.*') ? 'active' : '' }}" data-page="umkm">
+                <i class="bi bi-shop"></i>
+                <span class="nav-text">Kelola UMKM</span>
+            </a>
+        </li>
+
         <!-- Administrasi dengan Sub Menu -->
         <li class="nav-item">
             <div class="nav-link has-submenu {{ request()->routeIs('admin.surat-ktm.*', 'admin.arsip-surat.*', 'admin.administrasi.*') ? 'active' : '' }}"

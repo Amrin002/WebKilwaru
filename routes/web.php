@@ -16,6 +16,7 @@ use App\Http\Controllers\StatistikPertumbuhanController;
 use App\Http\Controllers\StrukturDesaController;
 use App\Http\Controllers\SuratKtmController;
 use App\Http\Controllers\SuratKtuController;
+use App\Http\Controllers\UmkmController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\VerifikasiSuratController;
 
@@ -200,6 +201,23 @@ Route::group(['prefix' => 'galeri'], function () {
 
     // Search API untuk live search
     Route::get('/search/api', [GaleriController::class, 'search'])->name('galeri.search');
+});
+
+Route::prefix('umkm')->name('umkm.')->group(function () {
+    // Rute-rute spesifik harus diletakkan di atas rute umum
+    Route::get('/daftar', [UmkmController::class, 'create'])->name('create');
+    Route::post('/daftar', [UmkmController::class, 'store'])->name('store');
+    Route::get('/sukses/{id}', [UmkmController::class, 'success'])->name('success');
+    Route::match(['get', 'post'], '/track', [UmkmController::class, 'track'])->name('track');
+    // Rute show detail untuk pembeli (hanya yang sudah approved)
+    Route::get('/produk/{id}', [UmkmController::class, 'publicProductShow'])
+        ->name('productShow')
+        ->where('id', '[0-9]+');
+
+
+    // Rute umum dengan parameter dinamis diletakkan paling bawah
+    Route::get('/', [UmkmController::class, 'publicIndex'])->name('index');
+    Route::get('/{id}', [UmkmController::class, 'publicShow'])->name('show');
 });
 
 // User dashboard (untuk semua user yang sudah login dan verified)
@@ -542,6 +560,26 @@ Route::middleware(['auth', 'admin'])->group(function () {
             Route::get('/action/export', [ArsipSuratController::class, 'export'])->name('export');
             Route::get('/page/import', [ArsipSuratController::class, 'showImport'])->name('show-import');
             Route::post('/action/import', [ArsipSuratController::class, 'import'])->name('import');
+        });
+
+        // ========================================
+        // UMKM MANAGEMENT ROUTES (Admin Only)
+        // ========================================
+        Route::prefix('umkm')->name('umkm.')->group(function () {
+            Route::get('/', [UmkmController::class, 'adminIndex'])->name('index');
+            Route::get('/create', [UmkmController::class, 'adminCreate'])->name('create'); // Rute untuk form tambah baru
+            Route::post('/', [UmkmController::class, 'adminStore'])->name('store'); // Rute untuk simpan data baru
+            Route::get('/{id}/edit', [UmkmController::class, 'adminEdit'])->name('edit'); // Rute untuk form edit
+            Route::get('/{id}', [UmkmController::class, 'adminShow'])->name('show');
+            Route::get('/{id}/approve', [UmkmController::class, 'approve'])->name('approve');
+            Route::get('/{id}/reject', [UmkmController::class, 'rejectForm'])->name('reject.form');
+            Route::post('/{id}/reject', [UmkmController::class, 'reject'])->name('reject');
+            Route::get('/{id}/reset', [UmkmController::class, 'resetToPending'])->name('reset-to-pending');
+            Route::get('/{id}/toggle-status', [UmkmController::class, 'toggleStatus'])->name('toggle-status');
+            Route::delete('/{id}', [UmkmController::class, 'destroy'])->name('destroy');
+            Route::post('/bulk-action', [UmkmController::class, 'bulkAction'])->name('bulk-action');
+            Route::get('/export', [UmkmController::class, 'export'])->name('export');
+            Route::get('/statistics', [UmkmController::class, 'statistics'])->name('statistics');
         });
 
         // ========================================
