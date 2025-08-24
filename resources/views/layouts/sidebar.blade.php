@@ -199,16 +199,16 @@
 
         <!-- Keuangan Desa dengan Sub Menu -->
         <li class="nav-item">
-            <div class="nav-link has-submenu {{ request()->routeIs('admin.keuangan.*') ? 'expanded' : '' }}"
+            <div class="nav-link has-submenu {{ request()->routeIs('admin.apbdes.*') ? 'expanded' : '' }}"
                 data-page="keuangan">
                 <i class="bi bi-cash-stack"></i>
                 <span class="nav-text">Keuangan Desa</span>
                 <i class="bi bi-chevron-down dropdown-arrow"></i>
             </div>
-            <ul class="sub-menu {{ request()->routeIs('admin.keuangan.*') ? 'expanded' : '' }}">
+            <ul class="sub-menu {{ request()->routeIs('admin.apbdes.*') ? 'expanded' : '' }}">
                 <li class="sub-menu-item">
-                    <a href="#"
-                        class="sub-menu-link {{ request()->routeIs('admin.keuangan.apbd.*') ? 'active' : '' }}"
+                    <a href="{{ route('admin.apbdes.index') }}"
+                        class="sub-menu-link {{ request()->routeIs('admin.apbdes.*') ? 'active' : '' }}"
                         data-subpage="apbd">
                         <i class="bi bi-pie-chart"></i>
                         <span>APB Desa</span>

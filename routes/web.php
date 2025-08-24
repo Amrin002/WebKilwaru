@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AdminDashboardController;
+use App\Http\Controllers\ApbdesController;
 use App\Http\Controllers\ArsipSuratController;
 use App\Http\Controllers\BeritaController;
 use App\Http\Controllers\GaleriController;
@@ -77,6 +78,27 @@ Route::prefix('api/berita')->name('api.berita.')->group(function () {
     Route::get('/featured', [PublicBeritaController::class, 'featured'])->name('featured');
     Route::get('/categories', [PublicBeritaController::class, 'categories'])->name('categories');
 });
+
+// ========================================
+// APBDES ROUTES (Public)
+// ========================================
+Route::prefix('apbdes')->name('apbdes.')->group(function () {
+
+    // Landing page APBDes (tahun terbaru)
+    Route::get('/', [ApbdesController::class, 'index'])->name('index');
+
+    // Detail APBDes per tahun
+    Route::get('/{tahun}', [ApbdesController::class, 'show'])->name('show')
+        ->where('tahun', '[0-9]{4}'); // Validasi tahun 4 digit
+
+    // API endpoint untuk AJAX get data by year
+    Route::get('/api/{tahun}', [ApbdesController::class, 'getByYear'])->name('api.get-by-year')
+        ->where('tahun', '[0-9]{4}');
+
+    // Download PDF dokumen APBDes
+    Route::get('/{apbdes}/download-pdf', [ApbdesController::class, 'downloadPdf'])->name('download-pdf');
+});
+
 
 // Landing page untuk semua layanan surat
 Route::get('/surat', function () {
@@ -545,6 +567,33 @@ Route::middleware(['auth', 'admin'])->group(function () {
         // Maintenance: Cleanup old logs
         Route::post('/cleanup-logs', [VerifikasiSuratController::class, 'cleanupLogs'])
             ->name('verifikasi.cleanup');
+
+
+        // Admin APBDES
+        Route::prefix('apbdes')->name('apbdes.')->group(function () {
+            // List semua APBDes
+            Route::get('/', [ApbdesController::class, 'adminIndex'])->name('index');
+
+            // Form tambah APBDes baru
+            Route::get('/create', [ApbdesController::class, 'create'])->name('create');
+
+            // Store APBDes baru
+            Route::post('/', [ApbdesController::class, 'store'])->name('store');
+
+            // Detail APBDes (admin view)
+            Route::get('/{apbdes}', [ApbdesController::class, 'adminShow'])->name('show');
+
+            // Form edit APBDes
+            Route::get('/{apbdes}/edit', [ApbdesController::class, 'edit'])->name('edit');
+
+            // Update APBDes
+            Route::put('/{apbdes}', [ApbdesController::class, 'update'])->name('update');
+
+            // Delete APBDes
+            Route::delete('/{apbdes}', [ApbdesController::class, 'destroy'])->name('destroy');
+
+            Route::get('/{apbdes}/download-pdf', [ApbdesController::class, 'downloadPdf'])->name('download.pdf');
+        });
     });
 });
 

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Apbdes;
 use App\Models\Berita;
 use App\Models\Galeri;
 use App\Models\StrukturDesa;
@@ -11,6 +12,21 @@ class HomeController extends Controller
 {
     public function index()
     {
+        // Mendapatkan tahun saat ini
+        $currentYear = date('Y');
+
+        // 1. Coba ambil APBDes untuk tahun ini
+        $currentApbdes = Apbdes::byTahun($currentYear)->first();
+
+        // 2. Jika APBDes tahun ini tidak ada, ambil yang terbaru
+        if (!$currentApbdes) {
+            $currentApbdes = Apbdes::latest()->first();
+        }
+        // Ambil data kepala desa
+        $kepalaDesa = StrukturDesa::byKategori('kepala_desa')
+            ->aktif()
+            ->ordered()
+            ->first();
         // Get latest 3 published berita for home page
         $latestBerita = Berita::published()
             ->with('kategoriBeri')
@@ -26,7 +42,7 @@ class HomeController extends Controller
             ->get()
             ->groupBy('kategori');
 
-        return view('home.index', compact('latestBerita', 'strukturDesa', 'latestGaleri'));
+        return view('home.index', compact('latestBerita', 'strukturDesa', 'latestGaleri', 'currentApbdes', 'kepalaDesa'));
     }
     public function beritaLatest()
     {

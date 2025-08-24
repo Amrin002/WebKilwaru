@@ -176,6 +176,63 @@
         </div>
     </section>
 
+    {{-- APBDes Section --}}
+    <section id="apbdes" class="py-5">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="section-title">APBDes Terbaru</h2>
+                <p class="lead">Transparansi Anggaran Pendapatan dan Belanja Desa (APBDes)</p>
+            </div>
+
+            @if ($currentApbdes)
+                <div class="card h-100 fade-in border-0 shadow-lg" style="border-radius: 15px;">
+                    <div class="card-body p-5">
+                        <div class="row align-items-center">
+                            <div class="col-lg-8">
+                                <div class="d-flex align-items-center mb-4">
+                                    <div class="feature-icon me-3">
+                                        <i class="bi bi-cash-stack"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="card-title mb-1 fw-bold" style="color: var(--primary-green);">
+                                            APBDes Tahun {{ $currentApbdes->tahun }}
+                                        </h4>
+                                        <p class="card-text lead text-success fw-bold mb-0">
+                                            Total Anggaran: {{ $currentApbdes->total_anggaran_formatted }}
+                                        </p>
+                                    </div>
+                                </div>
+                                <p class="text-muted">
+                                    Informasi ini mencakup rincian alokasi dana untuk pembangunan,
+                                    pemberdayaan, dan penyelenggaraan pemerintahan desa.
+                                </p>
+                                @if ($kepalaDesa)
+                                    <p class="small text-muted mt-3 mb-0">
+                                        <i class="bi bi-person me-1"></i> Disahkan oleh:
+                                        <strong>{{ $kepalaDesa->nama }}</strong>
+                                        <br>
+                                        <i class="bi bi-calendar me-1"></i> Terakhir diperbarui:
+                                        {{ $currentApbdes->updated_at->diffForHumans() }}
+                                    </p>
+                                @endif
+                            </div>
+                            <div class="col-lg-4 text-center mt-4 mt-lg-0">
+                                <a href="{{ route('apbdes.index') }}" class="btn btn-primary btn-lg">
+                                    <i class="bi bi-eye me-2"></i>Lihat Selengkapnya
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @else
+                <div class="text-center py-5">
+                    <i class="bi bi-receipt-cutoff" style="font-size: 4rem; color: var(--soft-gray);"></i>
+                    <p class="mt-3 text-muted">Belum ada data APBDes terbaru</p>
+                </div>
+            @endif
+        </div>
+    </section>
+
     <!-- Struktur Desa Section -->
     <section id="struktur" class="py-5 bg-light">
         <div class="container">
