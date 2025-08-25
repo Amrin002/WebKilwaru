@@ -72,20 +72,6 @@
             });
         }
 
-        // Trigger counter animation when stats section is visible
-        const statsSection = document.querySelector('.stats-section');
-        const statsObserver = new IntersectionObserver(function (entries) {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    animateCounters();
-                    statsObserver.unobserve(entry.target);
-                }
-            });
-        }, { threshold: 0.5 });
-
-        if (statsSection) {
-            statsObserver.observe(statsSection);
-        }
 
         // Add hover effects to cards
         document.querySelectorAll('.card, .news-card').forEach(card => {

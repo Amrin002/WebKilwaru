@@ -89,6 +89,10 @@
             transition: all 0.3s ease;
             position: relative;
             overflow: hidden;
+            border: none;
+            background: transparent;
+            width: 100%;
+            text-align: left;
         }
 
         .nav-link:hover {
@@ -110,6 +114,15 @@
             transition: all 0.3s ease;
         }
 
+        /* Chevron icon for dropdown */
+        .nav-link .bi-chevron-down {
+            margin-left: auto;
+            margin-right: 0;
+            width: auto;
+            font-size: 0.9rem;
+            transition: transform 0.3s ease;
+        }
+
         .sidebar.collapsed .nav-link {
             justify-content: center;
             padding: 12px;
@@ -121,6 +134,61 @@
 
         .sidebar.collapsed .nav-text {
             display: none;
+        }
+
+        /* Sub-menu Styles */
+        .nav-collapse {
+            background: rgba(0, 0, 0, 0.15);
+            border-radius: 10px;
+            margin: 5px 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        .sub-item {
+            display: block;
+            padding: 10px 20px 10px 55px;
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border-radius: 8px;
+            margin: 2px 10px;
+            position: relative;
+        }
+
+        .sub-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            transform: translateX(3px);
+        }
+
+        .sub-item.active {
+            background: var(--accent-orange);
+            color: white;
+            box-shadow: 0 2px 8px rgba(255, 140, 66, 0.3);
+        }
+
+        .sub-item::before {
+            content: '•';
+            position: absolute;
+            left: 35px;
+            color: var(--accent-orange);
+            font-size: 1.2rem;
+        }
+
+        .sub-item.active::before {
+            color: white;
+        }
+
+        .sub-item p {
+            margin: 0;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        /* Hide sub-menu when sidebar is collapsed */
+        .sidebar.collapsed .nav-collapse {
+            display: none !important;
         }
 
         /* Main Content */

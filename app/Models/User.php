@@ -21,6 +21,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'roles',
+        'no_hp'
     ];
 
     /**
@@ -44,5 +46,50 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+    /**
+     * Check if user is admin
+     */
+    public function isAdmin(): bool
+    {
+        return $this->roles === 'admin';
+    }
+
+    /**
+     * Check if user is regular user
+     */
+    public function isUser(): bool
+    {
+        return $this->roles === 'user';
+    }
+
+    /**
+     * Get user role name for display
+     */
+    public function getRoleDisplayName(): string
+    {
+        return match ($this->roles) {
+            'admin' => 'Administrator',
+            'user' => 'Pengguna',
+            default => 'Tidak Diketahui'
+        };
+    }
+    /**
+     * Relasi ke surat KTM
+     */
+    public function suratKtm()
+    {
+        return $this->hasMany(SuratKtm::class);
+    }
+
+    /**
+     * Ambil surat KTM terbaru milik user
+     */
+    public function latestSuratKtm(int $limit = 5)
+    {
+        return $this->suratKtm()
+            ->orderBy('created_at', 'desc')
+            ->limit($limit)
+            ->get();
     }
 }

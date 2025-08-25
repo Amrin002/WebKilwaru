@@ -12,10 +12,10 @@
                         <i class="bi bi-people"></i>
                     </div>
                 </div>
-                <div class="stat-number">2,847</div>
-                <div class="stat-change positive">
-                    <i class="bi bi-arrow-up"></i>
-                    +2.5% dari bulan lalu
+                <div class="stat-number">{{ number_format($totalPenduduk, 0, ',', '.') }}</div>
+                <div class="stat-change {{ $persenPendudukChange >= 0 ? 'positive' : 'negative' }}">
+                    <i class="bi bi-arrow-{{ $persenPendudukChange >= 0 ? 'up' : 'down' }}"></i>
+                    {{ number_format(abs($persenPendudukChange), 1) }}% dari bulan lalu
                 </div>
             </div>
 
@@ -26,26 +26,29 @@
                         <i class="bi bi-house-door"></i>
                     </div>
                 </div>
-                <div class="stat-number">847</div>
-                <div class="stat-change positive">
-                    <i class="bi bi-arrow-up"></i>
-                    +1.8% dari bulan lalu
+                <div class="stat-number">{{ number_format($kepalaKeluarga, 0, ',', '.') }}</div>
+                <div class="stat-change {{ $persenKkChange >= 0 ? 'positive' : 'negative' }}">
+                    <i class="bi bi-arrow-{{ $persenKkChange >= 0 ? 'up' : 'down' }}"></i>
+                    {{ number_format(abs($persenKkChange), 1) }}% dari bulan lalu
                 </div>
             </div>
 
+
+
             <div class="stat-card">
                 <div class="stat-header">
-                    <div class="stat-title">Layanan Aktif</div>
-                    <div class="stat-icon services">
-                        <i class="bi bi-gear"></i>
+                    <div class="stat-title">UMKM</div>
+                    <div class="stat-icon news">
+                        <i class="bi bi-shop"></i>
                     </div>
                 </div>
-                <div class="stat-number">12</div>
-                <div class="stat-change">
-                    <i class="bi bi-dash"></i>
-                    Tidak ada perubahan
+                <div class="stat-number">{{ number_format($totalUmkm, 0, ',', '.') }}</div>
+                <div class="stat-change {{ $persenUmkmChange >= 0 ? 'positive' : 'negative' }}">
+                    <i class="bi bi-arrow-{{ $persenUmkmChange >= 0 ? 'up' : 'down' }}"></i>
+                    {{ number_format(abs($persenUmkmChange), 1) }}% dari bulan lalu
                 </div>
             </div>
+
 
             <div class="stat-card">
                 <div class="stat-header">
@@ -54,10 +57,10 @@
                         <i class="bi bi-newspaper"></i>
                     </div>
                 </div>
-                <div class="stat-number">23</div>
-                <div class="stat-change positive">
-                    <i class="bi bi-arrow-up"></i>
-                    +15.4% dari bulan lalu
+                <div class="stat-number">{{ number_format($totalBeritaBulanIni, 0, ',', '.') }}</div>
+                <div class="stat-change {{ $persenBeritaChange >= 0 ? 'positive' : 'negative' }}">
+                    <i class="bi bi-arrow-{{ $persenBeritaChange >= 0 ? 'up' : 'down' }}"></i>
+                    {{ number_format(abs($persenBeritaChange), 1) }}% dari bulan lalu
                 </div>
             </div>
         </div>
@@ -66,102 +69,54 @@
         <div class="activity-section">
             <div class="activity-card">
                 <h3 class="chart-title mb-3">Aktivitas Terbaru</h3>
-                <div class="activity-item">
-                    <div class="activity-icon success">
-                        <i class="bi bi-check-lg"></i>
-                    </div>
-                    <div class="activity-content">
-                        <div class="activity-title">Surat Keterangan Usaha - Approved</div>
-                        <div class="activity-time">2 jam yang lalu</div>
-                    </div>
-                </div>
-                <div class="activity-item">
-                    <div class="activity-icon warning">
-                        <i class="bi bi-clock"></i>
-                    </div>
-                    <div class="activity-content">
-                        <div class="activity-title">Permohonan KTP Baru - Pending</div>
-                        <div class="activity-time">4 jam yang lalu</div>
-                    </div>
-                </div>
-                <div class="activity-item">
-                    <div class="activity-icon info">
-                        <i class="bi bi-info-lg"></i>
-                    </div>
-                    <div class="activity-content">
-                        <div class="activity-title">Berita Baru Dipublikasi</div>
-                        <div class="activity-time">6 jam yang lalu</div>
-                    </div>
-                </div>
-                <div class="activity-item">
-                    <div class="activity-icon success">
-                        <i class="bi bi-check-lg"></i>
-                    </div>
-                    <div class="activity-content">
-                        <div class="activity-title">Surat Domisili - Completed</div>
-                        <div class="activity-time">8 jam yang lalu</div>
-                    </div>
-                </div>
+                @if ($latestActivities->isEmpty())
+                    <p>Tidak ada aktivitas terbaru.</p>
+                @else
+                    @foreach ($latestActivities as $activity)
+                        <div class="activity-item">
+                            <div class="activity-icon info">
+                                <i class="{{ $activity->icon_class }}"></i>
+                            </div>
+                            <div class="activity-content">
+                                <div class="activity-title">{{ $activity->jenis_aktivitas }}</div>
+                                <div class="activity-time">{{ $activity->created_at->diffForHumans() }}</div>
+                            </div>
+                        </div>
+                    @endforeach
+                @endif
             </div>
-
             <div class="activity-card">
                 <h3 class="chart-title mb-3">Layanan Populer</h3>
-                <div class="activity-item">
-                    <div class="activity-icon success">
-                        <i class="bi bi-file-earmark-text"></i>
+                @foreach ($popularServices as $service)
+                    <div class="activity-item">
+                        <div class="activity-icon {{ $service['status_class'] }}">
+                            <i class="bi {{ $service['icon_class'] }}"></i>
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-title">{{ $service['title'] }}</div>
+                            <div class="activity-time">{{ $service['count'] }} permohonan bulan ini</div>
+                        </div>
                     </div>
-                    <div class="activity-content">
-                        <div class="activity-title">Surat Keterangan Usaha</div>
-                        <div class="activity-time">45 permohonan bulan ini</div>
-                    </div>
-                </div>
-                <div class="activity-item">
-                    <div class="activity-icon info">
-                        <i class="bi bi-person-badge"></i>
-                    </div>
-                    <div class="activity-content">
-                        <div class="activity-title">Pembuatan KTP</div>
-                        <div class="activity-time">32 permohonan bulan ini</div>
-                    </div>
-                </div>
-                <div class="activity-item">
-                    <div class="activity-icon warning">
-                        <i class="bi bi-house"></i>
-                    </div>
-                    <div class="activity-content">
-                        <div class="activity-title">Surat Domisili</div>
-                        <div class="activity-time">28 permohonan bulan ini</div>
-                    </div>
-                </div>
-                <div class="activity-item">
-                    <div class="activity-icon info">
-                        <i class="bi bi-heart-pulse"></i>
-                    </div>
-                    <div class="activity-content">
-                        <div class="activity-title">Layanan Kesehatan</div>
-                        <div class="activity-time">21 kunjungan bulan ini</div>
-                    </div>
-                </div>
+                @endforeach
             </div>
         </div>
 
-        <!-- Quick Actions -->
         <div class="quick-actions">
-            <a href="#" class="action-btn">
+            <a href="{{ route('admin.penduduk.create') }}" class="action-btn">
                 <i class="bi bi-plus-circle"></i>
                 <span>Tambah Penduduk</span>
             </a>
-            <a href="#" class="action-btn">
+            <a href="{{ route('admin.berita.index') }}" class="action-btn">
                 <i class="bi bi-newspaper"></i>
                 <span>Buat Berita</span>
             </a>
-            <a href="#" class="action-btn">
+            <a href="{{ route('admin.arsip-surat.index') }}" class="action-btn">
                 <i class="bi bi-file-earmark-plus"></i>
                 <span>Proses Surat</span>
             </a>
-            <a href="#" class="action-btn">
-                <i class="bi bi-bar-chart"></i>
-                <span>Lihat Laporan</span>
+            <a href="{{ route('admin.umkm.index') }}" class="action-btn">
+                <i class="bi bi-shop"></i>
+                <span>Kelola UMKM</span>
             </a>
         </div>
     </div>

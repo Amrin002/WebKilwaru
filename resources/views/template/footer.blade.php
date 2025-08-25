@@ -16,6 +16,9 @@
                      <a href="#"><i class="bi bi-instagram"></i></a>
                      <a href="#"><i class="bi bi-twitter"></i></a>
                      <a href="#"><i class="bi bi-youtube"></i></a>
+                     <a href="{{ route('berita.rss') }}" title="RSS Feed" target="_blank">
+                         <i class="bi bi-rss-fill"></i>
+                     </a>
                  </div>
              </div>
              <div class="col-lg-2 col-md-6 mb-4">
