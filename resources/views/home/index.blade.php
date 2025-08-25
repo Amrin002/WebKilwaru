@@ -88,29 +88,27 @@
 
     <section class="stats-section">
         <div class="container">
-            <div class="row">
-                <div class="col-md-3 col-6">
+            <div class="row justify-content-center">
+                <div class="col-lg-3 col-md-4 col-6">
                     <div class="stat-item fade-in">
-                        <span class="stat-number">2,847</span>
+                        <span class="stat-number" data-target="{{ $totalPenduduk }}">
+                            {{ number_format($totalPenduduk, 0, ',', '.') }}
+                        </span>
                         <span class="stat-label">Penduduk</span>
                     </div>
                 </div>
-                <div class="col-md-3 col-6">
+                <div class="col-lg-3 col-md-4 col-6">
                     <div class="stat-item fade-in">
-                        <span class="stat-number">847</span>
+                        <span class="stat-number" data-target="{{ $totalKK }}">
+                            {{ number_format($totalKK, 0, ',', '.') }}
+                        </span>
                         <span class="stat-label">Kepala Keluarga</span>
                     </div>
                 </div>
-                <div class="col-md-3 col-6">
+                <div class="col-lg-3 col-md-4 col-6">
                     <div class="stat-item fade-in">
-                        <span class="stat-number">15</span>
+                        <span class="stat-number" data-target="15">15</span>
                         <span class="stat-label">Dusun</span>
-                    </div>
-                </div>
-                <div class="col-md-3 col-6">
-                    <div class="stat-item fade-in">
-                        <span class="stat-number">12</span>
-                        <span class="stat-label">Layanan Publik</span>
                     </div>
                 </div>
             </div>
