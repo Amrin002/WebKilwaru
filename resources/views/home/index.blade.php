@@ -675,15 +675,15 @@
                                     alt="{{ $umkm->nama_umkm }}" style="height: 200px; object-fit: cover;">
                                 <div class="card-body">
                                     <h5 class="card-title fw-bold">{{ $umkm->nama_umkm }}</h5>
-                                    <p class="card-text text-muted small">{{ $umkm->jenis_usaha }}</p>
-                                    <p class="card-text">{{ Str::limit($umkm->deskripsi, 100) }}</p>
+                                    <p class="card-text text-muted small">{{ $umkm->kategori_label }}</p>
+                                    <p class="card-text">{{ $umkm->deskripsi_singkat }}</p>
                                 </div>
                                 <div
                                     class="card-footer bg-white border-0 d-flex justify-content-between align-items-center">
                                     <a href="{{ route('umkm.productShow', $umkm->id) }}"
                                         class="btn btn-sm btn-primary">Lihat Produk</a>
                                     <small class="text-muted"><i
-                                            class="bi bi-clock me-1"></i>{{ $umkm->formatted_date }}</small>
+                                            class="bi bi-clock me-1"></i>{{ $umkm->approved_at?->diffForHumans() }}</small>
                                 </div>
                             </div>
                         </div>
