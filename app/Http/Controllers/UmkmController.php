@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Umkm;
 use App\Models\Penduduk;
+use App\Models\User;
+use App\Notifications\UmkmPermohonanNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
@@ -154,6 +156,11 @@ class UmkmController extends Controller
                 'link_tiktok' => $validated['link_tiktok'],
                 'status' => 'pending'
             ]);
+            // Kirim notifikasi ke semua admin
+            $admins = User::where('roles', 'admin')->get();
+            foreach ($admins as $admin) {
+                $admin->notify(new UmkmPermohonanNotification($umkm));
+            }
 
             return redirect()
                 ->route('umkm.success', ['id' => $umkm->id])

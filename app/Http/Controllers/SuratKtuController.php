@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\SuratKtu;
+use App\Models\User;
+use App\Notifications\SuratBaruNotification;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Exception;
 use Illuminate\Http\Request;
@@ -61,7 +63,10 @@ class SuratKtuController extends Controller
 
         try {
             $surat = SuratKtu::createForGuest($request->all());
-
+            $admins = User::where('roles', 'admin')->get();
+            foreach ($admins as $admin) {
+                $admin->notify(new SuratBaruNotification($surat));
+            }
             return redirect()
                 ->route('public.surat-ktu.track', $surat->public_token)
                 ->with('success', 'Pengajuan surat berhasil! Simpan link ini untuk melacak status surat Anda.');

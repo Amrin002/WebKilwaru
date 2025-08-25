@@ -105,7 +105,6 @@
     }
 
     // Navigation functionality
-    // Navigation functionality - FIXED for Laravel
     function initNavigation() {
         const navLinks = document.querySelectorAll('.nav-link:not(.has-submenu)');
         const subMenuLinks = document.querySelectorAll('.sub-menu-link');
@@ -156,37 +155,26 @@
             'log-aktivitas': 'Log Aktivitas'
         };
 
-        // Handle main navigation - REMOVED preventDefault untuk link dengan href
+        // Handle main navigation
         navLinks.forEach(link => {
             link.addEventListener('click', function(e) {
-                // Jika link memiliki href yang valid (bukan #), biarkan navigasi Laravel berjalan
                 const href = this.getAttribute('href');
                 if (href && href !== '#' && href !== 'javascript:void(0)') {
-                    // Biarkan Laravel routing menghandle navigasi
-                    // Hanya update UI state
                     navLinks.forEach(l => l.classList.remove('active'));
                     subMenuLinks.forEach(l => l.classList.remove('active'));
                     this.classList.add('active');
 
-                    // Close sidebar on mobile after selection
                     if (window.innerWidth <= 768) {
                         sidebar.classList.remove('show');
                     }
-
-                    // Jangan preventDefault - biarkan link diikuti
                     return;
                 }
-
-                // Untuk link tanpa href valid, gunakan JavaScript navigation
                 e.preventDefault();
-
                 navLinks.forEach(l => l.classList.remove('active'));
                 subMenuLinks.forEach(l => l.classList.remove('active'));
                 this.classList.add('active');
-
                 const page = this.dataset.page;
                 headerTitle.textContent = pageNames[page] || 'Dashboard Admin';
-
                 if (window.innerWidth <= 768) {
                     sidebar.classList.remove('show');
                 }
@@ -196,42 +184,40 @@
         // Handle sub menu navigation
         subMenuLinks.forEach(link => {
             link.addEventListener('click', function(e) {
-                // Jika link memiliki href yang valid, biarkan navigasi Laravel berjalan
                 const href = this.getAttribute('href');
                 if (href && href !== '#' && href !== 'javascript:void(0)') {
                     navLinks.forEach(l => l.classList.remove('active'));
                     subMenuLinks.forEach(l => l.classList.remove('active'));
                     this.classList.add('active');
-
                     if (window.innerWidth <= 768) {
                         sidebar.classList.remove('show');
                     }
-
-                    return; // Biarkan link diikuti
+                    return;
                 }
-
-                // Untuk link tanpa href valid
                 e.preventDefault();
-
                 navLinks.forEach(l => l.classList.remove('active'));
                 subMenuLinks.forEach(l => l.classList.remove('active'));
                 this.classList.add('active');
-
                 const subpage = this.dataset.subpage;
                 headerTitle.textContent = subPageNames[subpage] || 'Dashboard Admin';
-
                 if (window.innerWidth <= 768) {
                     sidebar.classList.remove('show');
                 }
             });
         });
     }
+
     // Profile dropdown functionality
     function initProfileDropdown() {
         // Toggle dropdown
         userProfile.addEventListener('click', function(e) {
             e.stopPropagation();
             profileDropdown.classList.toggle('show');
+            // Close notification dropdown if open
+            const notificationDropdown = document.getElementById('notificationDropdown');
+            if (notificationDropdown) {
+                notificationDropdown.classList.remove('show');
+            }
         });
 
         // Close dropdown when clicking outside
@@ -248,25 +234,7 @@
         });
 
         // Profile actions
-        document.getElementById('profileBtn').addEventListener('click', function(e) {
-            e.preventDefault();
-            profileDropdown.classList.remove('show');
-            alert('Menuju halaman profil...');
-        });
-
-        document.getElementById('settingsBtn').addEventListener('click', function(e) {
-            e.preventDefault();
-            profileDropdown.classList.remove('show');
-            alert('Menuju halaman pengaturan...');
-        });
-
-        document.getElementById('logoutBtn').addEventListener('click', function(e) {
-            e.preventDefault();
-            profileDropdown.classList.remove('show');
-            if (confirm('Apakah Anda yakin ingin logout?')) {
-                alert('Logout berhasil!');
-            }
-        });
+        // Menghapus event listener lama yang tidak terpakai
     }
 
     // Clock functionality
@@ -356,14 +324,33 @@
 
     // Notification functionality
     function initNotifications() {
-        document.querySelector('.notification-btn').addEventListener('click', function() {
-            const notifications = [
-                'Ada 3 permohonan surat baru',
-                'Laporan bulanan siap dilihat',
-                'Update sistem berhasil'
-            ];
-            alert(notifications.join('\n'));
-        });
+        const notificationBtn = document.getElementById('notificationBtn');
+        const notificationDropdown = document.getElementById('notificationDropdown');
+
+        if (notificationBtn && notificationDropdown) {
+            notificationBtn.addEventListener('click', function(event) {
+                event.stopPropagation();
+                notificationDropdown.classList.toggle('show');
+
+                // Close profile dropdown if open
+                const profileDropdown = document.getElementById('profileDropdown');
+                if (profileDropdown) {
+                    profileDropdown.classList.remove('show');
+                }
+            });
+
+            // Hide dropdown when clicking outside
+            document.addEventListener('click', function(event) {
+                if (!notificationDropdown.contains(event.target) && !notificationBtn.contains(event.target)) {
+                    notificationDropdown.classList.remove('show');
+                }
+            });
+
+            // Prevent dropdown from closing when clicking inside
+            notificationDropdown.addEventListener('click', function(event) {
+                event.stopPropagation();
+            });
+        }
     }
 
     // Initialize all components

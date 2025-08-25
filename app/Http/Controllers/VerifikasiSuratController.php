@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\ArsipSurat;
+use App\Models\StrukturDesa;
 use App\Models\VerifikasiSurat;
 use App\Services\VerifikasiSuratService;
 use Illuminate\Http\Request;
@@ -71,7 +72,7 @@ class VerifikasiSuratController extends Controller
             'status' => 'TERVERIFIKASI',
             'type_surat' => $this->getJenisSurat($arsipSurat),
             'jenis_surat' => $this->getJenisSurat($arsipSurat),
-            'penandatangan' => 'SIDIK RUMALOWAK, S.Pd, MMP, M.Si',
+            'penandatangan' => $this->getPenandatangan(),
             'dikeluarkan_oleh' => 'Kantor Desa Akat Fadedo'
         ];
 
@@ -116,6 +117,55 @@ class VerifikasiSuratController extends Controller
         }
 
         return (object) $data;
+    }
+    /**
+     * Get nama penandatangan dari StrukturDesa
+     * Prioritas: Kepala Desa aktif -> Kepala Desa non-aktif -> Default
+     */
+    private function getPenandatangan(): string
+    {
+        try {
+            // Cari kepala desa yang aktif dan sedang menjabat
+            $kepalaDesa = StrukturDesa::where('kategori', 'kepala_desa')
+                ->where('aktif', true)
+                ->where(function ($query) {
+                    $query->whereNull('selesai_menjabat')
+                        ->orWhere('selesai_menjabat', '>=', now());
+                })
+                ->where('mulai_menjabat', '<=', now())
+                ->orderBy('mulai_menjabat', 'desc')
+                ->first();
+
+            if ($kepalaDesa) {
+                return strtoupper($kepalaDesa->nama);
+            }
+
+            // Fallback: Cari kepala desa aktif tanpa validasi tanggal
+            $kepalaDesaAktif = StrukturDesa::where('kategori', 'kepala_desa')
+                ->where('aktif', true)
+                ->orderBy('mulai_menjabat', 'desc')
+                ->first();
+
+            if ($kepalaDesaAktif) {
+                return strtoupper($kepalaDesaAktif->nama);
+            }
+
+            // Fallback terakhir: Cari kepala desa manapun
+            $kepalaDesaAny = StrukturDesa::where('kategori', 'kepala_desa')
+                ->orderBy('mulai_menjabat', 'desc')
+                ->first();
+
+            if ($kepalaDesaAny) {
+                return strtoupper($kepalaDesaAny->nama);
+            }
+
+            // Default jika tidak ada data kepala desa
+            return 'AHMAD BUGIS';
+        } catch (\Exception $e) {
+            // Log error dan return default
+            Log::warning('Error getting penandatangan from StrukturDesa: ' . $e->getMessage());
+            return 'AHMAD BUGIS';
+        }
     }
     /**
      * Log aktivitas verifikasi

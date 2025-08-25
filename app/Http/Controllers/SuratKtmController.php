@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\SuratKtm;
+use App\Models\User;
+use App\Notifications\SuratBaruNotification;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -54,6 +56,11 @@ class SuratKtmController extends Controller
 
         try {
             $surat = SuratKtm::createForGuest($request->all());
+            // Kirim notifikasi ke semua admin
+            $admins = User::where('roles', 'admin')->get();
+            foreach ($admins as $admin) {
+                $admin->notify(new SuratBaruNotification($surat));
+            }
 
             return redirect()
                 ->route('public.surat-ktm.track', $surat->public_token)

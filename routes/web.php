@@ -8,12 +8,14 @@ use App\Http\Controllers\GaleriController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\KategoriBeritaController;
 use App\Http\Controllers\KKController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PendudukController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PublicBeritaController;
 use App\Http\Controllers\QrCodeController;
 use App\Http\Controllers\StatistikPertumbuhanController;
 use App\Http\Controllers\StrukturDesaController;
+use App\Http\Controllers\SuratDashboardController;
 use App\Http\Controllers\SuratKtmController;
 use App\Http\Controllers\SuratKtuController;
 use App\Http\Controllers\UmkmController;
@@ -318,10 +320,12 @@ Route::middleware(['auth', 'user'])->group(function () {
 Route::middleware(['auth', 'admin'])->group(function () {
     // Admin Dashboard
     Route::get('/admin', [AdminDashboardController::class, 'index'])->name('admin.index');
+    Route::post('/notifications/mark-as-read', [NotificationController::class, 'markAsRead'])->name('notifications.mark-as-read');
+
 
     // Admin Routes dengan prefix 'admin'
     Route::prefix('admin')->name('admin.')->group(function () {
-
+        Route::get('/surat-dashboard', [SuratDashboardController::class, 'index'])->name('surat.dashboard');
         // KK Routes
         Route::get('kk/export', [KKController::class, 'export'])->name('kk.export');
         Route::post('kk/import', [KKController::class, 'import'])->name('kk.import');

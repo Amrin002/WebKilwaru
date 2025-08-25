@@ -740,6 +740,138 @@
         }
     }
 
+    /* GANTI CSS notification-dropdown yang ada dengan yang ini: */
+
+    .notification-dropdown {
+        position: absolute;
+        top: 100%;
+        right: 20px;
+        /* <-- PERUBAHAN DI SINI */
+        width: 350px;
+        background: var(--warm-white);
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        padding: 15px 0;
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(-10px);
+        transition: all 0.3s ease;
+        z-index: 1001;
+        border: 1px solid rgba(0, 0, 0, 0.1);
+
+        /* Default state, controlled by JS */
+    }
+
+    .notification-dropdown.show {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+        /* Gunakan visibility dan opacity untuk kontrol tampilan */
+    }
+
+    /* Dark theme support */
+    [data-theme="dark"] .notification-dropdown {
+        background: var(--warm-white);
+        border: 1px solid #404040;
+        color: #333;
+    }
+
+    .notification-dropdown .dropdown-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 20px 10px;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        margin-bottom: 10px;
+        font-weight: 600;
+        color: var(--primary-green);
+    }
+
+    [data-theme="dark"] .notification-dropdown .dropdown-header {
+        color: var(--primary-green);
+        border-bottom-color: #404040;
+    }
+
+    .mark-all-read-btn {
+        background: none;
+        border: none;
+        color: var(--soft-gray);
+        font-size: 0.8rem;
+        cursor: pointer;
+        transition: color 0.3s ease;
+    }
+
+    .mark-all-read-btn:hover {
+        color: var(--accent-orange);
+    }
+
+    .notification-dropdown .dropdown-body {
+        max-height: 300px;
+        overflow-y: auto;
+    }
+
+    .notification-dropdown .dropdown-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 12px 20px;
+        color: inherit;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    [data-theme="dark"] .notification-dropdown .dropdown-item {
+        border-bottom-color: #333;
+    }
+
+    .notification-dropdown .dropdown-item:last-child {
+        border-bottom: none;
+    }
+
+    .notification-dropdown .dropdown-item:hover {
+        background: var(--cream);
+        color: var(--primary-green);
+    }
+
+    [data-theme="dark"] .notification-dropdown .dropdown-item:hover {
+        background: #f5f5f5;
+        color: var(--primary-green);
+    }
+
+    .notification-dropdown .dropdown-item .icon {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background: var(--light-green);
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.9rem;
+        flex-shrink: 0;
+    }
+
+    .notification-dropdown .dropdown-item .content {
+        flex: 1;
+    }
+
+    .notification-dropdown .dropdown-item .title {
+        font-weight: 600;
+        margin-bottom: 3px;
+        color: var(--primary-green);
+    }
+
+    [data-theme="dark"] .notification-dropdown .dropdown-item .title {
+        color: var(--primary-green);
+    }
+
+    .notification-dropdown .dropdown-item .timestamp {
+        font-size: 0.75rem;
+        color: var(--soft-gray);
+    }
+
     /* Custom Scrollbar */
     .sidebar::-webkit-scrollbar {
         width: 6px;

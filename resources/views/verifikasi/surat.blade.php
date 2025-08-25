@@ -399,7 +399,7 @@
                                 <div class="info-row">
                                     <div class="info-label">Penandatanganan</div>
                                     <div class="info-value">
-                                        {{ $verifikasi->penandatangan ?? 'SIDIK RUMALOWAK, S.Pd, MMP, M.Si' }}
+                                        {{ $verifikasi->penandatangan ?? 'Ahmad Bugis' }}
                                     </div>
                                 </div>
 
@@ -420,10 +420,10 @@
 
                                 <!-- Enhanced Stats -->
                                 <div class="stats-grid">
-                                    <div class="stat-item">
+                                    {{-- <div class="stat-item">
                                         <span class="stat-number" id="totalVerifikasi">{{ $totalVerifikasi ?? 1 }}</span>
                                         <div class="stat-label">Total Verifikasi</div>
-                                    </div>
+                                    </div> --}}
                                     <div class="stat-item">
                                         <span class="stat-number" id="ipAddress">{{ request()->ip() }}</span>
                                         <div class="stat-label">IP Verifikasi</div>
