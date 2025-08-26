@@ -32,7 +32,6 @@
                 background-attachment: fixed;
             }
 
-
             .hero-section::before {
                 content: '';
                 position: absolute;
@@ -47,6 +46,358 @@
             .hero-content {
                 position: relative;
                 z-index: 2;
+            }
+
+            /* Map Container Styles */
+            .map-container {
+                background: white;
+                border-radius: 15px;
+                overflow: hidden;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+                transition: all 0.3s ease;
+                position: relative;
+            }
+
+            .map-container:hover {
+                box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+                transform: translateY(-2px);
+            }
+
+            .map-header {
+                background: linear-gradient(135deg, var(--primary-green) 0%, var(--secondary-green) 100%);
+                color: white;
+                padding: 15px 20px;
+                border-bottom: 3px solid var(--accent-orange);
+            }
+
+            .map-title {
+                font-size: 1.1rem;
+                font-weight: 600;
+            }
+
+            .map-iframe-wrapper {
+                position: relative;
+                height: 400px;
+                background: #f8f9fa;
+            }
+
+            .map-iframe {
+                width: 100%;
+                height: 100%;
+                border: none;
+                display: block;
+            }
+
+            .map-footer {
+                background: rgba(248, 249, 250, 0.95);
+                padding: 12px 20px;
+                border-top: 1px solid #e9ecef;
+            }
+
+            .galeri-card {
+                background: white;
+                border-radius: 15px;
+                overflow: hidden;
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+                transition: all 0.3s ease;
+                height: 100%;
+                display: flex;
+                flex-direction: column;
+            }
+
+            .galeri-card:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+            }
+
+            .galeri-image-wrapper {
+                position: relative;
+                overflow: hidden;
+                height: 250px;
+            }
+
+            .galeri-image {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                transition: transform 0.3s ease;
+            }
+
+            .galeri-card:hover .galeri-image {
+                transform: scale(1.05);
+            }
+
+            .galeri-overlay {
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: linear-gradient(to bottom,
+                        rgba(0, 0, 0, 0.1) 0%,
+                        rgba(0, 0, 0, 0.3) 60%,
+                        rgba(0, 0, 0, 0.7) 100%);
+                opacity: 0;
+                transition: opacity 0.3s ease;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+                padding: 15px;
+            }
+
+            .galeri-card:hover .galeri-overlay {
+                opacity: 1;
+            }
+
+            .galeri-actions {
+                display: flex;
+                justify-content: flex-end;
+                gap: 10px;
+            }
+
+            .galeri-zoom {
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border: none;
+                background: rgba(255, 255, 255, 0.9);
+                color: var(--primary-green);
+                transition: all 0.3s ease;
+            }
+
+            .galeri-zoom:hover {
+                background: white;
+                transform: scale(1.1);
+            }
+
+            .galeri-info {
+                color: white;
+            }
+
+            .galeri-title {
+                font-size: 1rem;
+                font-weight: 600;
+                margin: 0;
+                line-height: 1.3;
+            }
+
+            .galeri-date {
+                font-size: 0.85rem;
+                margin: 0;
+                opacity: 0.9;
+            }
+
+            .galeri-content {
+                padding: 20px;
+                flex-grow: 1;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+            }
+
+            /* Carousel Custom Styles */
+            #galeriCarousel {
+                margin-bottom: 4rem;
+                position: relative;
+            }
+
+            .carousel-indicators {
+                bottom: -60px;
+                margin-bottom: 0;
+                position: absolute;
+                left: 50%;
+                transform: translateX(-50%);
+                width: auto;
+                margin-left: 0;
+                margin-right: 0;
+            }
+
+            .carousel-indicators [data-bs-target] {
+                width: 12px;
+                height: 12px;
+                border-radius: 50%;
+                background-color: var(--primary-green);
+                opacity: 0.5;
+                border: none;
+                margin: 0 5px;
+                transition: all 0.3s ease;
+            }
+
+            .carousel-indicators .active {
+                opacity: 1;
+                transform: scale(1.2);
+            }
+
+            .view-all-container {
+                margin-top: 5rem;
+                clear: both;
+                position: relative;
+                z-index: 10;
+            }
+
+            .carousel-control-prev,
+            .carousel-control-next {
+                width: 60px;
+                height: 60px;
+                border-radius: 50%;
+                background: var(--primary-green);
+                border: none;
+                top: 50%;
+                transform: translateY(-50%);
+                opacity: 0.8;
+                transition: all 0.3s ease;
+            }
+
+            .carousel-control-prev {
+                left: -30px;
+            }
+
+            .carousel-control-next {
+                right: -30px;
+            }
+
+            .carousel-control-prev:hover,
+            .carousel-control-next:hover {
+                opacity: 1;
+                transform: translateY(-50%) scale(1.05);
+            }
+
+            .carousel-control-icon-wrapper {
+                width: 100%;
+                height: 100%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                font-size: 1.5rem;
+            }
+
+            .carousel-control-prev-icon,
+            .carousel-control-next-icon {
+                display: none;
+            }
+
+            .modal-content {
+                border-radius: 15px;
+                border: none;
+                overflow: hidden;
+            }
+
+            .modal-header {
+                background: var(--primary-green);
+                color: white;
+            }
+
+            .modal-header .btn-close {
+                filter: invert(1);
+            }
+
+            /* Responsive */
+            @media (max-width: 768px) {
+                .map-iframe-wrapper {
+                    height: 300px;
+                }
+
+                .map-header {
+                    padding: 12px 15px;
+                }
+
+                .map-title {
+                    font-size: 1rem;
+                }
+
+                .galeri-image-wrapper {
+                    height: 200px;
+                }
+
+                #galeriCarousel {
+                    margin-bottom: 3rem;
+                }
+
+                .carousel-indicators {
+                    bottom: -40px;
+                }
+
+                .view-all-container {
+                    margin-top: 3.5rem;
+                }
+
+                .carousel-control-prev,
+                .carousel-control-next {
+                    width: 50px;
+                    height: 50px;
+                    font-size: 1.2rem;
+                }
+
+                .carousel-control-prev {
+                    left: -15px;
+                }
+
+                .carousel-control-next {
+                    right: -15px;
+                }
+
+                .galeri-content {
+                    padding: 15px;
+                }
+            }
+
+            @media (max-width: 576px) {
+                .map-iframe-wrapper {
+                    height: 250px;
+                }
+
+                #galeriCarousel {
+                    margin-bottom: 2rem;
+                }
+
+                .carousel-control-prev,
+                .carousel-control-next {
+                    position: static;
+                    width: auto;
+                    height: auto;
+                    margin: 20px auto;
+                    display: block;
+                }
+
+                .carousel-indicators {
+                    position: static;
+                    margin-top: 20px;
+                    bottom: auto;
+                }
+
+                .view-all-container {
+                    margin-top: 2rem;
+                }
+            }
+
+            /* Animation untuk fade-in elements */
+            .fade-in {
+                opacity: 0;
+                transform: translateY(30px);
+                animation: fadeInUp 0.8s ease forwards;
+            }
+
+            .fade-in:nth-child(1) {
+                animation-delay: 0.1s;
+            }
+
+            .fade-in:nth-child(2) {
+                animation-delay: 0.2s;
+            }
+
+            .fade-in:nth-child(3) {
+                animation-delay: 0.3s;
+            }
+
+            @keyframes fadeInUp {
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
             }
         </style>
     @endpush
@@ -171,6 +522,119 @@
         </div>
     </section>
 
+    {{-- Section Peta Lokasi Desa --}}
+    {{-- Section Peta Lokasi Desa --}}
+    <section id="peta-lokasi" class="py-5 bg-light">
+        <div class="container">
+            <div class="text-center mb-5">
+                <h2 class="section-title">Lokasi Desa Kilwaru</h2>
+                <p class="lead">Temukan lokasi geografis Desa Kilwaru dengan batas wilayah administratif yang jelas</p>
+            </div>
+
+            <div class="row justify-content-center">
+                <div class="col-lg-10">
+                    <div class="row">
+                        <div class="col-lg-8 mb-4 mb-lg-0">
+                            <div class="map-container fade-in">
+                                <div class="map-header">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <h5 class="map-title mb-0">
+                                            <i class="bi bi-geo-alt-fill me-2 text-danger"></i>
+                                            Peta Desa Kilwaru
+                                        </h5>
+                                        <span class="badge bg-success">
+                                            <i class="bi bi-map me-1"></i>
+                                            Interactive Map
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="map-iframe-wrapper">
+                                    <iframe
+                                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d44450.527701293024!2d130.93505952043864!3d-3.886197248556427!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2d3f60abb1cbac43%3A0xd9654f0d013387b5!2sKilwaru%2C%20Kec.%20Seram%20Tim.%2C%20Kabupaten%20Seram%20Bagian%20Timur%2C%20Maluku!5e1!3m2!1sid!2sid!4v1756229574577!5m2!1sid!2sid"
+                                        class="map-iframe" allowfullscreen="" loading="lazy"
+                                        referrerpolicy="no-referrer-when-downgrade" title="Peta Lokasi Desa Kilwaru">
+                                    </iframe>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-4">
+                            <div class="location-info fade-in">
+                                <div class="card border-0 shadow-sm">
+                                    <div class="card-body p-4">
+                                        <h5 class="card-title fw-bold mb-4" style="color: var(--primary-green);">
+                                            <i class="bi bi-building me-2"></i>
+                                            Informasi Wilayah
+                                        </h5>
+                                        <div class="location-details">
+                                            <div class="detail-item mb-3">
+                                                <div class="d-flex align-items-start">
+                                                    <i class="fas fa-geo-alt text-danger me-3 mt-1"></i>
+                                                    <div>
+                                                        <strong>Alamat Lengkap</strong>
+                                                        <p class="text-muted mb-0 small">
+                                                            Desa Kilwaru<br>
+                                                            Kecamatan [Nama Kecamatan]<br>
+                                                            Kabupaten [Nama Kabupaten]<br>
+                                                            Provinsi [Nama Provinsi]
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="detail-item mb-3">
+                                                <div class="d-flex align-items-start">
+                                                    <i class="bi bi-rulers text-success me-3 mt-1"></i>
+                                                    <div>
+                                                        <strong>Luas Wilayah</strong>
+                                                        <p class="text-muted mb-0 small">
+                                                            ± [XX] km² / [XXX] Ha
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="detail-item mb-3">
+                                                <div class="d-flex align-items-start">
+                                                    <i class="bi bi-signpost text-warning me-3 mt-1"></i>
+                                                    <div>
+                                                        <strong>Batas Wilayah</strong>
+                                                        <div class="small text-muted">
+                                                            <div class="mb-1">
+                                                                <strong>Utara:</strong> [Desa/Kelurahan]
+                                                            </div>
+                                                            <div class="mb-1">
+                                                                <strong>Selatan:</strong> [Desa/Kelurahan]
+                                                            </div>
+                                                            <div class="mb-1">
+                                                                <strong>Timur:</strong> [Desa/Kelurahan]
+                                                            </div>
+                                                            <div class="mb-1">
+                                                                <strong>Barat:</strong> [Desa/Kelurahan]
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="detail-item">
+                                                <div class="d-flex align-items-start">
+                                                    <i class="bi bi-house-door text-info me-3 mt-1"></i>
+                                                    <div>
+                                                        <strong>Jumlah Dusun</strong>
+                                                        <p class="text-muted mb-0 small">
+                                                            15 Dusun dengan berbagai fasilitas umum
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     {{-- APBDes Section --}}
     <section id="apbdes" class="py-5">
         <div class="container">
@@ -228,7 +692,7 @@
         </div>
     </section>
 
-    <section id="struktur" class="py-5 bg-light">
+    <section id="struktur" class="py-5">
         <div class="container">
             <div class="text-center mb-5">
                 <h2 class="section-title">Struktur Pemerintahan Desa</h2>
@@ -331,7 +795,6 @@
                         @endif
                     </div>
                 @endif
-
                 <div class="row">
                     @php
                         $otherOfficials = collect();
@@ -430,7 +893,7 @@
         </div>
     </section>
 
-    <section id="services" class="py-5 bg-light">
+    <section id="services" class="py-5">
         <div class="container">
             <div class="text-center mb-5">
                 <h2 class="section-title">Layanan Publik</h2>
@@ -473,7 +936,6 @@
                         </div>
                     </div>
                 </div>
-                {{-- Layanana surat --}}
                 <div class="col-lg-4 col-md-6 mb-4">
                     <div class="card h-100 fade-in">
                         <div class="card-body text-center p-4">
@@ -489,11 +951,27 @@
                         </div>
                     </div>
                 </div>
+                <!-- Card UMKM Baru -->
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="card h-100 fade-in">
+                        <div class="card-body text-center p-4">
+                            <div class="feature-icon">
+                                <i class="bi bi-shop"></i>
+                            </div>
+                            <h5 class="card-title">UMKM</h5>
+                            <p class="card-text">Pemberdayaan dan pengembangan Usaha Mikro Kecil Menengah untuk
+                                meningkatkan ekonomi desa.</p>
+                            <a href="{{ route('umkm.index') }}" class="btn btn-primary mt-auto">
+                                <i class="bi bi-arrow-right me-2"></i>Lihat UMKM
+                            </a>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
 
-    <section id="news" class="py-5">
+    <section id="news" class="py-5 bg-light">
         <div class="container">
             <div class="text-center mb-5">
                 <h2 class="section-title">Berita Terkini</h2>
@@ -550,8 +1028,9 @@
             @endif
         </div>
     </section>
-    {{-- BAGIAN GALERI SECTION YANG DIPERBAIKI --}}
-    <section id="galeri" class="py-5 bg-light">
+
+    {{-- GALERI SECTION DENGAN PERBAIKAN CSS BARU --}}
+    <section id="galeri" class="py-5">
         <div class="container">
             <div class="text-center mb-5">
                 <h2 class="section-title">Galeri Foto</h2>
@@ -658,7 +1137,7 @@
         </div>
     </section>
 
-    <section id="umkm" class="py-5">
+    <section id="umkm" class="py-5 bg-light">
         <div class="container">
             <div class="text-center mb-5">
                 <h2 class="section-title">UMKM Desa</h2>
@@ -701,6 +1180,7 @@
             @endif
         </div>
     </section>
+
     <div class="modal fade" id="galeriModal" tabindex="-1" aria-labelledby="galeriModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered">
             <div class="modal-content">
@@ -721,12 +1201,12 @@
             </div>
         </div>
     </div>
-    {{-- Demographics Section - Optional, jika ada chart --}}
+
     @if (isset($showDemographics) && $showDemographics)
         <section class="py-5 bg-light demographics-section">
             <div class="container">
                 <div class="text-center mb-5">
-                    <h2 class="section-title">Data Demografis</h2>
+                    <h2 class="section-title">Data Demografis </h2>
                     <p class="lead">Statistik penduduk Desa Kilwaru</p>
                 </div>
                 <div class="row">
@@ -755,7 +1235,7 @@
         </section>
     @endif
 
-    <section id="contact" class="py-5 bg-light">
+    <section id="contact" class="py-5">
         <div class="container">
             <div class="text-center mb-5">
                 <h2 class="section-title">Hubungi Kami</h2>
@@ -801,7 +1281,40 @@
 
 @push('scripts')
     <script>
-        // Counter animation for statistics (Landing page only)
+        // Function to open full map
+        function openFullMap(event) {
+            // Mencegah tautan menavigasi ke URL default ('#')
+            event.preventDefault();
+            // Membuka URL Google Maps yang valid di tab baru
+            window.open('https://www.google.com/maps/place/Desa+Kilwaru', '_blank');
+        }
+
+        // Lazy loading untuk iframe peta
+        document.addEventListener('DOMContentLoaded', function() {
+            const mapSection = document.querySelector('#peta-lokasi');
+            const mapIframe = document.querySelector('.map-iframe');
+
+            if (mapSection && mapIframe) {
+                const observer = new IntersectionObserver(function(entries) {
+                    entries.forEach(function(entry) {
+                        if (entry.isIntersecting) {
+                            mapIframe.style.opacity = '0';
+                            mapIframe.onload = function() {
+                                mapIframe.style.transition = 'opacity 0.5s ease';
+                                mapIframe.style.opacity = '1';
+                            };
+                            observer.unobserve(entry.target);
+                        }
+                    });
+                }, {
+                    threshold: 0.3
+                });
+
+                observer.observe(mapSection);
+            }
+        });
+
+        // Counter animation for statistics
         function animateCounters() {
             const counters = document.querySelectorAll('.stat-number');
             const speed = 200;
@@ -819,7 +1332,6 @@
                         counter.innerText = value.toLocaleString();
                     }
                 };
-                // Set target values and start animation when visible
                 if (!counter.getAttribute('data-target')) {
                     const originalValue = counter.innerText.replace(/,/g, '');
                     counter.setAttribute('data-target', originalValue);
@@ -829,7 +1341,7 @@
             });
         }
 
-        // Trigger counter animation when stats section is visible (Landing page)
+        // Trigger counter animation when stats section is visible
         const statsSection = document.querySelector('.stats-section');
         const statsObserver = new IntersectionObserver(function(entries) {
             entries.forEach(entry => {
@@ -846,7 +1358,7 @@
             statsObserver.observe(statsSection);
         }
 
-        // Parallax effect for hero section (Landing page only)
+        // Parallax effect for hero section
         window.addEventListener('scroll', () => {
             const scrolled = window.pageYOffset;
             const parallaxElements = document.querySelectorAll('.floating-elements');
@@ -857,7 +1369,7 @@
             });
         });
 
-        // Typing effect for hero title (Landing page only)
+        // Typing effect for hero title
         function typeWriter(element, text, speed = 100) {
             let i = 0;
             element.innerHTML = '';
@@ -872,7 +1384,7 @@
             type();
         }
 
-        // Initialize typing effect after page load (Landing page)
+        // Initialize typing effect after page load
         window.addEventListener('load', () => {
             setTimeout(() => {
                 const heroTitle = document.querySelector('.hero-content h1');
@@ -883,7 +1395,7 @@
             }, 500);
         });
 
-        // Particle effect for hero section (Landing page only)
+        // Particle effect for hero section
         function createParticles() {
             const hero = document.querySelector('.hero-section');
             if (!hero) return;
@@ -899,7 +1411,7 @@
                 `;
                 hero.appendChild(particle);
             }
-            // Add float animation CSS
+
             const floatStyle = document.createElement('style');
             floatStyle.textContent = `
                 @keyframes float {
@@ -910,24 +1422,17 @@
             `;
             document.head.appendChild(floatStyle);
         }
-        // Initialize particles (Landing page)
+
         createParticles();
 
-        // Chart initialization for demographics (Landing page only)
+        // Chart initialization for demographics
         function initCharts() {
-            // Age Distribution Chart
             const ageCtx = document.getElementById('ageChart');
             if (ageCtx) {
                 const ageChart = new Chart(ageCtx.getContext('2d'), {
                     type: 'pie',
                     data: {
-                        labels: [
-                            '0-17 Tahun',
-                            '18-35 Tahun',
-                            '36-50 Tahun',
-                            '51-65 Tahun',
-                            '65+ Tahun'
-                        ],
+                        labels: ['0-17 Tahun', '18-35 Tahun', '36-50 Tahun', '51-65 Tahun', '65+ Tahun'],
                         datasets: [{
                             data: [642, 1089, 736, 285, 95],
                             backgroundColor: ['#4a7c59', '#8fbc8f', '#ff8c42', '#2d5016', '#6c757d'],
@@ -970,7 +1475,6 @@
                 });
             }
 
-            // Gender Distribution Chart
             const genderCtx = document.getElementById('genderChart');
             if (genderCtx) {
                 const genderChart = new Chart(genderCtx.getContext('2d'), {
@@ -979,10 +1483,7 @@
                         labels: ['Laki-laki', 'Perempuan'],
                         datasets: [{
                             data: [1456, 1391],
-                            backgroundColor: [
-                                '#4a7c59',
-                                '#ff8c42'
-                            ],
+                            backgroundColor: ['#4a7c59', '#ff8c42'],
                             borderColor: '#fff',
                             borderWidth: 3,
                             hoverOffset: 15
@@ -1023,13 +1524,13 @@
             }
         }
 
-        // Initialize charts when demographic section becomes visible (Landing page)
+        // Initialize charts when demographic section becomes visible
         const chartSection = document.querySelector('.demographics-section, .charts-section');
         if (chartSection) {
             const chartObserver = new IntersectionObserver(function(entries) {
                 entries.forEach(entry => {
                     if (entry.isIntersecting) {
-                        setTimeout(initCharts, 500); // Small delay for better effect
+                        setTimeout(initCharts, 500);
                         chartObserver.unobserve(entry.target);
                     }
                 });
@@ -1040,7 +1541,7 @@
             chartObserver.observe(chartSection);
         }
 
-        // Hero section specific animations (Landing page)
+        // Hero section specific animations
         const heroElements = document.querySelectorAll('.hero-animation');
         heroElements.forEach((element, index) => {
             element.style.opacity = '0';
@@ -1053,10 +1554,65 @@
             }, 200 + (index * 200));
         });
 
-        // Landing page specific news refresh (if needed)
+        // Typing effect for hero title
+        function typeWriter(element, text, speed = 100) {
+            let i = 0;
+            element.innerHTML = '';
+
+            function type() {
+                if (i < text.length) {
+                    element.innerHTML += text.charAt(i);
+                    i++;
+                    setTimeout(type, speed);
+                }
+            }
+            type();
+        }
+
+        // Initialize typing effect after page load
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                const heroTitle = document.querySelector('.hero-content h1');
+                if (heroTitle) {
+                    const originalText = heroTitle.innerText;
+                    typeWriter(heroTitle, originalText, 50);
+                }
+            }, 500);
+        });
+
+        // Particle effect for hero section
+        function createParticles() {
+            const hero = document.querySelector('.hero-section');
+            if (!hero) return;
+
+            const particleCount = 20;
+
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.style.cssText = `
+                    position: absolute; width: 4px; height: 4px; background: rgba(255, 255, 255, 0.3); border-radius: 50%;
+                    animation: float ${3 + Math.random() * 4}s ease-in-out infinite; animation-delay: ${Math.random() * 2}s;
+                    left: ${Math.random() * 100}%; top: ${Math.random() * 100}%; pointer-events: none;
+                `;
+                hero.appendChild(particle);
+            }
+
+            const floatStyle = document.createElement('style');
+            floatStyle.textContent = `
+                @keyframes float {
+                    0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 1; }
+                    33% { transform: translateY(-20px) rotate(120deg); opacity: 0.7; }
+                    66% { transform: translateY(20px) rotate(240deg); opacity: 0.4; }
+                }
+            `;
+            document.head.appendChild(floatStyle);
+        }
+
+        createParticles();
+
+        // News refresh functionality
         if (typeof refreshNews === 'undefined') {
             window.refreshNews = function() {
-                // Auto refresh berita setiap 5 menit - hanya di landing page
                 setInterval(function() {
                     const newsSection = document.querySelector('#news');
                     if (newsSection && window.location.pathname === '/') {
@@ -1064,16 +1620,14 @@
                             .then(response => response.json())
                             .then(data => {
                                 console.log('Checking for new articles...');
-                                // Logic untuk update berita bisa ditambahkan di sini
                             })
                             .catch(error => console.log('News refresh error:', error));
                     }
-                }, 300000); // 5 menit
+                }, 300000); // 5 minutes
             };
-
-            // Initialize news refresh
             refreshNews();
         }
+
         // Galeri Modal Handler
         const galeriModal = document.getElementById('galeriModal');
         if (galeriModal) {
@@ -1097,7 +1651,7 @@
             });
         }
 
-        // Lazy loading untuk carousel images
+        // Lazy loading for carousel images
         const observerOptions = {
             root: null,
             rootMargin: '50px',
@@ -1117,7 +1671,6 @@
             });
         }, observerOptions);
 
-        // Apply lazy loading to carousel images
         document.querySelectorAll('.galeri-image[data-src]').forEach(function(img) {
             imageObserver.observe(img);
         });
@@ -1125,323 +1678,17 @@
         // Galeri carousel autoplay control
         const galeriCarousel = document.getElementById('galeriCarousel');
         if (galeriCarousel) {
-            // Pause on hover
             galeriCarousel.addEventListener('mouseenter', function() {
                 const carousel = bootstrap.Carousel.getInstance(galeriCarousel);
                 if (carousel) carousel.pause();
             });
 
-            // Resume on mouse leave
             galeriCarousel.addEventListener('mouseleave', function() {
                 const carousel = bootstrap.Carousel.getInstance(galeriCarousel);
                 if (carousel) carousel.cycle();
             });
         }
 
-        console.log('Desa Kilwaru landing page scripts loaded successfully! 🏡');
+        console.log('Desa Kilwaru landing page scripts loaded successfully!');
     </script>
-@endpush
-
-@push('styles')
-    <style>
-        .hero-section {
-            background:
-                linear-gradient(rgba(45, 80, 22, 0.7), rgba(74, 124, 89, 0.7)),
-                url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2532&q=80') center/cover no-repeat;
-            color: white;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            position: relative;
-            overflow: hidden;
-            background-attachment: fixed;
-        }
-
-
-        .hero-section::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><path d="M0,300 C300,200 700,400 1000,300 L1000,1000 L0,1000 Z" fill="%23ffffff08"/></svg>');
-            opacity: 0.2;
-        }
-
-        .hero-content {
-            position: relative;
-            z-index: 2;
-        }
-
-        .galeri-card {
-            background: white;
-            border-radius: 15px;
-            overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
-            transition: all 0.3s ease;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .galeri-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
-        }
-
-        .galeri-image-wrapper {
-            position: relative;
-            overflow: hidden;
-            height: 250px;
-        }
-
-        .galeri-image {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.3s ease;
-        }
-
-        .galeri-card:hover .galeri-image {
-            transform: scale(1.05);
-        }
-
-        .galeri-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(to bottom,
-                    rgba(0, 0, 0, 0.1) 0%,
-                    rgba(0, 0, 0, 0.3) 60%,
-                    rgba(0, 0, 0, 0.7) 100%);
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            padding: 15px;
-        }
-
-        .galeri-card:hover .galeri-overlay {
-            opacity: 1;
-        }
-
-        .galeri-actions {
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-        }
-
-        .galeri-zoom {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: none;
-            background: rgba(255, 255, 255, 0.9);
-            color: var(--primary-green);
-            transition: all 0.3s ease;
-        }
-
-        .galeri-zoom:hover {
-            background: white;
-            transform: scale(1.1);
-        }
-
-        .galeri-info {
-            color: white;
-        }
-
-        .galeri-title {
-            font-size: 1rem;
-            font-weight: 600;
-            margin: 0;
-            line-height: 1.3;
-        }
-
-        .galeri-date {
-            font-size: 0.85rem;
-            margin: 0;
-            opacity: 0.9;
-        }
-
-        .galeri-content {
-            padding: 20px;
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
-
-        /* Carousel Custom Styles - PERBAIKAN UTAMA */
-        #galeriCarousel {
-            margin-bottom: 4rem;
-            /* Increased margin untuk memberi ruang lebih */
-            position: relative;
-        }
-
-        /* Carousel Indicators - PERBAIKAN POSITIONING */
-        .carousel-indicators {
-            bottom: -60px;
-            /* Moved further down */
-            margin-bottom: 0;
-            position: absolute;
-            left: 50%;
-            transform: translateX(-50%);
-            width: auto;
-            margin-left: 0;
-            margin-right: 0;
-        }
-
-        .carousel-indicators [data-bs-target] {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background-color: var(--primary-green);
-            opacity: 0.5;
-            border: none;
-            margin: 0 5px;
-            transition: all 0.3s ease;
-        }
-
-        .carousel-indicators .active {
-            opacity: 1;
-            transform: scale(1.2);
-        }
-
-        /* View All Button Container - PERBAIKAN SPACING */
-        .view-all-container {
-            margin-top: 5rem;
-            /* Increased margin untuk memberi jarak dari carousel indicators */
-            clear: both;
-            position: relative;
-            z-index: 10;
-        }
-
-        .carousel-control-prev,
-        .carousel-control-next {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background: var(--primary-green);
-            border: none;
-            top: 50%;
-            transform: translateY(-50%);
-            opacity: 0.8;
-            transition: all 0.3s ease;
-        }
-
-        .carousel-control-prev {
-            left: -30px;
-        }
-
-        .carousel-control-next {
-            right: -30px;
-        }
-
-        .carousel-control-prev:hover,
-        .carousel-control-next:hover {
-            opacity: 1;
-            transform: translateY(-50%) scale(1.05);
-        }
-
-        .carousel-control-icon-wrapper {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 1.5rem;
-        }
-
-        .carousel-control-prev-icon,
-        .carousel-control-next-icon {
-            display: none;
-        }
-
-        /* Modal Styles */
-        .modal-content {
-            border-radius: 15px;
-            border: none;
-            overflow: hidden;
-        }
-
-        .modal-header {
-            background: var(--primary-green);
-            color: white;
-        }
-
-        .modal-header .btn-close {
-            filter: invert(1);
-        }
-
-        /* Responsive - PERBAIKAN RESPONSIVE */
-        @media (max-width: 768px) {
-            .galeri-image-wrapper {
-                height: 200px;
-            }
-
-            #galeriCarousel {
-                margin-bottom: 3rem;
-            }
-
-            .carousel-indicators {
-                bottom: -40px;
-            }
-
-            .view-all-container {
-                margin-top: 3.5rem;
-            }
-
-            .carousel-control-prev,
-            .carousel-control-next {
-                width: 50px;
-                height: 50px;
-                font-size: 1.2rem;
-            }
-
-            .carousel-control-prev {
-                left: -15px;
-            }
-
-            .carousel-control-next {
-                right: -15px;
-            }
-
-            .galeri-content {
-                padding: 15px;
-            }
-        }
-
-        @media (max-width: 576px) {
-            #galeriCarousel {
-                margin-bottom: 2rem;
-            }
-
-            .carousel-control-prev,
-            .carousel-control-next {
-                position: static;
-                width: auto;
-                height: auto;
-                margin: 20px auto;
-                display: block;
-            }
-
-            .carousel-indicators {
-                position: static;
-                margin-top: 20px;
-                bottom: auto;
-            }
-
-            .view-all-container {
-                margin-top: 2rem;
-            }
-        }
-    </style>
 @endpush

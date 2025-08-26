@@ -11,21 +11,40 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto">
                 <li class="nav-item">
-                    <a class="nav-link" href="#home">Beranda</a>
+                    @if (request()->routeIs('home'))
+                        <a class="nav-link" href="#home">Beranda</a>
+                    @else
+                        <a class="nav-link" href="{{ route('home') }}">Beranda</a>
+                    @endif
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#about">Tentang</a>
+                    @if (request()->routeIs('home'))
+                        <a class="nav-link" href="#about">Tentang</a>
+                    @else
+                        <a class="nav-link" href="{{ route('home') }}#about">Tentang</a>
+                    @endif
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#services">Layanan</a>
+                    @if (request()->routeIs('home'))
+                        <a class="nav-link" href="#services">Layanan</a>
+                    @else
+                        <a class="nav-link" href="{{ route('home') }}#services">Layanan</a>
+                    @endif
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#news">Berita</a>
+                    @if (request()->routeIs('home'))
+                        <a class="nav-link" href="#news">Berita</a>
+                    @else
+                        <a class="nav-link" href="{{ route('berita.index') }}">Berita</a>
+                    @endif
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#contact">Kontak</a>
+                    @if (request()->routeIs('home'))
+                        <a class="nav-link" href="#contact">Kontak</a>
+                    @else
+                        <a class="nav-link" href="{{ route('home') }}#contact">Kontak</a>
+                    @endif
                 </li>
-
             </ul>
         </div>
     </div>
