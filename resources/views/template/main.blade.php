@@ -79,7 +79,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.10.0/font/bootstrap-icons.min.css"
         rel="stylesheet">
-    @extends('template.style')
+    @include('template.style')
 
     <!-- RSS Feed -->
     <link rel="alternate" type="application/rss+xml" title="{{ config('app.village_name') }} - Berita RSS"
@@ -106,7 +106,7 @@
 
     <!-- Scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
-    @extends('template.js')
+    @include('template.js')
 
     <!-- Additional Scripts -->
     @stack('scripts')
