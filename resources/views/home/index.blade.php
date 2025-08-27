@@ -1122,7 +1122,7 @@
 
                 <div class="view-all-container">
                     <div class="text-center">
-                        <a href="#" class="btn btn-primary btn-lg">
+                        <a href="{{ route('public.galeri.index') }}" class="btn btn-primary btn-lg">
                             <i class="bi bi-images me-2"></i>Lihat Semua Galeri
                         </a>
                     </div>
