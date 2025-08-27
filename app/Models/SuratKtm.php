@@ -745,11 +745,11 @@ class SuratKtm extends Model
 
             if ($qrContent && strlen($qrContent) > 100) {
                 // Buat nama file
-                $fileName = 'qr_' . $this->id . '_' . time() . '.png';
+                $fileName = 'qr_' . $this->id  . '.png';
                 $filePath = 'qr_codes/' . $fileName;
 
                 // Simpan file ke storage/app/public/qr_codes/
-                $saved = \Illuminate\Support\Facades\Storage::disk('public')->put($filePath, $qrContent);
+                $saved = Storage::disk('public')->put($filePath, $qrContent);
 
                 if ($saved) {
                     // Update path di database (bukan data base64)
