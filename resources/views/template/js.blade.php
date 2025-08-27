@@ -60,16 +60,21 @@
                 } else {
                     counter.innerText = value.toLocaleString();
                 }
-            }; // Set target values and start animation when visible if
-            (!counter.getAttribute('data-target')) {
+            };
+
+            // Set target values and start animation when visible
+            if (!counter.getAttribute('data-target')) {
                 const originalValue = counter.innerText.replace(/,/g, '');
                 counter.setAttribute('data-target', originalValue);
                 counter.innerText = '0';
             }
+
             animate();
         });
-    } // Add hover effects
-    to cards document.querySelectorAll('.card, .news-card').forEach(card => {
+    }
+
+    // Add hover effects to cards
+    document.querySelectorAll('.card, .news-card').forEach(card => {
         card.addEventListener('mouseenter', function() {
             this.style.transform = 'translateY(-10px)';
             this.style.transition = 'all 0.3s ease';
@@ -90,17 +95,17 @@
             const y = e.clientY - rect.top - size / 2;
 
             ripple.style.cssText = `
-    position: absolute;
-    width: ${size}px;
-    height: ${size}px;
-    left: ${x}px;
-    top: ${y}px;
-    background: rgba(255,255,255,0.3);
-    border-radius: 50%;
-    transform: scale(0);
-    animation: ripple 0.6s linear;
-    pointer-events: none;
-    `;
+            position: absolute;
+            width: ${size}px;
+            height: ${size}px;
+            left: ${x}px;
+            top: ${y}px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 50%;
+            transform: scale(0);
+            animation: ripple 0.6s linear;
+            pointer-events: none;
+        `;
 
             this.style.position = 'relative';
             this.style.overflow = 'hidden';
@@ -116,16 +121,16 @@
     const style = document.createElement('style');
     style.textContent = `
     @keyframes ripple {
-    to {
-    transform: scale(4);
-    opacity: 0;
+        to {
+            transform: scale(4);
+            opacity: 0;
+        }
     }
-    }
-
+    
     .parallax {
-    transform: translateY(var(--scroll));
+        transform: translateY(var(--scroll));
     }
-    `;
+`;
     document.head.appendChild(style);
 
     // Parallax effect for hero section
@@ -170,7 +175,7 @@
     background: var(--accent-orange);
     z-index: 9999;
     transition: width 0.1s ease;
-    `;
+`;
     document.body.appendChild(progressBar);
 
     window.addEventListener('scroll', () => {
@@ -199,7 +204,7 @@
     transition: all 0.3s ease;
     z-index: 1000;
     box-shadow: 0 4px 15px rgba(255, 140, 66, 0.3);
-    `;
+`;
 
     backToTopBtn.addEventListener('click', () => {
         window.scrollTo({
@@ -242,9 +247,12 @@
                 setTimeout(type, speed);
             }
         }
+
         type();
-    } // Initialize
-    typing effect after page load window.addEventListener('load', () => {
+    }
+
+    // Initialize typing effect after page load
+    window.addEventListener('load', () => {
         setTimeout(() => {
             const heroTitle = document.querySelector('.hero-content h1');
             if (heroTitle) {
@@ -262,14 +270,26 @@
         for (let i = 0; i < particleCount; i++) {
             const particle = document.createElement('div');
             particle.style.cssText = `
-            position: absolute; width: 4px; height: 4px; background: rgba(255, 255, 255, 0.3); border-radius: 50%;
-            animation: float ${3 + Math.random() * 4}s ease-in-out infinite; animation-delay: ${Math.random() * 2}s;
-            left: ${Math.random() * 100}%; top: ${Math.random() * 100}%; pointer-events: none; `;
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            animation: float ${3 + Math.random() * 4}s ease-in-out infinite;
+            animation-delay: ${Math.random() * 2}s;
+            left: ${Math.random() * 100}%;
+            top: ${Math.random() * 100}%;
+            pointer-events: none;
+        `;
             hero.appendChild(particle);
         }
-    } // Initialize particles createParticles(); // Add form validation for
-    contact section
-    if needed document.querySelectorAll('input, textarea').forEach(field => {
+    }
+
+    // Initialize particles
+    createParticles();
+
+    // Add form validation for contact section if needed
+    document.querySelectorAll('input, textarea').forEach(field => {
         field.addEventListener('focus', function() {
             this.style.borderColor = 'var(--accent-orange)';
             this.style.boxShadow = '0 0 0 0.2rem rgba(255, 140, 66, 0.25)';
@@ -398,7 +418,6 @@
     }, {
         threshold: 0.3
     });
-
 
     console.log('Desa Kilwaru website loaded successfully! 🏡');
 </script>
