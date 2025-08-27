@@ -4,8 +4,9 @@
          <div class="row">
              <div class="col-lg-4 mb-4">
                  <h5 class="mb-3">
-                     <i class="bi bi-house-heart-fill me-2"></i>
-                     Desa Sejahtera
+                     <img src="{{ asset('asset/img/logo_sbt.png') }}" alt="Logo SBT" class="me-2"
+                         style="width: 32px; height: 32px; object-fit: contain;">
+                     Desa Kilwaru
                  </h5>
                  <p class="text-light">
                      Membangun masa depan yang lebih baik melalui transparansi, inovasi, dan pelayanan yang
@@ -35,10 +36,11 @@
                  <h6 class="mb-3">Layanan</h6>
                  <ul class="list-unstyled footer-links">
                      <li><a href="#">Administrasi</a></li>
-                     <li><a href="#">Surat Keterangan</a></li>
+                     <li><a href="{{ route('public.surat.index') }}">Surat Keterangan</a></li>
                      <li><a href="#">Kesehatan</a></li>
                      <li><a href="#">Pendidikan</a></li>
                      <li><a href="#">Bantuan Sosial</a></li>
+                     <li><a href="{{ route('umkm.index') }}">UMKM</a></li>
                  </ul>
              </div>
              <div class="col-lg-3 col-md-6 mb-4">
@@ -54,10 +56,10 @@
          <hr class="my-4">
          <div class="row align-items-center">
              <div class="col-md-6">
-                 <p class="mb-0">&copy; 2025 Desa Sejahtera. All rights reserved.</p>
+                 <p class="mb-0">&copy; 2025 Desa Kilwaru. All rights reserved.</p>
              </div>
              <div class="col-md-6 text-md-end">
-                 <p class="mb-0">Powered by <span style="color: var(--accent-orange);">Digital Village</span></p>
+                 <p class="mb-0">Made By <span style="color: var(--accent-orange);">Local Class Tech</span></p>
              </div>
          </div>
      </div>

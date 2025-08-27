@@ -1,8 +1,9 @@
 <!-- Navigation -->
 <nav class="navbar navbar-expand-lg fixed-top">
     <div class="container">
-        <a class="navbar-brand" href="{{ route('home') }}">
-            <i class="bi bi-house-heart-fill me-2"></i>
+        <a class="navbar-brand d-flex align-items-center" href="{{ route('home') }}">
+            <img src="{{ asset('asset/img/logo_sbt.png') }}" alt="Logo SBT" class="me-2"
+                style="width: 32px; height: 32px; object-fit: contain;">
             Website Resmi Desa Kilwaru
         </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">

@@ -22,7 +22,7 @@
             .hero-section {
                 background:
                     linear-gradient(rgba(45, 80, 22, 0.7), rgba(74, 124, 89, 0.7)),
-                    url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2532&q=80') center/cover no-repeat;
+                    url({{ asset('asset/img/pulau_kilwaru.png') }}) center/cover no-repeat;
                 color: white;
                 min-height: 100vh;
                 display: flex;
@@ -458,7 +458,7 @@
                 </div>
                 <div class="col-lg-3 col-md-4 col-6">
                     <div class="stat-item fade-in">
-                        <span class="stat-number" data-target="15">15</span>
+                        <span class="stat-number" data-target="15">8</span>
                         <span class="stat-label">Dusun</span>
                     </div>
                 </div>
@@ -511,8 +511,8 @@
                                 <i class="bi bi-people-fill" style="font-size: 4rem; color: var(--secondary-green);"></i>
                                 <h4 class="mt-3 mb-3">Visi Desa</h4>
                                 <p class="text-muted">
-                                    "Menjadi desa yang mandiri, Kilwaru, dan berkelanjutan dengan memanfaatkan
-                                    teknologi dan kearifan lokal untuk keKilwaruan bersama."
+                                    "Menjadi desa yang mandiri, Sejahter, dan berkelanjutan dengan memanfaatkan
+                                    teknologi dan kearifan lokal untuk kesejahteraan bersama."
                                 </p>
                             </div>
                         </div>
@@ -619,7 +619,7 @@
                                                     <div>
                                                         <strong>Jumlah Dusun</strong>
                                                         <p class="text-muted mb-0 small">
-                                                            15 Dusun dengan berbagai fasilitas umum
+                                                            8 Dusun dengan berbagai fasilitas umum
                                                         </p>
                                                     </div>
                                                 </div>
@@ -1250,7 +1250,8 @@
                                     <i class="bi bi-geo-alt"></i>
                                 </div>
                                 <h6>Alamat</h6>
-                                <p class="text-muted">Jl. Raya Desa No. 123<br>Kecamatan Kilwaru<br>Kabupaten Makmur
+                                <p class="text-muted">Jl. Rumaniu <br>Desa Kilwaru<br>Kecamatan Seram Timur<br>Kabupaten
+                                    Seram Bagian Timur
                                 </p>
                             </div>
                         </div>
@@ -1269,7 +1270,7 @@
                                     <i class="bi bi-envelope"></i>
                                 </div>
                                 <h6>Email</h6>
-                                <p class="text-muted">info@desakilwaru.id<br>admin@desakilwaru.id</p>
+                                <p class="text-muted">adminkilwaru@kilwaru.com</p>
                             </div>
                         </div>
                     </div>
