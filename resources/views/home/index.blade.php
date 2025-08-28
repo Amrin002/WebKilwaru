@@ -563,7 +563,7 @@
                                 <div class="card border-0 shadow-sm">
                                     <div class="card-body p-4">
                                         <h5 class="card-title fw-bold mb-4" style="color: var(--primary-green);">
-                                            <i class="bi bi-building me-2"></i>
+                                            <i class="fa-solid fa-building-columns"></i>
                                             Informasi Wilayah
                                         </h5>
                                         <div class="location-details">
