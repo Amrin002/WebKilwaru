@@ -132,7 +132,7 @@
             </ul>
         </li>
 
-        <!-- Layanan Publik dengan Sub Menu -->
+        {{-- <!-- Layanan Publik dengan Sub Menu -->
         <li class="nav-item">
             <div class="nav-link has-submenu {{ request()->routeIs('admin.layanan.*') ? 'expanded' : '' }}"
                 data-page="layanan">
@@ -174,7 +174,7 @@
                     </a>
                 </li>
             </ul>
-        </li>
+        </li> --}}
 
         <!-- Berita & Info dengan Sub Menu -->
         <li class="nav-item">
@@ -193,14 +193,14 @@
                         <span>Kelola Berita</span>
                     </a>
                 </li>
-                <li class="sub-menu-item">
+                {{-- <li class="sub-menu-item">
                     <a href="#"
                         class="sub-menu-link {{ request()->routeIs('admin.berita.pengumuman.*') ? 'active' : '' }}"
                         data-subpage="pengumuman">
                         <i class="bi bi-megaphone"></i>
                         <span>Pengumuman</span>
                     </a>
-                </li>
+                </li> --}}
                 <li class="sub-menu-item">
                     <a href="{{ route('admin.galeri.index') }}"
                         class="sub-menu-link {{ request()->routeIs('admin.galeri.*') ? 'active' : '' }}"
@@ -212,8 +212,16 @@
             </ul>
         </li>
 
-        <!-- Keuangan Desa dengan Sub Menu -->
+        <!-- Keuangan Desa -->
         <li class="nav-item">
+            <a href="{{ route('admin.apbdes.index') }}"
+                class="nav-link {{ request()->routeIs('admin.apbdes.*') ? 'active' : '' }}" data-page="struktur-desa">
+                <i class="bi bi-pie-chart"></i>
+                <span class="nav-text">APBDes</span>
+            </a>
+        </li>
+        <!-- Keuangan Desa dengan Sub Menu -->
+        {{-- <li class="nav-item">
             <div class="nav-link has-submenu {{ request()->routeIs('admin.apbdes.*') ? 'expanded' : '' }}"
                 data-page="keuangan">
                 <i class="bi bi-cash-stack"></i>
@@ -254,9 +262,9 @@
                     </a>
                 </li>
             </ul>
-        </li>
+        </li> --}}
 
-        <!-- Infrastruktur dengan Sub Menu -->
+        {{-- <!-- Infrastruktur dengan Sub Menu -->
         <li class="nav-item">
             <div class="nav-link has-submenu {{ request()->routeIs('admin.infrastruktur.*') ? 'expanded' : '' }}"
                 data-page="infrastruktur">
@@ -298,9 +306,9 @@
                     </a>
                 </li>
             </ul>
-        </li>
+        </li> --}}
 
-        <!-- Laporan dengan Sub Menu -->
+        {{-- <!-- Laporan dengan Sub Menu -->
         <li class="nav-item">
             <div class="nav-link has-submenu {{ request()->routeIs('admin.laporan.*') ? 'expanded' : '' }}"
                 data-page="laporan">
@@ -342,9 +350,9 @@
                     </a>
                 </li>
             </ul>
-        </li>
+        </li> --}}
 
-        <!-- Pengaturan dengan Sub Menu -->
+        {{-- <!-- Pengaturan dengan Sub Menu -->
         <li class="nav-item">
             <div class="nav-link has-submenu {{ request()->routeIs('admin.pengaturan.*') ? 'expanded' : '' }}"
                 data-page="pengaturan">
@@ -386,6 +394,6 @@
                     </a>
                 </li>
             </ul>
-        </li>
+        </li> --}}
     </ul>
 </nav>

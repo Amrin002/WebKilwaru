@@ -695,4 +695,6 @@ Route::redirect('/news', '/berita', 301);
 Route::redirect('/news/{slug}', '/berita/{slug}', 301);
 Route::redirect('/category/{slug}', '/berita/kategori/{slug}', 301);
 
+
+
 require __DIR__ . '/auth.php';
