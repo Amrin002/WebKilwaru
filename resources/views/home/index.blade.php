@@ -429,7 +429,8 @@
                     <div class="text-center">
                         <div
                             style="background: rgba(255,255,255,0.1); border-radius: 50%; padding: 60px; backdrop-filter: blur(10px);">
-                            <i class="bi bi-geo-alt-fill" style="font-size: 8rem; color: var(--accent-orange);"></i>
+                            <img src="{{ asset('asset/img/logo_sbt.png') }}" alt="Logo SBT" class="me-2"
+                                style="width: 100px; height: 100px; object-fit: contain;">
                         </div>
                     </div>
                 </div>
@@ -573,9 +574,9 @@
                                                         <strong>Alamat Lengkap</strong>
                                                         <p class="text-muted mb-0 small">
                                                             Desa Kilwaru<br>
-                                                            Kecamatan [Nama Kecamatan]<br>
-                                                            Kabupaten [Nama Kabupaten]<br>
-                                                            Provinsi [Nama Provinsi]
+                                                            Kecamatan Seram Timur<br>
+                                                            Kabupaten Seram Bagian Timur<br>
+                                                            Provinsi Maluku
                                                         </p>
                                                     </div>
                                                 </div>
@@ -598,16 +599,16 @@
                                                         <strong>Batas Wilayah</strong>
                                                         <div class="small text-muted">
                                                             <div class="mb-1">
-                                                                <strong>Utara:</strong> [Desa/Kelurahan]
+                                                                <strong>Utara:</strong> Desa Kiltai
                                                             </div>
                                                             <div class="mb-1">
-                                                                <strong>Selatan:</strong> [Desa/Kelurahan]
+                                                                <strong>Selatan:</strong> Laut Banda
                                                             </div>
                                                             <div class="mb-1">
-                                                                <strong>Timur:</strong> [Desa/Kelurahan]
+                                                                <strong>Timur:</strong> Dusun Kidan
                                                             </div>
                                                             <div class="mb-1">
-                                                                <strong>Barat:</strong> [Desa/Kelurahan]
+                                                                <strong>Barat:</strong> Selat Geser
                                                             </div>
                                                         </div>
                                                     </div>
