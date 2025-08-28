@@ -82,13 +82,14 @@
 
         <!-- Administrasi dengan Sub Menu -->
         <li class="nav-item">
-            <div class="nav-link has-submenu {{ request()->routeIs('admin.surat.*', 'admin.arsip-surat.*') ? 'active' : '' }}"
+            <div class="nav-link has-submenu {{ request()->routeIs('admin.surat.*', 'admin.arsip-surat.*', 'admin.surat-ktm.*', 'admin.surat-ktu.*') ? 'active' : '' }}"
                 data-page="surat">
                 <i class="bi bi-file-earmark-text"></i>
                 <span class="nav-text">Administrasi</span>
                 <i class="bi bi-chevron-down dropdown-arrow"></i>
             </div>
-            <ul class="sub-menu {{ request()->routeIs('admin.surat.*', 'admin.arsip-surat.*') ? 'expanded' : '' }}">
+            <ul
+                class="sub-menu {{ request()->routeIs('admin.surat.*', 'admin.arsip-surat.*', 'admin.surat-ktm.*', 'admin.surat-ktu.*') ? 'expanded' : '' }}">
                 <li class="sub-menu-item">
                     <a href="{{ route('admin.surat.dashboard') }}"
                         class="sub-menu-link {{ request()->routeIs('admin.surat.dashboard') ? 'active' : '' }}"
