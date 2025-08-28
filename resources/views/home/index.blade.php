@@ -802,6 +802,8 @@
                         $categories = [
                             'kaur_umum',
                             'kaur_keuangan',
+                            'kaur_perencanaan',
+                            'kaur_tata_usaha',
                             'kasi_pemerintahan',
                             'kasi_kesejahteraan',
                             'kasi_pelayanan',
