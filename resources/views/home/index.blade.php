@@ -587,7 +587,7 @@
                                                     <div>
                                                         <strong>Luas Wilayah</strong>
                                                         <p class="text-muted mb-0 small">
-                                                            ± [XX] km² / [XXX] Ha
+                                                            ± 36 km²
                                                         </p>
                                                     </div>
                                                 </div>
