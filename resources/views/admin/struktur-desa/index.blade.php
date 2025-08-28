@@ -276,7 +276,7 @@
                                             <div class="dropdown">
                                                 <button class="btn btn-outline-secondary btn-sm dropdown-toggle"
                                                     type="button" data-bs-toggle="dropdown">
-                                                    <i class="bi bi-three-dots"></i>
+                                                    <i class="bi bi-three-dots-vertical"></i>
                                                 </button>
                                                 <ul class="dropdown-menu">
                                                     <li>
@@ -286,9 +286,10 @@
                                                             @csrf
                                                             <button type="submit" class="dropdown-item">
                                                                 @if ($pejabat->aktif)
-                                                                    <i class="bi bi-x-circle text-warning"></i> Nonaktifkan
+                                                                    <i class="bi bi-x-circle text-warning me-2"></i>
+                                                                    Nonaktifkan
                                                                 @else
-                                                                    <i class="bi bi-check-circle text-success"></i>
+                                                                    <i class="bi bi-check-circle text-success me-2"></i>
                                                                     Aktifkan
                                                                 @endif
                                                             </button>
@@ -305,7 +306,7 @@
                                                             @csrf
                                                             @method('DELETE')
                                                             <button type="submit" class="dropdown-item text-danger">
-                                                                <i class="bi bi-trash"></i> Hapus
+                                                                <i class="bi bi-trash me-2"></i> Hapus
                                                             </button>
                                                         </form>
                                                     </li>
@@ -319,13 +320,93 @@
                     </table>
                 </div>
 
-                <!-- Pagination -->
-                <div class="d-flex justify-content-between align-items-center mt-3">
+                <!-- Custom Pagination - FIXED VERSION -->
+                <div class="d-flex justify-content-between align-items-center mt-4">
                     <div class="text-muted">
                         Menampilkan {{ $strukturDesa->firstItem() }} - {{ $strukturDesa->lastItem() }}
                         dari {{ $strukturDesa->total() }} pejabat
                     </div>
-                    {{ $strukturDesa->links() }}
+
+                    <!-- Custom Pagination -->
+                    @if ($strukturDesa->hasPages())
+                        <nav aria-label="Page Navigation">
+                            <ul class="pagination mb-0">
+                                {{-- Previous Page Link --}}
+                                @if ($strukturDesa->onFirstPage())
+                                    <li class="page-item disabled">
+                                        <span class="page-link">
+                                            <i class="bi bi-chevron-left"></i>
+                                        </span>
+                                    </li>
+                                @else
+                                    <li class="page-item">
+                                        <a class="page-link" href="{{ $strukturDesa->previousPageUrl() }}"
+                                            rel="prev">
+                                            <i class="bi bi-chevron-left"></i>
+                                        </a>
+                                    </li>
+                                @endif
+
+                                {{-- Page Numbers --}}
+                                @php
+                                    $start = max($strukturDesa->currentPage() - 2, 1);
+                                    $end = min($start + 4, $strukturDesa->lastPage());
+                                    $start = max($end - 4, 1);
+                                @endphp
+
+                                @if ($start > 1)
+                                    <li class="page-item">
+                                        <a class="page-link" href="{{ $strukturDesa->url(1) }}">1</a>
+                                    </li>
+                                    @if ($start > 2)
+                                        <li class="page-item disabled">
+                                            <span class="page-link">...</span>
+                                        </li>
+                                    @endif
+                                @endif
+
+                                @for ($i = $start; $i <= $end; $i++)
+                                    @if ($i == $strukturDesa->currentPage())
+                                        <li class="page-item active">
+                                            <span class="page-link">{{ $i }}</span>
+                                        </li>
+                                    @else
+                                        <li class="page-item">
+                                            <a class="page-link"
+                                                href="{{ $strukturDesa->url($i) }}">{{ $i }}</a>
+                                        </li>
+                                    @endif
+                                @endfor
+
+                                @if ($end < $strukturDesa->lastPage())
+                                    @if ($end < $strukturDesa->lastPage() - 1)
+                                        <li class="page-item disabled">
+                                            <span class="page-link">...</span>
+                                        </li>
+                                    @endif
+                                    <li class="page-item">
+                                        <a class="page-link"
+                                            href="{{ $strukturDesa->url($strukturDesa->lastPage()) }}">{{ $strukturDesa->lastPage() }}</a>
+                                    </li>
+                                @endif
+
+                                {{-- Next Page Link --}}
+                                @if ($strukturDesa->hasMorePages())
+                                    <li class="page-item">
+                                        <a class="page-link" href="{{ $strukturDesa->nextPageUrl() }}" rel="next">
+                                            <i class="bi bi-chevron-right"></i>
+                                        </a>
+                                    </li>
+                                @else
+                                    <li class="page-item disabled">
+                                        <span class="page-link">
+                                            <i class="bi bi-chevron-right"></i>
+                                        </span>
+                                    </li>
+                                @endif
+                            </ul>
+                        </nav>
+                    @endif
                 </div>
             @else
                 <div class="text-center py-5">
@@ -431,6 +512,7 @@
 
     @push('style')
         <style>
+            /* Table Styling */
             .table th {
                 border-top: none;
                 font-weight: 600;
@@ -466,23 +548,136 @@
                 box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
             }
 
+            /* PAGINATION STYLING - FIXED */
+            .pagination {
+                margin-bottom: 0;
+            }
+
             .pagination .page-link {
                 color: var(--primary-green);
-                border-color: var(--cream);
+                border: 1px solid var(--cream);
+                border-radius: 8px;
+                margin: 0 3px;
+                padding: 10px 15px;
+                transition: all 0.3s ease;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                min-width: 44px;
+                min-height: 44px;
+                font-size: 0.875rem;
+                line-height: 1;
+                text-decoration: none;
+                background-color: white;
+            }
+
+            .pagination .page-link:hover {
+                background-color: var(--cream);
+                border-color: var(--primary-green);
+                color: var(--primary-green);
+                text-decoration: none;
+                transform: translateY(-1px);
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
             }
 
             .pagination .page-item.active .page-link {
                 background-color: var(--accent-orange);
                 border-color: var(--accent-orange);
+                color: white;
+                box-shadow: 0 2px 8px rgba(255, 140, 0, 0.3);
             }
 
+            .pagination .page-item.disabled .page-link {
+                color: #6c757d;
+                background-color: #f8f9fa;
+                border-color: #dee2e6;
+                pointer-events: none;
+                cursor: not-allowed;
+                opacity: 0.6;
+            }
+
+            /* Bootstrap Icons Fix */
+            .bi {
+                font-family: "Bootstrap Icons" !important;
+                font-style: normal;
+                font-weight: normal !important;
+                font-variant: normal;
+                text-transform: none;
+                line-height: 1;
+                vertical-align: -.125em;
+                -webkit-font-smoothing: antialiased;
+                -moz-osx-font-smoothing: grayscale;
+            }
+
+            /* Dropdown Arrow Fix */
+            .dropdown-toggle::after {
+                display: inline-block;
+                margin-left: 0.255em;
+                vertical-align: 0.255em;
+                content: "";
+                border-top: 0.3em solid;
+                border-right: 0.3em solid transparent;
+                border-bottom: 0;
+                border-left: 0.3em solid transparent;
+            }
+
+            .dropdown-toggle:empty::after {
+                margin-left: 0;
+            }
+
+            /* Button Styling */
             .btn-sm {
                 padding: 0.25rem 0.5rem;
                 font-size: 0.75rem;
             }
 
+            /* Image Styling */
             img.rounded-circle {
                 border: 2px solid var(--cream);
+                transition: all 0.3s ease;
+            }
+
+            img.rounded-circle:hover {
+                border-color: var(--primary-green);
+                transform: scale(1.05);
+            }
+
+            /* Responsive Design */
+            @media (max-width: 768px) {
+                .pagination .page-link {
+                    padding: 8px 12px;
+                    min-width: 38px;
+                    min-height: 38px;
+                    font-size: 0.8rem;
+                    margin: 0 1px;
+                }
+
+                .stats-grid {
+                    grid-template-columns: 1fr 1fr;
+                }
+
+                .btn-group {
+                    flex-direction: column;
+                }
+            }
+
+            /* Dark mode support */
+            [data-theme="dark"] .pagination .page-link {
+                color: var(--light-green);
+                background-color: var(--dark-bg-secondary);
+                border-color: var(--dark-border);
+            }
+
+            [data-theme="dark"] .pagination .page-link:hover {
+                background-color: var(--dark-bg-hover);
+                border-color: var(--light-green);
+                color: var(--light-green);
+            }
+
+            [data-theme="dark"] .pagination .page-item.active .page-link {
+                background-color: var(--accent-orange);
+                border-color: var(--accent-orange);
+                color: white;
             }
         </style>
     @endpush
