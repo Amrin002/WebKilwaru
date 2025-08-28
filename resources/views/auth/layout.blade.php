@@ -390,15 +390,15 @@
                                     </p>
                                     <div class="row text-center mt-5">
                                         <div class="col-4">
-                                            <div class="h3 fw-bold">2.8K+</div>
+                                            <div class="h3 fw-bold">{{ $dataPenduduk }}</div>
                                             <small>Penduduk</small>
                                         </div>
                                         <div class="col-4">
-                                            <div class="h3 fw-bold">847</div>
+                                            <div class="h3 fw-bold">{{ $dataKk }}</div>
                                             <small>Kepala Keluarga</small>
                                         </div>
                                         <div class="col-4">
-                                            <div class="h3 fw-bold">12</div>
+                                            <div class="h3 fw-bold">{{ $layanan }}</div>
                                             <small>Layanan</small>
                                         </div>
                                     </div>
