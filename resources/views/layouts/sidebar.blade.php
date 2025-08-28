@@ -83,7 +83,7 @@
         <!-- Administrasi dengan Sub Menu -->
         <li class="nav-item">
             <div class="nav-link has-submenu {{ request()->routeIs('admin.surat.*', 'admin.arsip-surat.*') ? 'active' : '' }}"
-                data-page="administrasi">
+                data-page="surat">
                 <i class="bi bi-file-earmark-text"></i>
                 <span class="nav-text">Administrasi</span>
                 <i class="bi bi-chevron-down dropdown-arrow"></i>
@@ -107,12 +107,36 @@
                 </li>
                 <li class="sub-menu-item">
                     <a href="#"
-                        class="sub-menu-link {{ request()->routeIs('admin.administrasi.surat-domisili.*') ? 'active' : '' }}"
+                        class="sub-menu-link {{ request()->routeIs('admin.surat-domisili.*') ? 'active' : '' }}"
                         data-subpage="surat-domisili">
                         <i class="bi bi-geo-alt"></i>
                         <span>Surat Domisili</span>
                     </a>
                 </li>
+                {{-- <li class="sub-menu-item">
+                    <a href="#"
+                        class="sub-menu-link {{ request()->routeIs('admin.surat-domisili.*') ? 'active' : '' }}"
+                        data-subpage="surat-domisili">
+                        <i class="bi bi-geo-alt"></i>
+                        <span>Surat Pindah Domisili</span>
+                    </a>
+                </li>
+                <li class="sub-menu-item">
+                    <a href="#"
+                        class="sub-menu-link {{ request()->routeIs('admin.surat-domisili.*') ? 'active' : '' }}"
+                        data-subpage="surat-domisili">
+                        <i class="bi bi-geo-alt"></i>
+                        <span>Surat </span>
+                    </a>
+                </li> --}}
+                {{-- <li class="sub-menu-item">
+                    <a href="#"
+                        class="sub-menu-link {{ request()->routeIs('admin.surat-domisili.*') ? 'active' : '' }}"
+                        data-subpage="surat-domisili">
+                        <i class="bi bi-geo-alt"></i>
+                        <span>Surat Domisili</span>
+                    </a>
+                </li> --}}
                 <li class="sub-menu-item">
                     <a href="{{ route('admin.surat-ktu.index') }}"
                         class="sub-menu-link {{ request()->routeIs('admin.surat-ktu.*') ? 'active' : '' }}"
