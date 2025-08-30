@@ -255,6 +255,7 @@ class UmkmController extends Controller
         return view('public.umkm.index', compact('umkms', 'kategoriOptions'));
     }
 
+
     /**
      * Show detail UMKM untuk publik (future feature)
      */
@@ -389,6 +390,84 @@ class UmkmController extends Controller
     }
 
     /**
+     * Update an existing UMKM record.
+     */
+    public function adminUpdate(Request $request, $id)
+    {
+        // Check if user is admin
+        if (!Auth::check() || !Auth::user()->role === 'admin') {
+            return redirect()->route('login')->with('error', 'Akses ditolak.');
+        }
+
+        $umkm = Umkm::findOrFail($id);
+
+        // Validation rules for update
+        $validated = $request->validate([
+            'nik' => [
+                'required',
+                'digits:16',
+                'exists:penduduks,nik',
+                // Pastikan NIK yang sama tidak boleh memiliki UMKM pending/approved,
+                // kecuali NIK itu adalah NIK dari UMKM yang sedang diedit.
+                Rule::unique('umkms')->ignore($umkm->id)->where(function ($query) {
+                    return $query->whereIn('status', ['pending', 'approved']);
+                }),
+            ],
+            'nama_umkm' => ['required', 'string', 'max:255', 'min:3'],
+            'kategori' => ['required', Rule::in(array_keys(Umkm::getKategoriOptions()))],
+            'nama_produk' => ['required', 'string', 'max:255', 'min:3'],
+            'deskripsi_produk' => ['required', 'string', 'max:1000', 'min:10'],
+            'foto_produk' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'nomor_telepon' => ['required', 'string', 'min:10', 'max:20', 'regex:/^[0-9+\-\s\(\)]*$/'],
+            'link_facebook' => ['nullable', 'url', 'max:500'],
+            'link_instagram' => ['nullable', 'url', 'max:500'],
+            'link_tiktok' => ['nullable', 'url', 'max:500'],
+        ]);
+
+        // Handle foto produk
+        $fotoFilename = $umkm->foto_produk;
+        if ($request->hasFile('foto_produk')) {
+            // Hapus foto lama jika ada
+            if ($umkm->foto_produk) {
+                Storage::disk('public')->delete('umkm-photos/' . $umkm->foto_produk);
+            }
+            // Upload foto baru
+            $file = $request->file('foto_produk');
+            $fotoFilename = time() . '_' . Str::random(10) . '.' . $file->getClientOriginalExtension();
+            $file->storeAs('umkm-photos', $fotoFilename, 'public');
+        }
+
+        // Update record
+        try {
+            $umkm->update([
+                'nik' => $validated['nik'],
+                'nama_umkm' => $validated['nama_umkm'],
+                'kategori' => $validated['kategori'],
+                'nama_produk' => $validated['nama_produk'],
+                'deskripsi_produk' => $validated['deskripsi_produk'],
+                'foto_produk' => $fotoFilename,
+                'nomor_telepon' => $validated['nomor_telepon'],
+                'link_facebook' => $validated['link_facebook'],
+                'link_instagram' => $validated['link_instagram'],
+                'link_tiktok' => $validated['link_tiktok'],
+            ]);
+
+            return redirect()
+                ->route('admin.umkm.edit', $umkm->id)
+                ->with('success', 'Data UMKM berhasil diperbarui.');
+        } catch (\Exception $e) {
+            // Jika gagal update, dan ada foto baru yang sudah diupload, hapus fotonya
+            if ($request->hasFile('foto_produk') && $umkm->foto_produk !== $fotoFilename) {
+                Storage::disk('public')->delete('umkm-photos/' . $fotoFilename);
+            }
+
+            return back()
+                ->withInput()
+                ->withErrors(['error' => 'Terjadi kesalahan saat menyimpan data. Silakan coba lagi.']);
+        }
+    }
+
+    /**
      * Approve UMKM
      */
     public function approve($id)
@@ -472,7 +551,7 @@ class UmkmController extends Controller
         $umkm->reject($request->catatan_admin, Auth::id());
 
         // Pesan notifikasi WhatsApp
-        $waMessage = "Mohon maaf, pendaftaran UMKM Anda dengan nama usaha *{$umkm->nama_umkm}* telah ditolak. Catatan admin: {$request->catatan_admin}. Anda bisa mengajukan pendaftaran ulang setelah memperbaiki kekurangan data.";
+        $waMessage = "Mohon maaf, pendaftaran UMKM Anda dengan nama usaha *{$umkm->nama_umkm}* telah ditolak. Dengan Catatan: {$request->catatan_admin}. Anda bisa mengajukan pendaftaran ulang setelah memperbaiki kekurangan data. ";
         $waLink = 'https://wa.me/' . $umkm->nomor_telepon . '?text=' . urlencode($waMessage);
 
         return redirect()

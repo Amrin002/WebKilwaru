@@ -1,7 +1,6 @@
 @extends('layouts.main')
 
 @push('style')
-    <!-- Include same CSS as before -->
     <style>
         /* Form Styles */
         .form-container {
@@ -184,21 +183,9 @@
         }
 
         /* Input Group Styles */
-        .input-group-kk {
+        .input-group-umkm {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 15px;
-        }
-
-        .input-group-address {
-            display: grid;
-            grid-template-columns: 2fr 1fr 1fr;
-            gap: 15px;
-        }
-
-        .input-group-location {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
             gap: 15px;
         }
 
@@ -296,9 +283,7 @@
                 padding: 20px;
             }
 
-            .input-group-kk,
-            .input-group-address,
-            .input-group-location {
+            .input-group-umkm {
                 grid-template-columns: 1fr;
             }
 
@@ -340,235 +325,240 @@
 
 @section('content')
     <div class="dashboard-content">
-        <!-- Page Header -->
         <div class="page-header">
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb">
                     <li class="breadcrumb-item"><a href="{{ route('admin.index') }}">Dashboard</a></li>
-                    <li class="breadcrumb-item">Data Penduduk</li>
-                    <li class="breadcrumb-item"><a href="{{ route('admin.kk.index') }}">Data Kartu Keluarga</a></li>
-                    <li class="breadcrumb-item active">Tambah KK Baru</li>
+                    <li class="breadcrumb-item"><a href="{{ route('admin.umkm.index') }}">Kelola
+                            UMKM</a></li>
+                    <li class="breadcrumb-item active">Tambah UMKM Baru</li>
                 </ol>
             </nav>
-            <h1 class="page-title">Tambah Kartu Keluarga Baru</h1>
-            <p class="page-subtitle">Lengkapi form di bawah untuk menambahkan data kartu keluarga baru ke sistem</p>
+            <h1 class="page-title">Tambah UMKM Baru</h1>
+            <p class="page-subtitle">Lengkapi form di bawah untuk menambahkan data UMKM baru ke sistem.</p>
         </div>
 
-        <!-- Info Card -->
         <div class="info-card">
             <div class="info-icon">
                 <i class="bi bi-info-lg"></i>
             </div>
             <h6>Petunjuk Pengisian</h6>
             <p>
-                Pastikan data yang dimasukkan sesuai dengan dokumen kartu keluarga asli.
-                Nomor KK harus 16 digit dan belum terdaftar dalam sistem.
-                Nama kepala keluarga harus sesuai dengan KTP.
+                Pastikan data yang dimasukkan sesuai dengan data UMKM yang valid.
+                Nomor Induk Kependudukan (NIK) pemilik UMKM harus terdaftar sebagai penduduk desa.
                 Semua field yang bertanda bintang (*) wajib diisi.
             </p>
         </div>
 
-        <!-- Progress Steps -->
         <div class="form-progress">
             <div class="progress-step active">
                 <div class="step-number">1</div>
-                <span>Identitas KK</span>
+                <span>Data Pemilik UMKM</span>
             </div>
             <div class="progress-step">
                 <div class="step-number">2</div>
-                <span>Alamat Detail</span>
+                <span>Detail Usaha & Produk</span>
             </div>
             <div class="progress-step">
                 <div class="step-number">3</div>
-                <span>Konfirmasi</span>
+                <span>Kontak & Media Sosial</span>
             </div>
         </div>
 
-        <!-- Main Form -->
         <div class="form-container">
             <div class="form-header">
                 <div class="form-icon">
-                    <i class="bi bi-house-door-fill"></i>
+                    <i class="bi bi-shop-window"></i>
                 </div>
-                <h2 class="form-title">Form Tambah Kartu Keluarga</h2>
-                <p class="form-subtitle">Masukkan data kartu keluarga dengan lengkap dan benar</p>
+                <h2 class="form-title">Form Tambah UMKM</h2>
+                <p class="form-subtitle">Masukkan data UMKM dengan lengkap dan benar</p>
             </div>
 
-            <form action="{{ route('admin.kk.store') }}" method="POST" novalidate>
+            <form action="{{ route('admin.umkm.store') }}" method="POST" enctype="multipart/form-data" novalidate>
                 @csrf
 
-                <!-- Section 1: Identitas KK -->
                 <div class="form-section">
                     <h4 class="section-title">
                         <div class="section-icon">
-                            <i class="bi bi-card-text"></i>
+                            <i class="bi bi-person-fill"></i>
                         </div>
-                        Identitas Kartu Keluarga
+                        Data Pemilik UMKM
                     </h4>
 
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label for="no_kk" class="form-label">
-                                Nomor Kartu Keluarga <span class="required">*</span>
+                            <label for="nik" class="form-label">
+                                NIK Pemilik <span class="required">*</span>
                             </label>
-                            <input type="text" class="form-control @error('no_kk') is-invalid @enderror" id="no_kk"
-                                name="no_kk" value="{{ old('no_kk') }}" placeholder="Masukkan 16 digit nomor KK"
+                            <input type="text" class="form-control @error('nik') is-invalid @enderror" id="nik"
+                                name="nik" value="{{ old('nik') }}" placeholder="Masukkan 16 digit NIK"
                                 maxlength="16" pattern="[0-9]{16}" required>
-                            <div class="form-text">
-                                <i class="bi bi-info-circle me-1"></i>
-                                Nomor KK harus 16 digit angka sesuai dokumen resmi
-                            </div>
-                            @error('no_kk')
+                            @error('nik')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
-                        </div>
 
-                        <div class="col-md-6 mb-3">
-                            <label for="nama_kepala_keluarga" class="form-label">
-                                Nama Kepala Keluarga <span class="required">*</span>
-                            </label>
-                            <input type="text" class="form-control @error('nama_kepala_keluarga') is-invalid @enderror"
-                                id="nama_kepala_keluarga" name="nama_kepala_keluarga"
-                                value="{{ old('nama_kepala_keluarga') }}" placeholder="Nama lengkap kepala keluarga"
-                                maxlength="100" required>
-                            <div class="form-text">
-                                <i class="bi bi-info-circle me-1"></i>
-                                Nama lengkap kepala keluarga sesuai KTP
-                            </div>
-                            @error('nama_kepala_keluarga')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
                         </div>
                     </div>
                 </div>
 
-                <!-- Section 2: Alamat Detail -->
                 <div class="form-section">
                     <h4 class="section-title">
                         <div class="section-icon">
-                            <i class="bi bi-geo-alt"></i>
+                            <i class="bi bi-box-seam"></i>
                         </div>
-                        Detail Alamat
+                        Detail Usaha & Produk
                     </h4>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="nama_umkm" class="form-label">
+                                Nama UMKM <span class="required">*</span>
+                            </label>
+                            <input type="text" class="form-control @error('nama_umkm') is-invalid @enderror"
+                                id="nama_umkm" name="nama_umkm" value="{{ old('nama_umkm') }}"
+                                placeholder="Nama Usaha atau Bisnis" required>
+                            @error('nama_umkm')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="kategori" class="form-label">
+                                Kategori <span class="required">*</span>
+                            </label>
+                            <select class="form-select @error('kategori') is-invalid @enderror" id="kategori"
+                                name="kategori" required>
+                                <option value="" disabled selected>Pilih Kategori
+                                </option>
+                                @foreach ($kategoriOptions as $value => $label)
+                                    <option value="{{ $value }}" {{ old('kategori') == $value ? 'selected' : '' }}>
+                                        {{ $label }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('kategori')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="nama_produk" class="form-label">
+                                Nama Produk/Jasa <span class="required">*</span>
+                            </label>
+                            <input type="text" class="form-control @error('nama_produk') is-invalid @enderror"
+                                id="nama_produk" name="nama_produk" value="{{ old('nama_produk') }}"
+                                placeholder="Contoh: Keripik Singkong Renyah" required>
+                            @error('nama_produk')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="foto_produk" class="form-label">
+                                Foto Produk <span class="required">*</span>
+                            </label>
+                            <input type="file" class="form-control @error('foto_produk') is-invalid @enderror"
+                                id="foto_produk" name="foto_produk" required>
+                            <div class="form-text">
+                                <i class="bi bi-info-circle me-1"></i>
+                                Maksimal 2MB (jpg, jpeg, png, webp)
+                            </div>
+                            @error('foto_produk')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+
+                        </div>
+                    </div>
 
                     <div class="row">
                         <div class="col-md-12 mb-3">
-                            <label for="alamat" class="form-label">
-                                Alamat Lengkap <span class="required">*</span>
+                            <label for="deskripsi_produk" class="form-label">
+                                Deskripsi Produk/Jasa <span class="required">*</span>
                             </label>
-                            <textarea class="form-control @error('alamat') is-invalid @enderror" id="alamat" name="alamat" rows="3"
-                                placeholder="Contoh: Jl. Rumaniu, Desa Kilwaru" required>{{ old('alamat') }}</textarea>
-                            @error('alamat')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-                    </div>
 
-                    <div class="input-group-kk">
-                        <div class="mb-3">
-                            <label for="rt" class="form-label">
-                                RT <span class="required">*</span>
-                            </label>
-                            <input type="text" class="form-control @error('rt') is-invalid @enderror" id="rt"
-                                name="rt" value="{{ old('rt') }}" placeholder="001" maxlength="3" required>
-                            @error('rt')
+                            <textarea class="form-control @error('deskripsi_produk') is-invalid @enderror"                                
+                                id="deskripsi_produk" name="deskripsi_produk" rows="3"                                
+                                placeholder="Jelaskan produk atau jasa Anda secara detail" required>{{ old('deskripsi_produk') }}</textarea>
+                            @error('deskripsi_produk')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
-                        </div>
 
-                        <div class="mb-3">
-                            <label for="rw" class="form-label">
-                                RW <span class="required">*</span>
-                            </label>
-                            <input type="text" class="form-control @error('rw') is-invalid @enderror" id="rw"
-                                name="rw" value="{{ old('rw') }}" placeholder="001" maxlength="3" required>
-                            @error('rw')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
                         </div>
                     </div>
                 </div>
 
-                <!-- Section 3: Wilayah Administratif -->
                 <div class="form-section">
                     <h4 class="section-title">
                         <div class="section-icon">
-                            <i class="bi bi-signpost"></i>
+                            <i class="bi bi-link-45deg"></i>
                         </div>
-                        Wilayah Administratif
+                        Kontak & Media Sosial
                     </h4>
 
-                    <div class="input-group-location">
-                        <div class="mb-3">
-                            <label for="desa" class="form-label">
-                                Desa/Kelurahan <span class="required">*</span>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="nomor_telepon" class="form-label">
+                                Nomor Telepon/WhatsApp <span class="required">*</span>
                             </label>
-                            <input type="text" class="form-control @error('desa') is-invalid @enderror" id="desa"
-                                name="desa" value="{{ old('desa') }}" placeholder="Nama Desa/Kelurahan" required>
-                            @error('desa')
+                            <input type="text" class="form-control @error('nomor_telepon') is-invalid @enderror"
+                                id="nomor_telepon" name="nomor_telepon" value="{{ old('nomor_telepon') }}"
+                                placeholder="Contoh: 081234567890" required>
+                            @error('nomor_telepon')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
+
                         </div>
 
-                        <div class="mb-3">
-                            <label for="kecamatan" class="form-label">
-                                Kecamatan <span class="required">*</span>
+                        <div class="col-md-6 mb-3">
+                            <label for="link_facebook" class="form-label">
+                                Link Facebook (opsional)
                             </label>
-                            <input type="text" class="form-control @error('kecamatan') is-invalid @enderror"
-                                id="kecamatan" name="kecamatan" value="{{ old('kecamatan') }}"
-                                placeholder="Nama Kecamatan" required>
-                            @error('kecamatan')
+                            <input type="url" class="form-control @error('link_facebook') is-invalid @enderror"
+                                id="link_facebook" name="link_facebook" value="{{ old('link_facebook') }}"
+                                placeholder="Contoh: https://facebook.com/umkmkita">
+                            @error('link_facebook')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
-                        </div>
 
-                        <div class="mb-3">
-                            <label for="kabupaten" class="form-label">
-                                Kabupaten/Kota <span class="required">*</span>
-                            </label>
-                            <input type="text" class="form-control @error('kabupaten') is-invalid @enderror"
-                                id="kabupaten" name="kabupaten" value="{{ old('kabupaten') }}"
-                                placeholder="Nama Kabupaten/Kota" required>
-                            @error('kabupaten')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="provinsi" class="form-label">
-                                Provinsi <span class="required">*</span>
-                            </label>
-                            <input type="text" class="form-control @error('provinsi') is-invalid @enderror"
-                                id="provinsi" name="provinsi" value="{{ old('provinsi') }}"
-                                placeholder="Nama Provinsi" required>
-                            @error('provinsi')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
                         </div>
                     </div>
 
                     <div class="row">
-                        <div class="col-md-4 mb-3">
-                            <label for="kode_pos" class="form-label">
-                                Kode Pos <span class="required">*</span>
+                        <div class="col-md-6 mb-3">
+                            <label for="link_instagram" class="form-label">
+                                Link Instagram (opsional)
                             </label>
-                            <input type="text" class="form-control @error('kode_pos') is-invalid @enderror"
-                                id="kode_pos" name="kode_pos" value="{{ old('kode_pos') }}" placeholder="12345"
-                                maxlength="5" pattern="[0-9]{5}" required>
-                            <div class="form-text">
-                                <i class="bi bi-info-circle me-1"></i>
-                                5 digit kode pos sesuai wilayah
-                            </div>
-                            @error('kode_pos')
+                            <input type="url" class="form-control @error('link_instagram') is-invalid @enderror"
+                                id="link_instagram" name="link_instagram" value="{{ old('link_instagram') }}"
+                                placeholder="Contoh: https://instagram.com/umkmkita">
+                            @error('link_instagram')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
+
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label for="link_tiktok" class="form-label">
+                                Link TikTok (opsional)
+                            </label>
+                            <input type="url" class="form-control @error('link_tiktok') is-invalid @enderror"
+                                id="link_tiktok" name="link_tiktok" value="{{ old('link_tiktok') }}"
+                                placeholder="Contoh: https://tiktok.com/@umkmkita">
+                            @error('link_tiktok')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+
                         </div>
                     </div>
                 </div>
 
-                <!-- Form Actions -->
                 <div class="form-actions">
-                    <a href="{{ route('admin.kk.index') }}" class="btn btn-outline-secondary">
+                    <a href="{{ route('admin.umkm.index') }}" class="btn btn-outline-secondary">
                         <i class="bi bi-arrow-left me-2"></i>Kembali
                     </a>
                     <button type="submit" class="btn btn-primary">
@@ -583,69 +573,65 @@
 @push('script')
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Format nomor KK (hanya angka)
-            const noKkInput = document.getElementById('no_kk');
-            noKkInput.addEventListener('input', function(e) {
+            // Format NIK (hanya angka)
+            const nikInput = document.getElementById('nik');
+            nikInput.addEventListener('input', function(e) {
                 e.target.value = e.target.value.replace(/\D/g, '');
             });
 
-            // Format nama kepala keluarga (hanya huruf dan spasi)
-            const namaKepalaKeluargaInput = document.getElementById('nama_kepala_keluarga');
-            namaKepalaKeluargaInput.addEventListener('input', function(e) {
-                // Remove numbers and special characters, keep only letters and spaces
-                e.target.value = e.target.value.replace(/[^a-zA-Z\s]/g, '');
-                // Capitalize first letter of each word
-                e.target.value = e.target.value.toLowerCase().replace(/\b\w/g, l => l.toUpperCase());
-            });
-
-            // Format kode pos (hanya angka)
-            const kodePosInput = document.getElementById('kode_pos');
-            kodePosInput.addEventListener('input', function(e) {
-                e.target.value = e.target.value.replace(/\D/g, '');
-            });
-
-            // Auto uppercase untuk wilayah
-            const locationInputs = ['desa', 'kecamatan', 'kabupaten', 'provinsi'];
-            locationInputs.forEach(inputId => {
-                const input = document.getElementById(inputId);
-                input.addEventListener('input', function(e) {
-                    // Capitalize first letter of each word
-                    e.target.value = e.target.value.toLowerCase().replace(/\b\w/g, l => l
-                        .toUpperCase());
-                });
+            // Format nomor telepon (hanya angka dan simbol yang diizinkan)
+            const teleponInput = document.getElementById('nomor_telepon');
+            teleponInput.addEventListener('input', function(e) {
+                e.target.value = e.target.value.replace(/[^0-9+\-\s\(\)]/g, '');
             });
 
             // Form validation
             const form = document.querySelector('form');
             form.addEventListener('submit', function(e) {
-                const noKk = document.getElementById('no_kk').value;
-                const namaKepalaKeluarga = document.getElementById('nama_kepala_keluarga').value.trim();
-                const kodePos = document.getElementById('kode_pos').value;
+                const nik = document.getElementById('nik').value;
+                const namaUmkm = document.getElementById('nama_umkm').value.trim();
+                const namaProduk = document.getElementById('nama_produk').value.trim();
+                const deskripsiProduk = document.getElementById('deskripsi_produk').value.trim();
+                const telepon = document.getElementById('nomor_telepon').value.trim();
+                const kategori = document.getElementById('kategori').value;
 
-                if (noKk.length !== 16) {
+                if (nik.length !== 16) {
                     e.preventDefault();
-                    alert('Nomor KK harus 16 digit!');
+                    alert('NIK harus 16 digit!');
                     return false;
                 }
 
-                if (namaKepalaKeluarga.length < 2) {
+                if (namaUmkm.length < 3) {
                     e.preventDefault();
-                    alert('Nama kepala keluarga harus minimal 2 karakter!');
+                    alert('Nama UMKM minimal 3 karakter!');
                     return false;
                 }
 
-                if (!/^[a-zA-Z\s]+$/.test(namaKepalaKeluarga)) {
+                if (namaProduk.length < 3) {
                     e.preventDefault();
-                    alert('Nama kepala keluarga hanya boleh berisi huruf dan spasi!');
+                    alert('Nama produk minimal 3 karakter!');
                     return false;
                 }
 
-                if (kodePos.length !== 5) {
+                if (deskripsiProduk.length < 10) {
                     e.preventDefault();
-                    alert('Kode pos harus 5 digit!');
+                    alert('Deskripsi produk minimal 10 karakter!');
+                    return false;
+                }
+
+                if (telepon.length < 10) {
+                    e.preventDefault();
+                    alert('Nomor telepon minimal 10 digit!');
+                    return false;
+                }
+
+                if (kategori === '') {
+                    e.preventDefault();
+                    alert('Kategori wajib dipilih!');
                     return false;
                 }
             });
+
 
             // Progress step animation
             const formSections = document.querySelectorAll('.form-section');

@@ -147,7 +147,7 @@
     }
 
     .sub-menu.expanded {
-        max-height: 300px;
+        max-height: 600px;
     }
 
     .sidebar.collapsed .sub-menu {

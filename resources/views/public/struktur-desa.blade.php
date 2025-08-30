@@ -245,6 +245,8 @@
                         'sekretaris' => 'Sekretaris Desa',
                         'kaur_umum' => 'Kaur Umum & Perencanaan',
                         'kaur_keuangan' => 'Kaur Keuangan',
+                        'kaur_perencanaan' => 'Kaur Perencanaan',
+                        'kaur_tata_usaha' => 'Kaur Tata Usaha',
                         'kasi_pemerintahan' => 'Kasi Pemerintahan',
                         'kasi_kesejahteraan' => 'Kasi Kesejahteraan',
                         'kasi_pelayanan' => 'Kasi Pelayanan',

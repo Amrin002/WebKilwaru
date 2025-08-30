@@ -574,6 +574,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
             Route::get('/create', [UmkmController::class, 'adminCreate'])->name('create'); // Rute untuk form tambah baru
             Route::post('/', [UmkmController::class, 'adminStore'])->name('store'); // Rute untuk simpan data baru
             Route::get('/{id}/edit', [UmkmController::class, 'adminEdit'])->name('edit'); // Rute untuk form edit
+            Route::put('{id}/update', [UmkmController::class, 'adminUpdate'])->name('update');
             Route::get('/{id}', [UmkmController::class, 'adminShow'])->name('show');
             Route::get('/{id}/approve', [UmkmController::class, 'approve'])->name('approve');
             Route::get('/{id}/reject', [UmkmController::class, 'rejectForm'])->name('reject.form');
@@ -693,5 +694,7 @@ Route::prefix('api')->group(function () {
 Route::redirect('/news', '/berita', 301);
 Route::redirect('/news/{slug}', '/berita/{slug}', 301);
 Route::redirect('/category/{slug}', '/berita/kategori/{slug}', 301);
+
+
 
 require __DIR__ . '/auth.php';

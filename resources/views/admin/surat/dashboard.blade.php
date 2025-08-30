@@ -280,8 +280,6 @@
                 <div class="stat-number">{{ number_format($totalDitolak, 0, ',', '.') }}</div>
             </div>
 
-
-
             <div class="stat-card">
                 <div class="stat-header">
                     <div class="stat-title">Total Arsip Surat</div>
@@ -346,7 +344,6 @@
                 </div>
             </div>
         </div>
-
 
         <div class="quick-actions mt-4">
             <a href="{{ route('admin.surat-ktm.create') }}" class="action-btn">
@@ -415,32 +412,26 @@
 
 @push('script')
     <script>
-        // Delay untuk memastikan Chart.js sudah loaded
         setTimeout(function() {
-            console.log('⏰ Delayed script execution started');
-            console.log('Chart.js available:', typeof Chart !== 'undefined');
+            const permohonanData = {!! json_encode($permohonanPerBulan) !!};
 
             if (typeof Chart === 'undefined') {
-                console.error('❌ Chart.js masih belum tersedia setelah delay');
+                console.error('❌ Chart.js is not available.');
                 return;
             }
 
-            // Chart 1: Permohonan
             const canvas1 = document.getElementById('permohonanChart');
             if (canvas1) {
-                console.log('📊 Creating chart 1...');
                 try {
                     const ctx1 = canvas1.getContext('2d');
 
                     new Chart(ctx1, {
                         type: 'line',
                         data: {
-                            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt',
-                                'Nov', 'Des'
-                            ],
+                            labels: permohonanData.labels,
                             datasets: [{
                                 label: 'Total Permohonan',
-                                data: [0, 0, 0, 0, 0, 0, 0, 16, 0, 0, 0, 0],
+                                data: permohonanData.datasets.total,
                                 borderColor: '#3b82f6',
                                 backgroundColor: 'rgba(59, 130, 246, 0.1)',
                                 borderWidth: 3,
@@ -450,14 +441,14 @@
                                 fill: true
                             }, {
                                 label: 'Surat KTM',
-                                data: [0, 0, 0, 0, 0, 0, 0, 8, 0, 0, 0, 0],
+                                data: permohonanData.datasets.ktm,
                                 borderColor: '#ef4444',
                                 borderWidth: 2,
                                 tension: 0.4,
                                 pointRadius: 4
                             }, {
                                 label: 'Surat KTU',
-                                data: [0, 0, 0, 0, 0, 0, 0, 8, 0, 0, 0, 0],
+                                data: permohonanData.datasets.ktu,
                                 borderColor: '#10b981',
                                 borderWidth: 2,
                                 tension: 0.4,
@@ -477,7 +468,7 @@
                                 },
                                 title: {
                                     display: true,
-                                    text: 'Tren Permohonan Surat per Bulan (2025)',
+                                    text: 'Tren Permohonan Surat per Bulan ({{ date('Y') }})',
                                     font: {
                                         size: 16,
                                         weight: 'bold'
@@ -506,14 +497,13 @@
                         }
                     });
 
-                    console.log('✅ Chart 1 berhasil dibuat!');
+                    console.log('✅ Chart has been successfully created!');
                 } catch (error) {
-                    console.error('❌ Error chart 1:', error);
+                    console.error('❌ Error creating chart:', error);
                 }
             } else {
-                console.error('❌ Canvas 1 tidak ditemukan');
+                console.error('❌ Canvas element not found.');
             }
-
-        }, 2000); // Delay 2 detik untuk memastikan semua loaded
+        }, 200);
     </script>
 @endpush

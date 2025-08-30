@@ -1133,18 +1133,35 @@
                             console.log('Response data:', data);
 
                             if (data.success) {
-                                // Close modal
-                                const modal = bootstrap.Modal.getInstance(document.getElementById(
-                                    'updateStatusModal'));
-                                modal.hide();
+                                // Cek jika ada link WA dan flag redirect_to_wa
+                                if (data.data.waLink && data.data.redirect_to_wa) {
+                                    // Tutup modal
+                                    const modal = bootstrap.Modal.getInstance(document.getElementById(
+                                        'updateStatusModal'));
+                                    modal.hide();
 
-                                // Show success message
-                                showAlert('success', data.message || 'Status berhasil diupdate');
+                                    // Tampilkan pesan sukses singkat
+                                    showAlert('success', data.message || 'Status berhasil diupdate');
 
-                                // Reload page setelah delay
-                                setTimeout(() => {
-                                    window.location.reload();
-                                }, 1500);
+                                    // Buka WhatsApp di tab baru
+                                    window.open(data.data.waLink, '_blank');
+
+                                    // Reload halaman setelah delay singkat
+                                    setTimeout(() => {
+                                        window.location.reload();
+                                    }, 2000);
+                                } else {
+                                    // Flow lama jika tidak ada WA link
+                                    const modal = bootstrap.Modal.getInstance(document.getElementById(
+                                        'updateStatusModal'));
+                                    modal.hide();
+
+                                    showAlert('success', data.message || 'Status berhasil diupdate');
+
+                                    setTimeout(() => {
+                                        window.location.reload();
+                                    }, 1500);
+                                }
                             } else {
                                 throw new Error(data.message || 'Gagal update status');
                             }

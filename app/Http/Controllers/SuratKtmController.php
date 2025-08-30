@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Redirect;
 
 class SuratKtmController extends Controller
 {
@@ -337,9 +338,27 @@ class SuratKtmController extends Controller
                 $surat->simpanKeArsip();
             }
 
+            // --- Mulai penambahan untuk notifikasi WA ---
+            $waLink = null;
+            if ($surat->nomor_telepon) {
+                $waMessage = '';
+                if ($surat->status === 'disetujui') {
+                    $waMessage = "Pemberitahuan: Surat Keterangan Tidak Mampu (KTM) Anda dengan nama *{$surat->nama}* telah *disetujui*. Anda dapat mengunduh atau mencetak surat Anda di tautan berikut: " . route('public.surat-ktm.track', $surat->public_token);
+                } elseif ($surat->status === 'ditolak') {
+                    $catatan = $surat->keterangan ? "Dengan catatan: {$surat->keterangan}" : "";
+                    $waMessage = "Mohon maaf, pengajuan Surat Keterangan Tidak Mampu (KTM) Anda dengan nama *{$surat->nama}* telah *ditolak*. {$catatan} Anda bisa mengajukan ulang setelah memperbaiki data. Untuk melacak status, kunjungi: " . route('public.surat-ktm.track', $surat->public_token);
+                }
+                if ($waMessage) {
+                    $waLink = 'https://wa.me/' . $surat->convertToWhatsAppNumber($surat->nomor_telepon) . '?text=' . urlencode($waMessage);
+                }
+            }
+            // --- Akhir penambahan untuk notifikasi WA ---
+
+
             return redirect()
                 ->route('admin.surat-ktm.show', $surat->id)
-                ->with('success', 'Surat berhasil diperbarui');
+                ->with('success', 'Surat berhasil diperbarui')
+                ->with('waLink', $waLink);
         } catch (\Exception $e) {
             return back()
                 ->withInput()
@@ -368,6 +387,7 @@ class SuratKtmController extends Controller
 
         try {
             $surat = SuratKtm::findOrFail($id);
+            $oldStatus = $surat->status;
 
             // Set nomor surat jika disetujui dan disediakan
             if ($request->status === 'disetujui' && $request->nomor_surat) {
@@ -375,12 +395,38 @@ class SuratKtmController extends Controller
                 $surat->save();
             }
 
-            // GUNAKAN method updateStatus() dari model untuk memastikan QR code tergenerate
+            // Update status menggunakan method updateStatus() dari model
             $result = $surat->updateStatus($request->status, $request->keterangan);
             if (!$result) {
                 throw new \Exception('Gagal mengupdate status surat');
             }
 
+            // Simpan ke arsip jika disetujui
+            if ($request->status === 'disetujui') {
+                $surat->simpanKeArsip();
+            }
+
+            // Generate WhatsApp notification link
+            $waLink = null;
+            if ($surat->nomor_telepon) {
+                $waMessage = '';
+                if ($surat->status === 'disetujui') {
+                    $waMessage = "Selamat! Surat Keterangan Tidak Mampu (KTM) Anda dengan nama *{$surat->nama}* telah *disetujui*";
+                    if ($surat->nomor_surat) {
+                        $waMessage .= " dengan nomor surat *{$surat->nomor_surat}*";
+                    }
+                    $waMessage .= ". Anda dapat mengunduh atau mencetak surat Anda di: " . route('public.surat-ktm.track', $surat->public_token);
+                } elseif ($surat->status === 'ditolak') {
+                    $catatan = $surat->keterangan ? "Alasan penolakan: {$surat->keterangan}. " : "";
+                    $waMessage = "Mohon maaf, pengajuan Surat Keterangan Tidak Mampu (KTM) Anda dengan nama *{$surat->nama}* telah *ditolak*. {$catatan}Anda dapat memperbaiki data dan mengajukan ulang. Status surat dapat dilihat di: " . route('public.surat-ktm.track', $surat->public_token);
+                } elseif ($surat->status === 'diproses') {
+                    $waMessage = "Surat Keterangan Tidak Mampu (KTM) Anda dengan nama *{$surat->nama}* sedang dalam tahap *pemrosesan*. Mohon menunggu untuk proses selanjutnya. Cek status di: " . route('public.surat-ktm.track', $surat->public_token);
+                }
+
+                if ($waMessage) {
+                    $waLink = 'https://wa.me/' . $surat->convertToWhatsAppNumber($surat->nomor_telepon) . '?text=' . urlencode($waMessage);
+                }
+            }
 
             return response()->json([
                 'success' => true,
@@ -389,9 +435,19 @@ class SuratKtmController extends Controller
                     'status' => $surat->status,
                     'nomor_surat' => $surat->nomor_surat,
                     'keterangan' => $surat->keterangan,
+                    'waLink' => $waLink,
+                    'old_status' => $oldStatus,
+                    'nama_pemohon' => $surat->nama,
+                    'redirect_to_wa' => true // Flag untuk redirect ke WA
                 ]
             ]);
         } catch (\Exception $e) {
+            Log::error('Error updating surat status', [
+                'surat_id' => $id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
             return response()->json([
                 'success' => false,
                 'message' => $e->getMessage()
@@ -422,6 +478,62 @@ class SuratKtmController extends Controller
     }
 
     /**
+     * Reject UMKM dengan form catatan
+     */
+    public function rejectForm($id)
+    {
+        // Check if user is admin
+        if (!Auth::check() || !Auth::user()->role === 'admin') {
+            return redirect()->route('login')->with('error', 'Akses ditolak.');
+        }
+
+        $surat = SuratKtm::findOrFail($id);
+
+        if ($surat->isDitolak()) {
+            return back()->with('warning', 'Surat sudah ditolak sebelumnya.');
+        }
+
+        $titleHeader = "Tolak Surat KTM: " . $surat->nama;
+        return view('admin.surat-ktm.reject', compact('surat', 'titleHeader'));
+    }
+
+    /**
+     * Process reject UMKM
+     */
+    public function reject(Request $request, $id)
+    {
+        // Check if user is admin
+        if (!Auth::check() || !Auth::user()->role === 'admin') {
+            return redirect()->route('login')->with('error', 'Akses ditolak.');
+        }
+
+        $request->validate([
+            'catatan_admin' => 'required|string|max:500'
+        ], [
+            'catatan_admin.required' => 'Catatan penolakan wajib diisi.',
+            'catatan_admin.max' => 'Catatan maksimal 500 karakter.'
+        ]);
+
+        $surat = SuratKtm::findOrFail($id);
+
+        if ($surat->isDitolak()) {
+            return back()->with('warning', 'Surat sudah ditolak sebelumnya.');
+        }
+
+        $surat->updateStatus('ditolak', $request->catatan_admin);
+
+        // Pesan notifikasi WhatsApp
+        $waMessage = "Mohon maaf, pengajuan Surat Keterangan Tidak Mampu (KTM) Anda dengan nama *{$surat->nama}* telah ditolak. Dengan Catatan: {$request->catatan_admin}. Anda bisa mengajukan pendaftaran ulang setelah memperbaiki kekurangan data. ";
+        $waLink = 'https://wa.me/' . $surat->convertToWhatsAppNumber($surat->nomor_telepon) . '?text=' . urlencode($waMessage);
+
+        return redirect()
+            ->route('admin.surat-ktm.index', ['tab' => 'rejected'])
+            ->with('success', "Surat '{$surat->nama}' ditolak dengan catatan: {$request->catatan_admin}")
+            ->with('waLink', $waLink); // Tambahkan waLink ke session flash
+    }
+
+
+    /**
      * Bulk action untuk admin
      */
     public function adminBulkAction(Request $request)
@@ -440,16 +552,28 @@ class SuratKtmController extends Controller
         try {
             $surats = SuratKtm::whereIn('id', $request->surat_ids)->get();
             $count = 0;
+            $waLinks = [];
 
             foreach ($surats as $surat) {
                 switch ($request->action) {
                     case 'approve':
                         $surat->updateStatusByAdmin('disetujui', $request->keterangan);
+                        // Logika WA
+                        if ($surat->nomor_telepon) {
+                            $waMessage = "Pemberitahuan: Surat Keterangan Tidak Mampu (KTM) Anda dengan nama *{$surat->nama}* telah *disetujui*. Anda dapat mengunduh atau mencetak surat Anda di tautan berikut: " . route('public.surat-ktm.track', $surat->public_token);
+                            $waLinks[] = 'https://wa.me/' . $surat->convertToWhatsAppNumber($surat->nomor_telepon) . '?text=' . urlencode($waMessage);
+                        }
                         $count++;
                         break;
 
                     case 'reject':
                         $surat->updateStatusByAdmin('ditolak', $request->keterangan);
+                        // Logika WA
+                        if ($surat->nomor_telepon) {
+                            $catatan = $surat->keterangan ? "Dengan catatan: {$surat->keterangan}." : "";
+                            $waMessage = "Mohon maaf, pengajuan Surat Keterangan Tidak Mampu (KTM) Anda dengan nama *{$surat->nama}* telah *ditolak*. {$catatan} Anda bisa mengajukan ulang setelah memperbaiki data. Untuk melacak status, kunjungi: " . route('public.surat-ktm.track', $surat->public_token);
+                            $waLinks[] = 'https://wa.me/' . $surat->convertToWhatsAppNumber($surat->nomor_telepon) . '?text=' . urlencode($waMessage);
+                        }
                         $count++;
                         break;
 
@@ -469,9 +593,16 @@ class SuratKtmController extends Controller
                 'delete' => 'dihapus'
             ];
 
-            return redirect()
+            // Tambahkan waLinks ke flash session
+            $response = redirect()
                 ->route('admin.surat-ktm.index')
                 ->with('success', "{$count} surat berhasil {$actions[$request->action]}");
+
+            if ($request->action !== 'delete' && count($waLinks) > 0) {
+                return $response->with('waLinks', $waLinks);
+            }
+
+            return $response;
         } catch (\Exception $e) {
             return back()->withErrors(['error' => 'Gagal melakukan bulk action: ' . $e->getMessage()]);
         }

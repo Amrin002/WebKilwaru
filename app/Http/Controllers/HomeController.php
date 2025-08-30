@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Apbdes;
 use App\Models\Berita;
 use App\Models\Galeri;
+use App\Models\KK;
+use App\Models\Penduduk;
 use App\Models\StrukturDesa;
 use App\Models\Umkm;
 use Illuminate\Http\Request;
@@ -44,8 +46,10 @@ class HomeController extends Controller
             ->groupBy('kategori');
 
         $latestUmkm = Umkm::approved()->with('penduduk')->latest()->limit(4)->get();
-
-        return view('home.index', compact('latestBerita', 'strukturDesa', 'latestGaleri', 'currentApbdes', 'kepalaDesa', 'latestUmkm'));
+        // Hitung total penduduk dan kepala keluarga dari database
+        $totalPenduduk = Penduduk::count();
+        $totalKK = KK::count();
+        return view('home.index', compact('latestBerita', 'strukturDesa', 'latestGaleri', 'currentApbdes', 'kepalaDesa', 'latestUmkm', 'totalPenduduk', 'totalKK'));
     }
     public function beritaLatest()
     {
