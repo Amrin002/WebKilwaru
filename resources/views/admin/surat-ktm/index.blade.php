@@ -589,7 +589,6 @@
 
 @section('content')
     <div class="dashboard-content">
-        <!-- Page Header -->
         <div class="page-header">
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb">
@@ -602,12 +601,26 @@
             <p class="page-subtitle">Kelola pengajuan surat keterangan tidak mampu dari warga dan guest</p>
         </div>
 
-        <!-- Alert Messages -->
         @if (session('success'))
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <div class="alert alert-success alert-dismissible fade show d-flex align-items-center" role="alert">
                 <i class="bi bi-check-circle me-2"></i>
-                {{ session('success') }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                <div>
+                    {{ session('success') }}
+                    @if (session('waLink'))
+                        <a href="{{ session('waLink') }}" target="_blank" class="btn btn-sm btn-success ms-3">
+                            <i class="fab fa-whatsapp me-1"></i> Kirim Notifikasi WA
+                        </a>
+                    @elseif(session('waLinks'))
+                        <div class="mt-2 d-flex flex-wrap gap-2">
+                            @foreach (session('waLinks') as $link)
+                                <a href="{{ $link }}" target="_blank" class="btn btn-sm btn-success">
+                                    <i class="fab fa-whatsapp me-1"></i> Kirim WA
+                                </a>
+                            @endforeach
+                        </div>
+                    @endif
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         @endif
 
@@ -619,7 +632,6 @@
             </div>
         @endif
 
-        <!-- Statistics -->
         <div class="ktm-stats">
             <div class="ktm-stat-card">
                 <div class="stat-icon total">
@@ -665,7 +677,6 @@
             </div>
         </div>
 
-        <!-- Filter Section -->
         <div class="filter-section">
             <div class="filter-header">
                 <h4 class="filter-title">
@@ -680,55 +691,18 @@
                             <i class="bi bi-download me-2"></i>Export/Actions
                         </button>
                         <ul class="dropdown-menu">
-                            {{-- <li><a class="dropdown-item" href="{{ route('admin.surat-ktm.export', request()->query()) }}">
-                                    <i class="bi bi-file-earmark-excel me-2"></i>Export Data
-                                </a></li> --}}
                             <li><a class="dropdown-item" href="#" onclick="toggleBulkActions()">
                                     <i class="bi bi-check-square me-2"></i>Bulk Actions
                                 </a></li>
                             <li>
                                 <hr class="dropdown-divider">
                             </li>
-                            {{-- PERBAIKAN: Ganti route name yang salah --}}
                             <li><a class="dropdown-item" href="{{ route('admin.surat-ktm.api.statistik') }}">
                                     <i class="bi bi-graph-up me-2"></i>Statistik API
                                 </a></li>
                         </ul>
                     </div>
                 </div>
-            </div>
-
-            <!-- Bulk Actions -->
-            <div class="bulk-actions" id="bulkActions">
-                <form action="{{ route('admin.surat-ktm.bulk-action') }}" method="POST" id="bulkForm">
-                    @csrf
-                    <div class="row g-3 align-items-end">
-                        <div class="col-md-3">
-                            <label class="form-label">Pilih Aksi</label>
-                            <select class="form-select" name="action" required>
-                                <option value="">Pilih Aksi</option>
-                                <option value="approve">Setujui</option>
-                                <option value="reject">Tolak</option>
-                                <option value="delete">Hapus</option>
-                            </select>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Keterangan (Opsional)</label>
-                            <input type="text" class="form-control" name="keterangan"
-                                placeholder="Keterangan untuk aksi ini...">
-                        </div>
-                        <div class="col-md-3">
-                            <div class="d-flex gap-2">
-                                <button type="submit" class="btn btn-success" disabled id="bulkSubmit">
-                                    <i class="bi bi-check-lg me-2"></i>Jalankan
-                                </button>
-                                <button type="button" class="btn btn-outline-secondary" onclick="toggleBulkActions()">
-                                    <i class="bi bi-x-lg"></i>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </form>
             </div>
 
             <form method="GET" action="{{ route('admin.surat-ktm.index') }}" class="row g-3">
@@ -789,7 +763,38 @@
             </form>
         </div>
 
-        <!-- Data Table -->
+        <div class="bulk-actions" id="bulkActions">
+            <form action="{{ route('admin.surat-ktm.bulk-action') }}" method="POST" id="bulkForm">
+                @csrf
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-3">
+                        <label class="form-label">Pilih Aksi</label>
+                        <select class="form-select" name="action" required>
+                            <option value="">Pilih Aksi</option>
+                            <option value="approve">Setujui</option>
+                            <option value="reject">Tolak</option>
+                            <option value="delete">Hapus</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Keterangan (Opsional)</label>
+                        <input type="text" class="form-control" name="keterangan"
+                            placeholder="Keterangan untuk aksi ini...">
+                    </div>
+                    <div class="col-md-3">
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-success" disabled id="bulkSubmit">
+                                <i class="bi bi-check-lg me-2"></i>Jalankan
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary" onclick="toggleBulkActions()">
+                                <i class="bi bi-x-lg"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+
         <div class="data-table-container">
             <div class="table-header">
                 <h4 class="table-title">
@@ -930,7 +935,6 @@
                     </table>
                 </div>
 
-                <!-- Pagination -->
                 <div class="d-flex justify-content-between align-items-center mt-4">
                     <div class="text-muted">
                         Menampilkan {{ $surats->firstItem() }} - {{ $surats->lastItem() }} dari
@@ -951,7 +955,6 @@
         </div>
     </div>
 
-    <!-- Update Status Modal -->
     <div class="modal fade" id="updateStatusModal" tabindex="-1" aria-labelledby="updateStatusModalLabel"
         aria-hidden="true">
         <div class="modal-dialog">
@@ -971,7 +974,6 @@
                         <div class="mb-3">
                             <label class="form-label">Status Baru</label>
                             <div class="alert alert-info" id="statusInfo">
-                                <!-- Status info will be populated by JavaScript -->
                             </div>
                         </div>
 
@@ -986,9 +988,6 @@
                             <div class="input-group">
                                 <input type="text" class="form-control" id="statusNomorSurat" name="nomor_surat"
                                     placeholder="Nomor surat akan di-generate otomatis">
-                                {{-- <button type="button" class="btn btn-outline-primary" onclick="generateNomorSurat()">
-                                    <i class="bi bi-gear"></i> Generate
-                                </button> --}}
                             </div>
                             <small class="text-muted">Kosongkan untuk generate otomatis</small>
                         </div>
@@ -1009,18 +1008,16 @@
     <script>
         // Perbaikan JavaScript untuk Modal Status Update Surat KTM
 
-        // Pastikan DOM sudah siap
         document.addEventListener('DOMContentLoaded', function() {
-            // Auto-hide alerts after 5 seconds
+            // Auto-hide alerts after 5 seconds, tapi biarkan tombol WA muncul lebih lama
             const alerts = document.querySelectorAll('.alert');
             alerts.forEach(alert => {
                 setTimeout(() => {
                     const bsAlert = new bootstrap.Alert(alert);
                     bsAlert.close();
-                }, 5000);
+                }, 10000); // 10 detik agar user sempat klik tombol WA
             });
 
-            // Initialize modal
             const updateStatusModal = document.getElementById('updateStatusModal');
             if (updateStatusModal) {
                 updateStatusModal.addEventListener('hidden.bs.modal', function() {
@@ -1029,13 +1026,7 @@
             }
         });
 
-        // Quick Status Update Functions - DIPERBAIKI
         function updateStatus(suratId, status) {
-            console.log('Update Status Called:', {
-                suratId,
-                status
-            }); // Debug log
-
             const statusInfo = document.getElementById('statusInfo');
             const nomorSuratSection = document.getElementById('nomorSuratSection');
             const statusKeterangan = document.getElementById('statusKeterangan');
@@ -1046,11 +1037,9 @@
                 return;
             }
 
-            // Set form values
             document.getElementById('statusSuratId').value = suratId;
             document.getElementById('statusValue').value = status;
 
-            // Update status info berdasarkan status
             if (status === 'disetujui') {
                 statusInfo.innerHTML =
                     '<i class="bi bi-check-circle text-success me-2"></i>Surat akan <strong>DISETUJUI</strong>';
@@ -1066,13 +1055,10 @@
                 statusKeterangan.setAttribute('required', 'required');
             }
 
-            // Show modal menggunakan Bootstrap 5
             const modalInstance = new bootstrap.Modal(modal);
             modalInstance.show();
         }
 
-
-        // Status update form submission - DIPERBAIKI
         document.addEventListener('DOMContentLoaded', function() {
             const updateStatusForm = document.getElementById('updateStatusForm');
             if (updateStatusForm) {
@@ -1085,28 +1071,23 @@
                     const keterangan = formData.get('keterangan');
                     let nomorSurat = formData.get('nomor_surat');
 
-                    // Validasi form
                     if (!suratId || !status) {
                         alert('Data surat atau status tidak valid!');
                         return;
                     }
 
-                    // Validasi keterangan untuk status ditolak
                     if (status === 'ditolak' && (!keterangan || keterangan.trim() === '')) {
                         alert('Keterangan wajib diisi untuk penolakan surat!');
                         document.getElementById('statusKeterangan').focus();
                         return;
                     }
 
-
-                    // Disable submit button dan tampilkan loading
                     const submitBtn = this.querySelector('button[type="submit"]');
                     const originalText = submitBtn.innerHTML;
                     submitBtn.disabled = true;
                     submitBtn.innerHTML =
                         '<span class="spinner-border spinner-border-sm me-2"></span>Memproses...';
 
-                    // Prepare request data
                     const requestData = {
                         status: status,
                         keterangan: keterangan,
@@ -1114,14 +1095,10 @@
                             'content') || '{{ csrf_token() }}'
                     };
 
-                    // Tambahkan nomor surat jika status disetujui
                     if (status === 'disetujui' && nomorSurat) {
                         requestData.nomor_surat = nomorSurat;
                     }
 
-                    console.log('Sending request data:', requestData);
-
-                    // Send AJAX request
                     fetch(`/admin/surat-ktm/${suratId}/update-status`, {
                             method: 'PATCH',
                             body: JSON.stringify(requestData),
@@ -1133,53 +1110,62 @@
                             }
                         })
                         .then(response => {
-                            console.log('Response status:', response.status);
                             if (!response.ok) {
                                 return response.json().then(err => Promise.reject(err));
                             }
                             return response.json();
                         })
                         .then(data => {
-                            console.log('Response data:', data);
-
                             if (data.success) {
-                                // Close modal
-                                const modal = bootstrap.Modal.getInstance(document.getElementById(
-                                    'updateStatusModal'));
-                                modal.hide();
+                                // Cek jika ada link WA dan flag redirect_to_wa
+                                if (data.data.waLink && data.data.redirect_to_wa) {
+                                    // Tutup modal
+                                    const modal = bootstrap.Modal.getInstance(document.getElementById(
+                                        'updateStatusModal'));
+                                    modal.hide();
 
-                                // Show success message
-                                showAlert('success', data.message || 'Status berhasil diupdate');
+                                    // Tampilkan pesan sukses singkat
+                                    showAlert('success', data.message || 'Status berhasil diupdate');
 
-                                // Reload page setelah delay
-                                setTimeout(() => {
-                                    window.location.reload();
-                                }, 1500);
+                                    // Buka WhatsApp di tab baru
+                                    window.open(data.data.waLink, '_blank');
+
+                                    // Reload halaman setelah delay singkat
+                                    setTimeout(() => {
+                                        window.location.reload();
+                                    }, 2000);
+                                } else {
+                                    // Flow lama jika tidak ada WA link
+                                    const modal = bootstrap.Modal.getInstance(document.getElementById(
+                                        'updateStatusModal'));
+                                    modal.hide();
+                                    showAlert('success', data.message || 'Status berhasil diupdate',
+                                        data
+                                        .data.waLink);
+
+                                    setTimeout(() => {
+                                        window.location.reload();
+                                    }, 1500);
+                                }
                             } else {
                                 throw new Error(data.message || 'Gagal update status');
                             }
                         })
                         .catch(error => {
-                            console.error('Error:', error);
-
-                            // Handle specific errors
                             let errorMessage = 'Terjadi kesalahan saat update status';
 
                             if (error.message && error.message.includes('Duplicate entry')) {
                                 errorMessage =
                                     'Nomor surat sudah digunakan. Silakan generate nomor baru.';
-                                // Re-generate nomor surat
                                 generateNomorSurat();
                             } else if (error.message) {
                                 errorMessage = error.message;
                             } else if (error.errors) {
-                                // Handle validation errors
                                 errorMessage = Object.values(error.errors).flat().join(', ');
                             }
 
                             showAlert('danger', errorMessage);
 
-                            // Re-enable button
                             submitBtn.disabled = false;
                             submitBtn.innerHTML = originalText;
                         });
@@ -1187,7 +1173,6 @@
             }
         });
 
-        // Function untuk reset modal form
         function resetModalForm() {
             const form = document.getElementById('updateStatusForm');
             if (form) {
@@ -1206,39 +1191,36 @@
             }
         }
 
-        // Function untuk menampilkan alert
-        function showAlert(type, message) {
-            const alertHtml = `
-        <div class="alert alert-${type} alert-dismissible fade show" role="alert">
-            <i class="bi bi-${type === 'success' ? 'check-circle' : 'exclamation-triangle'} me-2"></i>
-            ${message}
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-    `;
+        function showAlert(type, message, waLink = null) {
+            const container = document.querySelector('.dashboard-content');
+            let alertHtml = `
+                <div class="alert alert-${type} alert-dismissible fade show d-flex align-items-center" role="alert">
+                    <i class="bi bi-${type === 'success' ? 'check-circle' : 'exclamation-triangle'} me-2"></i>
+                    <div>
+                        ${message}
+                        ${waLink ? `<a href="${waLink}" target="_blank" class="btn btn-sm btn-success ms-3"><i class="fab fa-whatsapp me-1"></i> Kirim Notifikasi WA</a>` : ''}
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            `;
+            container.insertAdjacentHTML('afterbegin', alertHtml);
 
-            const dashboardContent = document.querySelector('.dashboard-content');
-            if (dashboardContent) {
-                dashboardContent.insertAdjacentHTML('afterbegin', alertHtml);
-
-                // Auto hide alert setelah 5 detik
-                setTimeout(() => {
-                    const alert = dashboardContent.querySelector('.alert');
-                    if (alert) {
-                        const bsAlert = new bootstrap.Alert(alert);
-                        bsAlert.close();
-                    }
-                }, 5000);
-            }
+            // Auto hide alert after 10 seconds
+            setTimeout(() => {
+                const alertElement = container.querySelector('.alert');
+                if (alertElement) {
+                    const bsAlert = new bootstrap.Alert(alertElement);
+                    bsAlert.close();
+                }
+            }, 10000);
         }
 
-        // Bulk Actions Functions
         function toggleBulkActions() {
             const bulkActions = document.getElementById('bulkActions');
             if (bulkActions) {
                 bulkActions.classList.toggle('show');
 
                 if (!bulkActions.classList.contains('show')) {
-                    // Clear all checkboxes when hiding
                     document.querySelectorAll('.surat-checkbox').forEach(checkbox => {
                         checkbox.checked = false;
                     });
@@ -1269,11 +1251,9 @@
             }
 
             if (bulkForm) {
-                // Remove existing hidden inputs
                 const existingInputs = bulkForm.querySelectorAll('input[name="surat_ids[]"]');
                 existingInputs.forEach(input => input.remove());
 
-                // Add selected IDs to form
                 checkedBoxes.forEach(checkbox => {
                     const hiddenInput = document.createElement('input');
                     hiddenInput.type = 'hidden';
@@ -1283,7 +1263,6 @@
                 });
             }
 
-            // Update main checkbox state
             const mainCheckbox = document.querySelector('.bulk-select-all');
             const allCheckboxes = document.querySelectorAll('.surat-checkbox');
             if (mainCheckbox && allCheckboxes.length > 0) {
@@ -1292,7 +1271,6 @@
             }
         }
 
-        // Bulk form submission handler
         document.addEventListener('DOMContentLoaded', function() {
             const bulkForm = document.getElementById('bulkForm');
             if (bulkForm) {
@@ -1321,23 +1299,19 @@
             }
         });
 
-        // Confirm delete function
         function confirmDelete(url) {
             if (confirm('Yakin ingin menghapus surat ini? Data yang sudah dihapus tidak dapat dikembalikan.')) {
                 window.location.href = url;
             }
         }
 
-        // Auto-refresh statistics every 30 seconds - PERBAIKAN ROUTE
         setInterval(function() {
             if (document.visibilityState === 'visible') {
-                // Only refresh if page is visible and API route exists
                 const currentUrl = window.location.pathname;
                 if (currentUrl.includes('surat-ktm')) {
                     fetch('/admin/surat-ktm/api/statistik')
                         .then(response => response.json())
                         .then(data => {
-                            // Update statistics cards safely
                             updateStatCard('.stat-icon.total + .stat-number', data.status?.total || 0);
                             updateStatCard('.stat-icon.diproses + .stat-number', data.status?.diproses || 0);
                             updateStatCard('.stat-icon.disetujui + .stat-number', data.status?.disetujui || 0);
@@ -1353,7 +1327,6 @@
             }
         }, 30000);
 
-        // Helper function untuk update stat cards
         function updateStatCard(selector, value) {
             const element = document.querySelector(selector);
             if (element) {

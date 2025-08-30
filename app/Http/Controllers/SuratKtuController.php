@@ -372,6 +372,7 @@ class SuratKtuController extends Controller
 
         try {
             $surat = SuratKtu::findOrFail($id);
+            $oldStatus = $surat->status;
 
             // Set nomor surat jika disetujui dan disediakan
             if ($request->status === 'disetujui' && $request->nomor_surat) {
@@ -385,6 +386,33 @@ class SuratKtuController extends Controller
                 throw new Exception('Gagal mengupdate status surat');
             }
 
+            // Simpan ke arsip jika disetujui
+            if ($request->status === 'disetujui') {
+                $surat->simpanKeArsip();
+            }
+
+            // Generate WhatsApp notification link
+            $waLink = null;
+            if ($surat->nomor_telepon) {
+                $waMessage = '';
+                if ($surat->status === 'disetujui') {
+                    $waMessage = "Selamat! Surat Keterangan Usaha (KTU) Anda dengan nama *{$surat->nama}* telah *disetujui*";
+                    if ($surat->nomor_surat) {
+                        $waMessage .= " dengan nomor surat *{$surat->nomor_surat}*";
+                    }
+                    $waMessage .= ". Usaha: *{$surat->nama_usaha}*. Anda dapat mengunduh atau mencetak surat Anda di: " . route('public.surat-ktu.track', $surat->public_token);
+                } elseif ($surat->status === 'ditolak') {
+                    $catatan = $surat->keterangan ? "Alasan penolakan: {$surat->keterangan}. " : "";
+                    $waMessage = "Mohon maaf, pengajuan Surat Keterangan Usaha (KTU) Anda dengan nama *{$surat->nama}* untuk usaha *{$surat->nama_usaha}* telah *ditolak*. {$catatan}Anda dapat memperbaiki data dan mengajukan ulang. Status surat dapat dilihat di: " . route('public.surat-ktu.track', $surat->public_token);
+                } elseif ($surat->status === 'diproses') {
+                    $waMessage = "Surat Keterangan Usaha (KTU) Anda dengan nama *{$surat->nama}* untuk usaha *{$surat->nama_usaha}* sedang dalam tahap *pemrosesan*. Mohon menunggu untuk proses selanjutnya. Cek status di: " . route('public.surat-ktu.track', $surat->public_token);
+                }
+
+                if ($waMessage) {
+                    // Asumsi ada method convertToWhatsAppNumber di model SuratKtu
+                    $waLink = 'https://wa.me/' . $this->convertToWhatsAppNumber($surat->nomor_telepon) . '?text=' . urlencode($waMessage);
+                }
+            }
 
             return response()->json([
                 'success' => true,
@@ -393,14 +421,46 @@ class SuratKtuController extends Controller
                     'status' => $surat->status,
                     'nomor_surat' => $surat->nomor_surat,
                     'keterangan' => $surat->keterangan,
+                    'waLink' => $waLink,
+                    'old_status' => $oldStatus,
+                    'nama_pemohon' => $surat->nama,
+                    'nama_usaha' => $surat->nama_usaha,
+                    'redirect_to_wa' => true // Flag untuk redirect ke WA
                 ]
             ]);
         } catch (Exception $e) {
+            Log::error('Error updating surat status', [
+                'surat_id' => $id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
             return response()->json([
                 'success' => false,
                 'message' => $e->getMessage()
             ], 500);
         }
+    }
+
+    /**
+     * Helper method untuk convert nomor telepon ke format WhatsApp
+     */
+    private function convertToWhatsAppNumber($phone)
+    {
+        // Remove any non-numeric characters
+        $phone = preg_replace('/[^0-9]/', '', $phone);
+
+        // Convert 08xxx to 628xxx (Indonesian format)
+        if (substr($phone, 0, 2) === '08') {
+            $phone = '62' . substr($phone, 1);
+        }
+
+        // Add 62 if not present
+        if (substr($phone, 0, 2) !== '62') {
+            $phone = '62' . $phone;
+        }
+
+        return $phone;
     }
 
     /**

@@ -1012,6 +1012,38 @@ class SuratKtm extends Model
         }
     }
 
+    /**
+     * Convert nomor telepon ke format WhatsApp yang benar
+     */
+    public function convertToWhatsAppNumber($phoneNumber): string
+    {
+        // Hapus semua karakter non-digit kecuali +
+        $cleanNumber = preg_replace('/[^0-9+]/', '', $phoneNumber);
+
+        // Handle berbagai format nomor Indonesia
+        if (preg_match('/^0[8-9]\d{8,11}$/', $cleanNumber)) {
+            // Format: 0852xxxxxxxx, 0812xxxxxxxx, etc (nomor Indonesia yang diawali 0)
+            $cleanNumber = '62' . substr($cleanNumber, 1);
+        } elseif (preg_match('/^[8-9]\d{8,11}$/', $cleanNumber)) {
+            // Format: 852xxxxxxxx, 812xxxxxxxx (tanpa leading 0)
+            $cleanNumber = '62' . $cleanNumber;
+        } elseif (str_starts_with($cleanNumber, '62')) {
+            // Sudah format 62xxxxxxxxx
+            $cleanNumber = $cleanNumber;
+        } elseif (str_starts_with($cleanNumber, '+62')) {
+            // Format +62xxxxxxxxx, hapus +
+            $cleanNumber = substr($cleanNumber, 1);
+        } elseif (!str_starts_with($cleanNumber, '+') && !str_starts_with($cleanNumber, '62')) {
+            // Jika tidak ada country code sama sekali, assumsi Indonesia
+            $cleanNumber = '62' . $cleanNumber;
+        }
+
+        // Pastikan format akhir adalah 62xxxxxxxxx (tanpa +)
+        $cleanNumber = ltrim($cleanNumber, '+');
+
+        return $cleanNumber;
+    }
+
     // ========================================
     // BOOT METHOD - SIMPLIFIED
     // ========================================
