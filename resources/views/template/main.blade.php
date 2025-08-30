@@ -10,7 +10,7 @@
     <meta name="description" content="@yield('description', 'Website resmi Desa Kilwaru, Kecamatan Seram Timur, Kabupaten Seram Bagian Timur, menyajikan informasi lengkap tentang profil desa, sejarah, serta struktur pemerintahan desa. Melalui situs ini, Anda dapat mengenal lebih dekat kehidupan masyarakat Desa Kilwaru, serta berbagai potensi yang ada di desa ini. Temukan informasi mengenai program-program pembangunan dan kegiatan yang berlangsung di desa yang penuh dengan nilai sejarah dan budaya lokal.')">
 
     
-    <meta name="keywords" content="desa kilwaru, kilwaru maluku, website desa kilwaru, desa kilwaru seram timur">
+    <meta name="keywords" content="desa kilwaru, kilwaru maluku, website desa kilwaru, desa kilwaru seram timur, kilwaru, Kilwaru, Desa Kilwaru, Website Desa Kilwaru, Website desa kilwaru, kilwaru sistem, sistem kilwaru">
     <!-- Meta tags tambahan untuk SEO -->
     <meta name="author" content="Pemerintah Desa Kilwaru">
     <meta name="robots" content="index, follow">
