@@ -82,14 +82,14 @@
 
         <!-- Administrasi dengan Sub Menu -->
         <li class="nav-item">
-            <div class="nav-link has-submenu {{ request()->routeIs('admin.surat.*', 'admin.arsip-surat.*', 'admin.surat-ktm.*', 'admin.surat-ktu.*') ? 'active' : '' }}"
+            <div class="nav-link has-submenu {{ request()->routeIs('admin.surat.*', 'admin.arsip-surat.*', 'admin.surat-ktm.*', 'admin.surat-ktu.*', 'admin.surat-kpt.*') ? 'active' : '' }}"
                 data-page="surat">
                 <i class="bi bi-file-earmark-text"></i>
                 <span class="nav-text">Administrasi</span>
                 <i class="bi bi-chevron-down dropdown-arrow"></i>
             </div>
             <ul
-                class="sub-menu {{ request()->routeIs('admin.surat.*', 'admin.arsip-surat.*', 'admin.surat-ktm.*', 'admin.surat-ktu.*') ? 'expanded' : '' }}">
+                class="sub-menu {{ request()->routeIs('admin.surat.*', 'admin.arsip-surat.*', 'admin.surat-ktm.*', 'admin.surat-ktu.*', 'admin.surat-kpt.*') ? 'expanded' : '' }}">
                 <li class="sub-menu-item">
                     <a href="{{ route('admin.surat.dashboard') }}"
                         class="sub-menu-link {{ request()->routeIs('admin.surat.dashboard') ? 'active' : '' }}"
@@ -106,6 +106,7 @@
                         <span>Surat Keterangan Tidak Mampu</span>
                     </a>
                 </li>
+
                 <li class="sub-menu-item">
                     <a href="#"
                         class="sub-menu-link {{ request()->routeIs('admin.surat-domisili.*') ? 'active' : '' }}"
@@ -144,6 +145,14 @@
                         data-subpage="surat-usaha">
                         <i class="bi bi-briefcase"></i>
                         <span>Surat Keterangan Usaha</span>
+                    </a>
+                </li>
+                <li class="sub-menu-item">
+                    <a href="{{ route('admin.surat-kpt.index') }}"
+                        class="sub-menu-link {{ request()->routeIs('admin.surat-kpt.*') ? 'active' : '' }}"
+                        data-subpage="surat-ktm">
+                        <i class="bi bi-file-earmark-check"></i>
+                        <span>Surat Keterangan Penghasilan Tetap</span>
                     </a>
                 </li>
                 <li class="sub-menu-item">
@@ -240,7 +249,8 @@
         <!-- Keuangan Desa -->
         <li class="nav-item">
             <a href="{{ route('admin.apbdes.index') }}"
-                class="nav-link {{ request()->routeIs('admin.apbdes.*') ? 'active' : '' }}" data-page="struktur-desa">
+                class="nav-link {{ request()->routeIs('admin.apbdes.*') ? 'active' : '' }}"
+                data-page="struktur-desa">
                 <i class="bi bi-pie-chart"></i>
                 <span class="nav-text">APBDes</span>
             </a>

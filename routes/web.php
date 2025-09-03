@@ -16,6 +16,7 @@ use App\Http\Controllers\QrCodeController;
 use App\Http\Controllers\StatistikPertumbuhanController;
 use App\Http\Controllers\StrukturDesaController;
 use App\Http\Controllers\SuratDashboardController;
+use App\Http\Controllers\SuratKPTController;
 use App\Http\Controllers\SuratKtmController;
 use App\Http\Controllers\SuratKtuController;
 use App\Http\Controllers\UmkmController;
@@ -179,6 +180,26 @@ Route::prefix('surat-ktu')->name('public.surat-ktu.')->group(function () {
     Route::get('export/{id}/{token}', [SuratKtuController::class, 'export'])
         ->name('export');
 });
+// ========================================
+// SURAT KPT - GUEST ROUTES (Public - Landing Page)
+// ========================================
+Route::prefix('surat-kpt')->name('public.surat-kpt.')->group(function () {
+    // Form pengajuan untuk guest (Landing Page)
+    Route::get('/', [SuratKPTController::class, 'indexPublic'])->name('index');
+    Route::get('pengajuan', [SuratKPTController::class, 'guestForm'])->name('form');
+    // Submit pengajuan guest
+    Route::post('pengajuan', [SuratKPTController::class, 'guestStore'])->name('store');
+    // Track surat dengan token
+    Route::get('track/{token}', [SuratKPTController::class, 'guestTrack'])->name('track');
+    // Update data surat via token
+    Route::put('track/{token}', [SuratKPTController::class, 'guestUpdate'])->name('update');
+    // API untuk mencari surat berdasarkan token
+    Route::post('api/track', [SuratKPTController::class, 'apiTrackSurat'])->name('api.track');
+    // Download surat yang sudah disetujui via token
+    Route::get('download/{id}/{token}', [SuratKPTController::class, 'download'])->name('download');
+    // Export PDF surat via token
+    Route::get('export/{id}/{token}', [SuratKPTController::class, 'export'])->name('export');
+});
 
 // Static pages
 Route::get('/terms', function () {
@@ -311,6 +332,27 @@ Route::middleware(['auth', 'user'])->group(function () {
         // Download QR Code khusus untuk surat milik user
         Route::get('{id}/download-qr', [SuratKtuController::class, 'downloadQrCode'])
             ->name('download-qr');
+    });
+    // ========================================
+    // SURAT KPT - USER ROUTES (Login Required)
+    // ========================================
+    Route::prefix('user/surat-kpt')->name('user.surat-kpt.')->group(function () {
+        // Dashboard user - daftar surat milik user
+        Route::get('/', [SuratKPTController::class, 'userIndex'])->name('index');
+        // Form pengajuan surat baru
+        Route::get('create', [SuratKPTController::class, 'userForm'])->name('create');
+        // Submit pengajuan user
+        Route::post('/', [SuratKPTController::class, 'userStore'])->name('store');
+        // Detail surat milik user
+        Route::get('{id}', [SuratKPTController::class, 'userShow'])->name('show');
+        // Edit surat milik user (hanya yang masih diproses)
+        Route::get('{id}/edit', [SuratKPTController::class, 'userEdit'])->name('edit');
+        // Update surat milik user
+        Route::put('{id}', [SuratKPTController::class, 'userUpdate'])->name('update');
+        // Download surat yang sudah disetujui
+        Route::get('{id}/download', [SuratKPTController::class, 'download'])->name('download');
+        // Export PDF surat milik user
+        Route::get('{id}/export', [SuratKPTController::class, 'export'])->name('export');
     });
 });
 
@@ -544,6 +586,42 @@ Route::middleware(['auth', 'admin'])->group(function () {
 
             Route::get('{id}/download-qr', [SuratKtuController::class, 'downloadQrCode'])
                 ->name('download-qr');
+        });
+        // ========================================
+        // SURAT KPT - ADMIN ROUTES (Admin Only)
+        // ========================================
+        Route::prefix('surat-kpt')->name('surat-kpt.')->group(function () {
+            // Dashboard admin - daftar semua surat
+            Route::get('/', [SuratKPTController::class, 'adminIndex'])->name('index');
+            // Form create surat oleh admin
+            Route::get('create', [SuratKPTController::class, 'adminCreate'])->name('create');
+            // Store surat oleh admin
+            Route::post('/', [SuratKPTController::class, 'adminStore'])->name('store');
+            // Detail surat (admin view)
+            Route::get('{id}', [SuratKPTController::class, 'adminShow'])->name('show');
+            // Edit surat oleh admin
+            Route::get('{id}/edit', [SuratKPTController::class, 'adminEdit'])->name('edit');
+            // Update surat oleh admin
+            Route::put('{id}', [SuratKPTController::class, 'adminUpdate'])->name('update');
+            // Update status surat (AJAX)
+            Route::patch('{id}/update-status', [SuratKPTController::class, 'adminUpdateStatus'])->name('update-status');
+            // Delete surat
+            Route::delete('{id}', [SuratKPTController::class, 'adminDestroy'])->name('destroy');
+            // Bulk actions
+            Route::post('bulk-action', [SuratKPTController::class, 'adminBulkAction'])->name('bulk-action');
+            // Generate nomor surat otomatis (AJAX)
+            Route::post('generate-nomor', [SuratKPTController::class, 'generateNomor'])->name('generate-nomor');
+            // Export PDF surat
+            Route::get('{id}/export', [SuratKPTController::class, 'export'])->name('export');
+            // Download surat untuk admin
+            Route::get('{id}/download', [SuratKPTController::class, 'download'])->name('download');
+            // API Statistik untuk admin
+            Route::get('api/statistik', [SuratKPTController::class, 'apiStatistik'])->name('api.statistik');
+            // QR CODE MANAGEMENT ROUTES
+            Route::post('{id}/generate-qr', [SuratKPTController::class, 'generateQrCode'])->name('generate-qr');
+            Route::post('{id}/regenerate-qr', [SuratKPTController::class, 'regenerateQrCode'])->name('regenerate-qr');
+            Route::get('{id}/qr-info', [SuratKPTController::class, 'getQrCodeInfo'])->name('qr-info');
+            Route::get('{id}/download-qr', [SuratKPTController::class, 'downloadQrCode'])->name('download-qr');
         });
 
         // ========================================
