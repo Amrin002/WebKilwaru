@@ -47,6 +47,7 @@ class AdminDashboardController extends Controller
         // 2. Menghitung Kepala Keluarga
         $kepalaKeluarga = Penduduk::kepalaKeluarga()->count();
 
+
         // Menghitung kepala keluarga bulan ini dan bulan lalu
         $kkThisMonth = Penduduk::kepalaKeluarga()->whereBetween('created_at', [$startOfMonth, $endOfMonth])->count();
         $kkLastMonth = Penduduk::kepalaKeluarga()->whereBetween('created_at', [$startOfLastMonth, $endOfLastMonth])->count();

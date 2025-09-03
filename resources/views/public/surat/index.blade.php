@@ -406,6 +406,30 @@
                             </a>
                         </div>
                     </div>
+                    <!-- Surat Keterangan Penghasilan Tetap -->
+                    <div class="col-lg-4 col-md-6 mb-4">
+                        <div class="surat-card">
+                            <span class="badge-status badge-available">Tersedia</span>
+                            <div class="surat-icon">
+                                <i class="fas fa-money"></i>
+                            </div>
+                            <h4 class="mb-3">Surat Keterangan Penghasilan Tetap</h4>
+                            <p class="text-muted mb-4">
+                                Surat keterangan untuk menyatakan Penghasilan tetap.
+                                Digunakan untuk pengajuan beasiswa, bantuan, atau modal.
+                            </p>
+                            <div class="mb-3">
+                                <small class="text-success">
+                                    <i class="bi bi-clock me-1"></i>
+                                    Proses: 1-2 hari kerja
+                                </small>
+                            </div>
+                            <a href="{{ route('public.surat-kpt.index') }}" class="btn btn-surat text-white">
+                                <i class="bi bi-arrow-right me-2"></i>
+                                Ajukan Sekarang
+                            </a>
+                        </div>
+                    </div>
                 </div>
             </div>
 
