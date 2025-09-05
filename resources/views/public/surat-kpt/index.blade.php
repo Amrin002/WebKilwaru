@@ -187,7 +187,7 @@
             }
 
             .modal-header {
-                background: linear-gradient(135deg, #185a9d, #144983);
+                background: linear-gradient(135deg, var(--primary-green), var(--secondary-green));
                 color: white;
                 border-radius: 20px 20px 0 0;
             }

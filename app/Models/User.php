@@ -22,7 +22,10 @@ class User extends Authenticatable
         'email',
         'password',
         'roles',
-        'no_hp'
+        'no_hp',
+        'nik',
+        'is_verified_citizen',
+        'nik_verified_at'
     ];
 
     /**
@@ -45,6 +48,8 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_verified_citizen' => 'boolean',    // ← Tambahkan ini
+            'nik_verified_at' => 'datetime',       // ← Tambahkan ini
         ];
     }
     /**
@@ -93,9 +98,58 @@ class User extends Authenticatable
     {
         return $this->hasMany(SuratKpt::class);
     }
+// ========================================
+    // NIK VALIDATION & CITIZEN VERIFICATION
+    // ========================================
 
+    /**
+     * Check if user is verified citizen (has valid NIK)
+     */
+    public function isVerifiedCitizen(): bool
+    {
+        return $this->is_verified_citizen && !is_null($this->nik);
+    }
 
+    /**
+     * Check if user can register using NIK
+     */
+    public function canRegisterWithNIK(): bool
+    {
+        return is_null($this->nik) || !$this->is_verified_citizen;
+    }
 
+    /**
+     * Verify user's NIK against Penduduk data
+     */
+    public function verifyNIK(string $nik): bool
+    {
+        $penduduk = Penduduk::where('nik', $nik)->first();
+        
+        if (!$penduduk) {
+            return false;
+        }
+
+        // Update user dengan NIK dan status verifikasi
+        $this->update([
+            'nik' => $nik,
+            'is_verified_citizen' => true,
+            'nik_verified_at' => now(),
+            // Optional: Update nama sesuai data penduduk
+            'name' => $penduduk->nama_lengkap
+        ]);
+
+        return true;
+    }
+
+    public function penduduk()
+    {
+        return $this->belongsTo(Penduduk::class, 'nik', 'nik');
+    }
+    public function scopeVerifiedCitizens($query)
+    {
+        return $query->where('is_verified_citizen', true)->whereNotNull('nik');
+    }
+    
     /**
      * Ambil surat KTM terbaru milik user
      */

@@ -15,6 +15,10 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('email')->unique();
+            $table->string('nik', 16)->nullable()->unique();
+            $table->string('is_verified_citizen')->default(false);
+            $table->timestamp('nik_verified_at')->nullable();
+            $table->foreign('nik')->references('nik')->on('penduduks')->onDelete('set null');
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->string('roles')->default('user');

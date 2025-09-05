@@ -633,4 +633,43 @@ class SuratKPTController extends Controller
 
         return view('admin.surat-kpt.pdf', compact('surat', 'qrCodeBase64', 'verifikasiUrl'));
     }
+     public function export(Request $request, $id, $token = null)
+    {
+        if ($token) {
+            // Guest access - pakai token
+            $surat = SuratKPT::where('public_token', $token)->findOrFail($id);
+        } else {
+            // Admin/User access - pakai login
+            $surat = SuratKPT::findOrFail($id);
+
+            // Check access untuk user (bukan admin)
+            if ($request->user() && !$request->user()->isAdmin() && !$surat->canAccess()) {
+                abort(403, 'Anda tidak memiliki akses ke surat ini');
+            }
+        }
+
+        // Validasi status surat
+        if ($surat->status !== 'disetujui') {
+            return redirect()
+                ->back()
+                ->withErrors(['error' => 'Surat belum disetujui, tidak bisa diekspor']);
+        }
+
+        $tanggal_dikeluarkan = $surat->updated_at->format('d/m/Y');
+
+        // SIMPLE: Ambil QR Code base64 - otomatis generate jika belum ada
+        $qrCodeBase64 = $surat->getQrCodeForPdf();
+
+        // URL verifikasi untuk QR Code  
+        $verifikasiUrl = route('verifikasi.surat', ['nomorSurat' => $surat->nomor_surat]);
+
+        $response = Pdf::loadView('admin.surat-kpt.pdf', compact(
+            'surat',
+            'tanggal_dikeluarkan',
+            'qrCodeBase64',
+            'verifikasiUrl'
+        ))->download('surat-kpt-' . $surat->nama . '.pdf');
+
+        return $response;
+    }
 }
