@@ -35,9 +35,6 @@ class KKImport extends DefaultValueBinder implements
 
     /**
      * Bind value to a cell - Override untuk handle nomor KK yang panjang
-     * @param Cell $cell
-     * @param mixed $value
-     * @return bool
      */
     public function bindValue(Cell $cell, $value)
     {
@@ -52,17 +49,17 @@ class KKImport extends DefaultValueBinder implements
     }
 
     /**
-     * @param array $row
-     * @return \Illuminate\Database\Eloquent\Model|null
+     * Map baris Excel ke Model KK
      */
     public function model(array $row)
     {
         // Debug: Lihat struktur data yang masuk
         // Uncomment line di bawah untuk debug
-        // \Log::info('Import Row: ', $row);
+        // Log::info('Import Row: ', $row);
 
         // Clean no_kk dari kemungkinan format yang salah
-        $no_kk = $this->cleanNoKK($row['no_kk'] ?? '');
+        // Support berbagai nama kolom yang mungkin ada di Excel
+        $no_kk = $this->cleanNoKK($row['no_kk'] ?? $row['nokk'] ?? '');
 
         // Skip empty rows
         if (empty($no_kk)) {
@@ -78,8 +75,10 @@ class KKImport extends DefaultValueBinder implements
         }
 
         try {
-            // Clean nama kepala keluarga dari special characters
-            $nama_kepala = $this->cleanNamaKepala($row['nama_kepala_keluarga'] ?? '');
+            // Clean nama kepala keluarga
+            $nama_kepala = $this->cleanNamaKepala(
+                $row['nama_kepala_keluarga'] ?? $row['kepala_keluarga'] ?? ''
+            );
 
             // Validasi no_kk harus 16 digit
             if (strlen($no_kk) !== 16 || !ctype_digit($no_kk)) {
@@ -90,18 +89,18 @@ class KKImport extends DefaultValueBinder implements
 
             $this->importedCount++;
 
-            // Buat data KK baru
+            // Buat data KK baru (ID akan auto increment)
             return new KK([
                 'no_kk' => $no_kk,
                 'nama_kepala_keluarga' => $nama_kepala ?: 'TIDAK DIKETAHUI',
                 'alamat' => $this->cleanString($row['alamat'] ?? ''),
                 'rt' => $this->cleanRT($row['rt'] ?? ''),
                 'rw' => $this->cleanRT($row['rw'] ?? ''),
-                'desa' => $this->cleanString($row['desa'] ?? ''),
+                'desa' => $this->cleanString($row['desa'] ?? $row['desakelurahan'] ?? ''),
                 'kecamatan' => $this->cleanString($row['kecamatan'] ?? ''),
-                'kabupaten' => $this->cleanString($row['kabupaten'] ?? ''),
+                'kabupaten' => $this->cleanString($row['kabupaten'] ?? $row['kabupatenkota'] ?? ''),
                 'provinsi' => $this->cleanString($row['provinsi'] ?? ''),
-                'kode_pos' => $this->cleanKodePos($row['kode_pos'] ?? ''),
+                'kode_pos' => $this->cleanKodePos($row['kode_pos'] ?? $row['kodepos'] ?? ''),
             ]);
         } catch (\Exception $e) {
             Log::error('KK Import Error: ' . $e->getMessage() . ' for no_kk: ' . $no_kk);
@@ -217,7 +216,7 @@ class KKImport extends DefaultValueBinder implements
     }
 
     /**
-     * @return int
+     * Batch size untuk insert
      */
     public function batchSize(): int
     {
@@ -225,7 +224,7 @@ class KKImport extends DefaultValueBinder implements
     }
 
     /**
-     * @return int
+     * Chunk size untuk reading
      */
     public function chunkSize(): int
     {

@@ -22,6 +22,8 @@ class User extends Authenticatable
         'email',
         'password',
         'roles',
+        'penduduk_nik',
+        'platform_register',
         'no_hp'
     ];
 
@@ -92,6 +94,15 @@ class User extends Authenticatable
     public function suratKpt()
     {
         return $this->hasMany(SuratKpt::class);
+    }
+    public function penduduk()
+{
+    return $this->belongsTo(Penduduk::class, 'penduduk_nik', 'nik');
+
+}
+
+    public function isVerified():bool{
+        return $this->penduduk_nik !== null;
     }
 
 
